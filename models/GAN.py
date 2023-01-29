@@ -43,7 +43,8 @@ class GAN(pl.LightningModule):
 
             # generate images
             self.generated_imgs = self.forward(z)
-
+            print(self.generated_imgs.device)
+            exit()
             # log sampled images
             sample_imgs = self.generated_imgs[:6]
             # grid = torchvision.utils.make_grid(sample_imgs)
