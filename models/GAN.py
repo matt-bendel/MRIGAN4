@@ -16,10 +16,8 @@ from models.architectures.discriminator import Discriminator
 
 class GAN(pl.LightningModule):
 
-    def __init__(self, hparams):
+    def __init__(self):
         super(GAN, self).__init__()
-        self.hparams = hparams
-
         # networks
         mnist_shape = (1, 28, 28)
         self.generator = Generator(latent_dim=512, img_shape=mnist_shape)
