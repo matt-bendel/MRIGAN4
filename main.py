@@ -8,5 +8,5 @@ from models.GAN import GAN
 model = GAN(None)
 
 # fit trainer on 128 GPUs
-trainer = pl.Trainer(accelerator="gpu", devices=4, strategy="ddp")
+trainer = pl.Trainer(accelerator="gpu", devices=2, strategy="ddp")
 trainer.fit(model)
