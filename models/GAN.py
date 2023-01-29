@@ -3,6 +3,7 @@ import os
 import torch
 import torchvision
 import pytorch_lightning as pl
+import numpy as np
 
 from torch import nn
 from torch.nn import functional as F
