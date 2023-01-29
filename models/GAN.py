@@ -43,15 +43,13 @@ class GAN(pl.LightningModule):
 
             # generate images
             self.generated_imgs = self.forward(z)
-            print(imgs.device)
-            exit()
             # log sampled images
             sample_imgs = self.generated_imgs[:6]
             # grid = torchvision.utils.make_grid(sample_imgs)
             # self.experiment.add_image('generated_images', grid, 0)
 
             # ground truth result (ie: all fake)
-            valid = torch.ones(imgs.size(0), 1)
+            valid = torch.ones(imgs.size(0), 1).cuda()
 
             # adversarial loss is binary cross-entropy
             g_loss = self.adversarial_loss(self.discriminator(self.generated_imgs), valid)
@@ -63,11 +61,11 @@ class GAN(pl.LightningModule):
             # Measure discriminator's ability to classify real from generated samples
 
             # how well can it label as real?
-            valid = torch.ones(imgs.size(0), 1)
+            valid = torch.ones(imgs.size(0), 1).cuda()
             real_loss = self.adversarial_loss(self.discriminator(imgs), valid)
 
             # how well can it label as fake?
-            fake = torch.zeros(imgs.size(0), 1)
+            fake = torch.zeros(imgs.size(0), 1).cuda()
             fake_loss = self.adversarial_loss(self.discriminator(self.generated_imgs.detach()), fake)
 
             # discriminator loss is the average of these
