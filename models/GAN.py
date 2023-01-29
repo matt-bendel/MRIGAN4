@@ -88,8 +88,7 @@ class GAN(pl.LightningModule):
         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(b1, b2))
         return [opt_g, opt_d], []
 
-    @pl.data_loader
-    def tng_dataloader(self):
+    def train_dataloader(self):
         transform = transforms.Compose([transforms.ToTensor(),
                                         transforms.Normalize([0.5], [0.5])])
         dataset = MNIST(os.getcwd(), train=True, download=True, transform=transform)
