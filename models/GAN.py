@@ -39,11 +39,7 @@ class GAN(pl.LightningModule):
         # train generator
         if optimizer_idx == 0:
             # sample noise
-            z = torch.randn(imgs.shape[0], 512)
-
-            # match gpu device (or keep as cpu)
-            if self.on_gpu:
-                z = z.cuda(imgs.device.index)
+            z = torch.randn(imgs.shape[0], 512).cuda()
 
             # generate images
             self.generated_imgs = self.forward(z)
