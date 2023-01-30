@@ -199,6 +199,10 @@ class rcGAN(pl.LightningModule):
             single_gen[:, :, :, 0] = gens[j, 0, 0:8, :, :]
             single_gen[:, :, :, 1] = gens[j, 0, 8:16, :, :]
 
+            print(single_gen.device)
+            print(std.device)
+            print(mean.device)
+
             single_gen_complex_np = tensor_to_complex_np((single_gen * std[j] + mean[j]).cpu())
             single_gen_np = torch.tensor(S.H * single_gen_complex_np).abs().numpy()
 
