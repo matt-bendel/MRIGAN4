@@ -19,8 +19,7 @@ from models.architectures.our_gen import GeneratorModel
 from models.architectures.patch_disc import PatchDisc
 
 from evaluation_scripts.metrics import psnr, ssim
-from evaluation_scripts.plotting_scripts import gif_im, generate_gif, generate_image, generate_error_map
-from evaluation_scripts import compute_cfid
+from evaluation_scripts.plotting_scripts import gif_im, generate_gif
 from mail import send_mail
 
 class rcGAN(pl.LightningModule):
