@@ -125,7 +125,7 @@ class rcGAN(pl.LightningModule):
     def drift_penalty(self, real_pred):
         return 0.001 * torch.mean(real_pred ** 2)
 
-    def training_step(self, batch, optimizer_idx):
+    def training_step(self, batch, batch_idx, optimizer_idx):
         y, x, y_true, mean, std, mask = batch
 
         # train generator
