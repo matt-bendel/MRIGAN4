@@ -10,7 +10,7 @@ class MRIDataModule(pl.LightningDataModule):
     """
 
     def __init__(self, args):
-        super(MRIDataModule).__init__()
+        super().__init__()
         self.prepare_data_per_node = True
         self.args = args
 
