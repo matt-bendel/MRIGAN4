@@ -146,7 +146,7 @@ class rcGAN(pl.LightningModule):
             g_loss = self.adversarial_loss_generator(y, gens)
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
-            self.log('g_loss', g_loss.item())
+            self.log('g_loss', g_loss.item(), sync_dist=True)
 
             return g_loss
 
@@ -161,7 +161,7 @@ class rcGAN(pl.LightningModule):
             d_loss += self.gradient_penalty(x_hat, x, y)
             d_loss += self.drift_penalty(real_pred)
 
-            self.log('d_loss', d_loss.item())
+            self.log('d_loss', d_loss.item(), sync_dist=True)
 
             return d_loss
 
@@ -195,13 +195,13 @@ class rcGAN(pl.LightningModule):
             avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
             gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
 
-            single_gen = torch.zeros(8, self.args.im_size, self.args.im_size, 2).cuda()
+            single_gen = torch.zeros(8, self.args.im_size, self.args.im_size, 2).to
             single_gen[:, :, :, 0] = gens[j, 0, 0:8, :, :]
             single_gen[:, :, :, 1] = gens[j, 0, 8:16, :, :]
 
-            print(single_gen.device)
-            print(std.device)
-            print(mean.device)
+            print(f"SINGLE: {single_gen.device}")
+            print(f"STD: {std.device}")
+            print(f"MEAN: {mean.device}")
 
             single_gen_complex_np = tensor_to_complex_np((single_gen * std[j] + mean[j]).cpu())
             single_gen_np = torch.tensor(S.H * single_gen_complex_np).abs().numpy()
@@ -263,9 +263,9 @@ class rcGAN(pl.LightningModule):
         losses['ssim'] = np.mean(losses['ssim'])
         losses['single_psnr'] = np.mean(losses['single_psnr'])
 
-        self.log('val_psnr', losses['psnr'])
-        self.log('val_single_psnr', losses['single_psnr'])
-        self.log('val_ssim', losses['ssim'])
+        self.log('val_psnr', losses['psnr'], sync_dist=True)
+        self.log('val_single_psnr', losses['single_psnr'], sync_dist=True)
+        self.log('val_ssim', losses['ssim'], sync_dist=True)
 
         return losses
 
@@ -296,9 +296,9 @@ class rcGAN(pl.LightningModule):
         self.std_mult += mu_0 * psnr_diff
 
         if psnr_diff > 0.25:
-            avg_psnr = 0
+            avg_psnr = 0.000
 
-        self.log('final_val_psnr', avg_psnr)
+        self.log('final_val_psnr', avg_psnr, sync_dist=True)
 
         if self.global_rank == 0:
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE", f"Metrics:\nPSNR: {np.mean(psnrs):.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}", file_name="variation_gif.gif")
