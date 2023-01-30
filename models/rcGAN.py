@@ -146,7 +146,7 @@ class rcGAN(pl.LightningModule):
             g_loss = self.adversarial_loss_generator(y, gens)
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
-            self.log('g_loss', g_loss.item(), sync_dist=True)
+            self.log('g_loss', g_loss.item(), sync_dist=True, , prog_bar=Trueprog_bar=True)
 
             return g_loss
 
@@ -161,7 +161,7 @@ class rcGAN(pl.LightningModule):
             d_loss += self.gradient_penalty(x_hat, x, y)
             d_loss += self.drift_penalty(real_pred)
 
-            self.log('d_loss', d_loss.item(), sync_dist=True)
+            self.log('d_loss', d_loss.item(), sync_dist=True, prog_bar=True)
 
             return d_loss
 
@@ -198,10 +198,6 @@ class rcGAN(pl.LightningModule):
             single_gen = torch.zeros(8, self.args.im_size, self.args.im_size, 2).to(self.device)
             single_gen[:, :, :, 0] = gens[j, 0, 0:8, :, :]
             single_gen[:, :, :, 1] = gens[j, 0, 8:16, :, :]
-
-            print(f"SINGLE: {single_gen.device}")
-            print(f"STD: {std.device}")
-            print(f"MEAN: {mean.device}")
 
             single_gen_complex_np = tensor_to_complex_np((single_gen * std[j] + mean[j]).cpu())
             single_gen_np = torch.tensor(S.H * single_gen_complex_np).abs().numpy()
@@ -263,9 +259,9 @@ class rcGAN(pl.LightningModule):
         losses['ssim'] = np.mean(losses['ssim'])
         losses['single_psnr'] = np.mean(losses['single_psnr'])
 
-        self.log('val_psnr', losses['psnr'], sync_dist=True)
-        self.log('val_single_psnr', losses['single_psnr'], sync_dist=True)
-        self.log('val_ssim', losses['ssim'], sync_dist=True)
+        self.log('val_psnr', losses['psnr'], sync_dist=True, prog_bar=True)
+        self.log('val_single_psnr', losses['single_psnr'], sync_dist=True, prog_bar=True)
+        self.log('val_ssim', losses['ssim'], sync_dist=True, prog_bar=True)
 
         return losses
 
