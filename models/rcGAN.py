@@ -20,7 +20,7 @@ from models.architectures.patch_disc import PatchDisc
 
 class rcGAN(pl.LightningModule):
     def __init__(self, args):
-        super(rcGAN, self).__init__()
+        super().__init__()
         self.args = args
         self.generator = GeneratorModel(
             in_chans=args.in_chans + 4,
@@ -55,6 +55,10 @@ class rcGAN(pl.LightningModule):
     def readd_measures(self, samples, measures, mask):
         reformatted_tensor = self.reformat(samples)
         reconstructed_kspace = fft2c_new(reformatted_tensor)
+
+        if self.global_rank == 0:
+            print(reconstructed_kspace.shape)
+            print(mask.shape)
 
         reconstructed_kspace = mask * measures + (1 - mask) * reconstructed_kspace
 
