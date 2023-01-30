@@ -146,7 +146,7 @@ class rcGAN(pl.LightningModule):
             g_loss = self.adversarial_loss_generator(y, gens)
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
-            self.log('g_loss', g_loss.item(), sync_dist=True, prog_bar=True)
+            self.log('g_loss', g_loss.item(), prog_bar=True)
 
             return g_loss
 
@@ -161,7 +161,7 @@ class rcGAN(pl.LightningModule):
             d_loss += self.gradient_penalty(x_hat, x, y)
             d_loss += self.drift_penalty(real_pred)
 
-            self.log('d_loss', d_loss.item(), sync_dist=True, prog_bar=True)
+            self.log('d_loss', d_loss.item(), prog_bar=True)
 
             return d_loss
 
@@ -259,9 +259,9 @@ class rcGAN(pl.LightningModule):
         losses['ssim'] = np.mean(losses['ssim'])
         losses['single_psnr'] = np.mean(losses['single_psnr'])
 
-        self.log('val_psnr', losses['psnr'], sync_dist=True, prog_bar=True)
-        self.log('val_single_psnr', losses['single_psnr'], sync_dist=True, prog_bar=True)
-        self.log('val_ssim', losses['ssim'], sync_dist=True, prog_bar=True)
+        # self.log('val_psnr', losses['psnr'], sync_dist=True, prog_bar=True)
+        # self.log('val_single_psnr', losses['single_psnr'], sync_dist=True, prog_bar=True)
+        # self.log('val_ssim', losses['ssim'], sync_dist=True, prog_bar=True)
 
         return losses
 
@@ -295,10 +295,10 @@ class rcGAN(pl.LightningModule):
             avg_psnr = 0.000
 
         self.log('final_val_psnr', avg_psnr, sync_dist=True)
-        self.log('beta_std_mult', self.std_mult, sync_dist=True)
+        self.log('beta_std_mult', self.std_mult)
 
-        # if self.global_rank == 0:
-        #     send_mail(f"EPOCH {self.current_epoch + 1} UPDATE", f"Metrics:\nPSNR: {np.mean(psnrs):.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}", file_name="variation_gif.gif")
+        if self.global_rank == 0:
+            send_mail(f"EPOCH {self.current_epoch + 1} UPDATE", f"Metrics:\nPSNR: {np.mean(psnrs):.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}", file_name="variation_gif.gif")
 
     # def on_training_epoch_end(self):
 
