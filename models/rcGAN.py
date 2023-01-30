@@ -104,7 +104,7 @@ class rcGAN(pl.LightningModule):
         patch_out = 30
         fake_pred = torch.zeros(size=(y.shape[0], self.args.num_z, patch_out, patch_out)).cuda()
         for k in range(y.shape[0]):
-            cond = torch.zeros(1, gens.shape[2], gens.shape[3], gens.shape[4])
+            cond = torch.zeros(1, gens.shape[2], gens.shape[3], gens.shape[4]).cuda()
             cond[0, :, :, :] = y[k, :, :, :]
             cond = cond.repeat(self.args.num_z, 1, 1, 1)
             temp = self.discriminator(input=gens[k], y=cond)
