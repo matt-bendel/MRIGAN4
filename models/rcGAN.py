@@ -195,7 +195,7 @@ class rcGAN(pl.LightningModule):
             avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
             gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
 
-            single_gen = torch.zeros(8, self.args.im_size, self.args.im_size, 2)
+            single_gen = torch.zeros(8, self.args.im_size, self.args.im_size, 2).to(self.device)
             single_gen[:, :, :, 0] = gens[j, 0, 0:8, :, :]
             single_gen[:, :, :, 1] = gens[j, 0, 8:16, :, :]
 
