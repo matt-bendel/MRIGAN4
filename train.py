@@ -27,5 +27,5 @@ if __name__ == '__main__':
     model = rcGAN(args)
 
     # fit trainer on 128 GPUs
-    trainer = pl.Trainer(accelerator="gpu", devices=2, strategy="ddp", default_root_dir="some/path/")
-    # trainer.fit(model)
+    trainer = pl.Trainer(accelerator="gpu", gpus=[0,1], strategy="ddp", default_root_dir="some/path/")
+    # trainer.fit(model, train_loader, dev_loader)
