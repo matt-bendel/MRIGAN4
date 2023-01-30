@@ -58,7 +58,7 @@ class rcGAN(pl.LightningModule):
 
     def readd_measures(self, samples, measures, mask):
         reformatted_tensor = self.reformat(samples)
-        measures = self.reformat(measures)
+        measures = fft2c_new(self.reformat(measures))
         reconstructed_kspace = fft2c_new(reformatted_tensor)
 
         reconstructed_kspace = mask * measures + (1 - mask) * reconstructed_kspace
@@ -297,8 +297,8 @@ class rcGAN(pl.LightningModule):
         self.log('final_val_psnr', avg_psnr, sync_dist=True)
         self.log('beta_std_mult', self.std_mult, sync_dist=True)
 
-        if self.global_rank == 0:
-            send_mail(f"EPOCH {self.current_epoch + 1} UPDATE", f"Metrics:\nPSNR: {np.mean(psnrs):.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}", file_name="variation_gif.gif")
+        # if self.global_rank == 0:
+        #     send_mail(f"EPOCH {self.current_epoch + 1} UPDATE", f"Metrics:\nPSNR: {np.mean(psnrs):.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}", file_name="variation_gif.gif")
 
     # def on_training_epoch_end(self):
 
