@@ -15,6 +15,13 @@ from torchvision import transforms
 from models.architectures.generator import Generator
 from models.architectures.discriminator import Discriminator
 
+
+def train_dataloader(self):
+    transform = transforms.Compose([transforms.ToTensor(),
+                                    transforms.Normalize([0.5], [0.5])])
+    dataset = MNIST(os.getcwd(), train=True, download=True, transform=transform)
+    return DataLoader(dataset, batch_size=32)
+
 class GAN(pl.LightningModule):
 
     def __init__(self):

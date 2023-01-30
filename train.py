@@ -8,6 +8,7 @@ import pytorch_lightning as pl
 from data_loaders.prepare_data import create_data_loaders
 from utils.parse_args import create_arg_parser
 from models.rcGAN import rcGAN
+from models.GAN import train_dataloader
 
 if __name__ == '__main__':
     torch.set_float32_matmul_precision('medium')
@@ -21,11 +22,11 @@ if __name__ == '__main__':
 
     args.checkpoint_dir = "/home/bendel.8/Git_Repos/full_scale_mrigan/MRIGAN3/trained_models"
 
-    train_loader, dev_loader = create_data_loaders(args, big_test=False)
+    # train_loader, dev_loader = create_data_loaders(args, big_test=False)
 
     # init model
     model = rcGAN(args)
 
     # fit trainer on 128 GPUs
-    trainer = pl.Trainer(accelerator="gpu", gpus=[0,1], strategy="ddp", default_root_dir="some/path/")
-    # trainer.fit(model, train_loader, dev_loader)
+    trainer = pl.Trainer(accelerator="gpu", devices=2, strategy="ddp", default_root_dir="some/path/")
+    trainer.fit(model, train_dataloader(), train_dataloader())
