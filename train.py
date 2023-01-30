@@ -29,5 +29,5 @@ if __name__ == '__main__':
     model = rcGAN(args)
     dm = MRIDataModule(args)
     # fit trainer on 128 GPUs
-    trainer = pl.Trainer(accelerator="gpu", devices=2, strategy="ddp", default_root_dir=args.checkpoint_dir)
+    trainer = pl.Trainer(accelerator="gpu", devices=2, strategy="ddp", default_root_dir=args.checkpoint_dir, max_epochs=args.num_epochs)
     trainer.fit(model, dm)

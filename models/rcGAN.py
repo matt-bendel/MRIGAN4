@@ -56,9 +56,8 @@ class rcGAN(pl.LightningModule):
         reformatted_tensor = self.reformat(samples)
         reconstructed_kspace = fft2c_new(reformatted_tensor)
 
-        if self.global_rank == 0:
-            print(reconstructed_kspace.shape)
-            print(mask.shape)
+        print(reconstructed_kspace.shape)
+        print(mask.shape)
 
         reconstructed_kspace = mask * measures + (1 - mask) * reconstructed_kspace
 
