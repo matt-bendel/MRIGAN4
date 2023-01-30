@@ -87,16 +87,15 @@ class DataTransform:
 
 
 def create_datasets(args, val_only, big_test=False):
-    if not val_only:
-        train_data = SelectiveSliceData(
-            root=args.data_path / 'multicoil_train',
-            transform=DataTransform(args),
-            challenge='multicoil',
-            sample_rate=1,
-            use_top_slices=True,
-            number_of_top_slices=args.num_of_top_slices,
-            restrict_size=False,
-        )
+    train_data = SelectiveSliceData(
+        root=args.data_path / 'multicoil_train',
+        transform=DataTransform(args),
+        challenge='multicoil',
+        sample_rate=1,
+        use_top_slices=True,
+        number_of_top_slices=args.num_of_top_slices,
+        restrict_size=False,
+    )
 
     dev_data = SelectiveSliceData_Val(
         root=args.data_path / 'multicoil_val',
@@ -109,31 +108,28 @@ def create_datasets(args, val_only, big_test=False):
         big_test=big_test
     )
 
-    return dev_data, train_data if not val_only else dev_data
+    return dev_data, train_data
 
 
 def create_data_loaders(args, val_only=False, big_test=False):
     dev_data, train_data = create_datasets(args, val_only, big_test=big_test)
 
-    if not val_only:
-        train_loader = DataLoader(
-            dataset=train_data,
-            batch_size=args.batch_size,
-            shuffle=True,
-            num_workers=20,
-            pin_memory=True,
-            drop_last=True,
-        )
+    train_loader = DataLoader(
+        dataset=train_data,
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=20,
+        drop_last=True,
+    )
 
     dev_loader = DataLoader(
         dataset=dev_data,
         batch_size=args.batch_size,
         num_workers=20,
-        pin_memory=True,
         drop_last=True,
     )
 
-    return train_loader if not val_only else None, dev_loader
+    return train_loader, dev_loader
 
 
 def create_test_dataset(args):
