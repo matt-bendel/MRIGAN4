@@ -32,6 +32,7 @@ class rcGAN(pl.LightningModule):
         )
 
         self.std_mult = 1
+        self.resolution = self.args.resolution
 
     def get_noise(self, num_vectors, mask):
         z_vals = []

@@ -212,9 +212,6 @@ class SelectiveSliceData_Val(torch.utils.data.Dataset):
         keep_files = []
         f = sorted(files)
 
-        print('total_files:')
-        print(len(f))
-
         for fname in f[1:len(f)]:
             # kspace = h5py.File(fname, 'r')['kspace']
 
@@ -233,15 +230,12 @@ class SelectiveSliceData_Val(torch.utils.data.Dataset):
 
         files = keep_files
 
-        print(len(files))
-
         random.seed(1000)
         np.random.seed(1000)
 
         random.shuffle(files)
 
         num_files = (round(len(files)*0.7) if big_test else round(len(files)*0.3))
-        print(num_files)
 
         f_testing_and_Val = sorted(files[-num_files:]) if big_test else sorted(files[0:num_files])
 
@@ -264,8 +258,6 @@ class SelectiveSliceData_Val(torch.utils.data.Dataset):
             else:
                 num_slices = 8 # kspace.shape[0]
                 self.examples += [(fname, slice) for slice in range(num_slices)]
-
-        print(len(self.examples))
 
     def __len__(self):
         return len(self.examples)
