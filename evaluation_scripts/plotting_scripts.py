@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import imageio as iio
 import numpy as np
 
+import os
+
 from evaluation_scripts.metrics import psnr, ssim, snr
 
 def generate_image(fig, target, image, method, image_ind, rows, cols, kspace=False, disc_num=False):
