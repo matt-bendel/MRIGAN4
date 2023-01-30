@@ -42,7 +42,7 @@ class rcGAN(pl.LightningModule):
         z_vals = []
         measured_vals = []
         for i in range(2):
-            z = torch.randn(num_vectors, self.resolution, self.resolution, 2).cuda()
+            z = torch.randn(num_vectors, self.resolution, self.resolution, 2).to(self.device)
             noise_fft = fft2c_new(z)
             measured_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
             z_vals.append(z.permute(0, 3, 1, 2))
@@ -50,7 +50,7 @@ class rcGAN(pl.LightningModule):
         return measured_vals, z_vals
 
     def reformat(self, samples):
-        reformatted_tensor = torch.zeros(size=(samples.size(0), 8, self.resolution, self.resolution, 2)).cuda()
+        reformatted_tensor = torch.zeros(size=(samples.size(0), 8, self.resolution, self.resolution, 2)).to(self.device)
         reformatted_tensor[:, :, :, :, 0] = samples[:, 0:8, :, :]
         reformatted_tensor[:, :, :, :, 1] = samples[:, 8:16, :, :]
 
@@ -65,7 +65,7 @@ class rcGAN(pl.LightningModule):
 
         image = ifft2c_new(reconstructed_kspace)
 
-        output_im = torch.zeros(size=samples.shape).cuda()
+        output_im = torch.zeros(size=samples.shape).to(self.device)
         output_im[:, 0:8, :, :] = image[:, :, :, :, 0]
         output_im[:, 8:16, :, :] = image[:, :, :, :, 1]
 
@@ -75,11 +75,11 @@ class rcGAN(pl.LightningModule):
         """Calculates the gradient penalty loss for WGAN GP"""
         Tensor = torch.FloatTensor
         # Random weight term for interpolation between real and fake samples
-        alpha = Tensor(np.random.random((real_samples.size(0), 1, 1, 1))).cuda()
+        alpha = Tensor(np.random.random((real_samples.size(0), 1, 1, 1))).to(self.device)
         # Get random interpolation between real and fake samples
         interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
         d_interpolates = self.discriminator(input=interpolates, y=y)
-        fake = Tensor(real_samples.shape[0], 1, d_interpolates.shape[-1], d_interpolates.shape[-1]).fill_(1.0).cuda()
+        fake = Tensor(real_samples.shape[0], 1, d_interpolates.shape[-1], d_interpolates.shape[-1]).fill_(1.0).to(self.device)
 
         # Get gradient w.r.t. interpolates
         gradients = autograd.grad(
@@ -106,9 +106,9 @@ class rcGAN(pl.LightningModule):
 
     def adversarial_loss_generator(self, y, gens):
         patch_out = 30
-        fake_pred = torch.zeros(size=(y.shape[0], self.args.num_z, patch_out, patch_out)).cuda()
+        fake_pred = torch.zeros(size=(y.shape[0], self.args.num_z, patch_out, patch_out)).to(self.device)
         for k in range(y.shape[0]):
-            cond = torch.zeros(1, gens.shape[2], gens.shape[3], gens.shape[4]).cuda()
+            cond = torch.zeros(1, gens.shape[2], gens.shape[3], gens.shape[4]).to(self.device)
             cond[0, :, :, :] = y[k, :, :, :]
             cond = cond.repeat(self.args.num_z, 1, 1, 1)
             temp = self.discriminator(input=gens[k], y=cond)
@@ -136,7 +136,7 @@ class rcGAN(pl.LightningModule):
 
         # train generator
         if optimizer_idx == 0:
-            gens = torch.zeros(size=(y.size(0), self.args.num_z, self.args.in_chans, self.args.im_size, self.args.im_size)).cuda()
+            gens = torch.zeros(size=(y.size(0), self.args.num_z, self.args.in_chans, self.args.im_size, self.args.im_size)).to(self.device)
             for z in range(self.args.num_z):
                 gens[:, z, :, :, :] = self.forward(y, mask)
 
@@ -174,7 +174,7 @@ class rcGAN(pl.LightningModule):
 
         y, x, y_true, mean, std, mask = batch
 
-        gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size)).cuda()
+        gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size)).to(self.device)
         for z in range(8):
             gens[:, z, :, :, :] = self.forward(y, mask)
 
@@ -195,7 +195,7 @@ class rcGAN(pl.LightningModule):
             avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
             gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
 
-            single_gen = torch.zeros(8, self.args.im_size, self.args.im_size, 2).to
+            single_gen = torch.zeros(8, self.args.im_size, self.args.im_size, 2)
             single_gen[:, :, :, 0] = gens[j, 0, 0:8, :, :]
             single_gen[:, :, :, 1] = gens[j, 0, 8:16, :, :]
 
@@ -220,7 +220,7 @@ class rcGAN(pl.LightningModule):
 
                 gen_im_list = []
                 for z in range(8):
-                    val_rss = torch.zeros(8, self.args.im_size, self.args.im_size, 2).cuda()
+                    val_rss = torch.zeros(8, self.args.im_size, self.args.im_size, 2).to(self.device)
                     val_rss[:, :, :, 0] = gens[ind, z, 0:8, :, :]
                     val_rss[:, :, :, 1] = gens[ind, z, 8:16, :, :]
                     gen_im_list.append(transforms.root_sum_of_squares(
