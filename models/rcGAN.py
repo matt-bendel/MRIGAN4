@@ -54,10 +54,8 @@ class rcGAN(pl.LightningModule):
 
     def readd_measures(self, samples, measures, mask):
         reformatted_tensor = self.reformat(samples)
+        measures = self.reformat(measures)
         reconstructed_kspace = fft2c_new(reformatted_tensor)
-
-        print(reconstructed_kspace.shape)
-        print(mask.shape)
 
         reconstructed_kspace = mask * measures + (1 - mask) * reconstructed_kspace
 
