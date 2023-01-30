@@ -295,10 +295,9 @@ class rcGAN(pl.LightningModule):
             avg_psnr = 0.000
 
         self.log('final_val_psnr', avg_psnr, sync_dist=True)
-        self.log('beta_std_mult', self.std_mult)
 
-        if self.global_rank == 0:
-            send_mail(f"EPOCH {self.current_epoch + 1} UPDATE", f"Metrics:\nPSNR: {np.mean(psnrs):.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}", file_name="variation_gif.gif")
+        # if self.global_rank == 0:
+        #     send_mail(f"EPOCH {self.current_epoch + 1} UPDATE", f"Metrics:\nPSNR: {np.mean(psnrs):.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}", file_name="variation_gif.gif")
 
     # def on_training_epoch_end(self):
 
