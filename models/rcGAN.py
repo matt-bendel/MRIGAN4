@@ -27,7 +27,7 @@ class rcGAN(pl.LightningModule):
         super().__init__()
         self.args = args
         self.generator = GeneratorModel(
-            in_chans=args.in_chans + 4,
+            in_chans=args.in_chans + 2,
             out_chans=args.out_chans,
         )
 
