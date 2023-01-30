@@ -6,6 +6,7 @@ import numpy as np
 import pytorch_lightning as pl
 
 from data_loaders.prepare_data import create_data_loaders
+from data_loaders.MRIDataModule import MRIDataModule
 from utils.parse_args import create_arg_parser
 from models.rcGAN import rcGAN
 from models.GAN import train_dataloader
@@ -26,7 +27,7 @@ if __name__ == '__main__':
 
     # init model
     model = rcGAN(args)
-
+    dm = MRIDataModule(args)
     # fit trainer on 128 GPUs
     trainer = pl.Trainer(accelerator="gpu", devices=2, strategy="ddp", default_root_dir="some/path/")
-    trainer.fit(model, train_dataloader(), train_dataloader())
+    trainer.fit(model, dm)
