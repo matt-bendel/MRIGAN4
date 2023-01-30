@@ -146,7 +146,7 @@ class rcGAN(pl.LightningModule):
             g_loss = self.adversarial_loss_generator(y, gens)
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
-            self.log('g_loss', g_loss.item(), sync_dist=True, , prog_bar=Trueprog_bar=True)
+            self.log('g_loss', g_loss.item(), sync_dist=True, prog_bar=True)
 
             return g_loss
 
