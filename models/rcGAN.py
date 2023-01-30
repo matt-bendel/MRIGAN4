@@ -259,9 +259,9 @@ class rcGAN(pl.LightningModule):
         losses['ssim'] = np.mean(losses['ssim'])
         losses['single_psnr'] = np.mean(losses['single_psnr'])
 
-        # self.log('val_psnr', losses['psnr'], sync_dist=True, prog_bar=True)
-        # self.log('val_single_psnr', losses['single_psnr'], sync_dist=True, prog_bar=True)
-        # self.log('val_ssim', losses['ssim'], sync_dist=True, prog_bar=True)
+        self.log('val_psnr', losses['psnr'], sync_dist=True, prog_bar=True, on_step=True, on_epoch=False)
+        self.log('val_single_psnr', losses['single_psnr'], sync_dist=True, prog_bar=True, on_step=True, on_epoch=False)
+        self.log('val_ssim', losses['ssim'], sync_dist=True, prog_bar=True, on_step=True, on_epoch=False)
 
         return losses
 
