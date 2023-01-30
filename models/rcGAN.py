@@ -259,9 +259,9 @@ class rcGAN(pl.LightningModule):
         losses['ssim'] = np.mean(losses['ssim'])
         losses['single_psnr'] = np.mean(losses['single_psnr'])
 
-        self.log('val_psnr', losses['psnr'])
-        self.log('val_single_psnr', losses['ssim'])
-        self.log('val_ssim', losses['single_psnr'])
+        self.log('val_psnr', torch.Tensor(losses['psnr'], device=torch.float32))
+        self.log('val_single_psnr', torch.Tensor(losses['val_single_psnr'], device=torch.float32))
+        self.log('val_ssim', torch.Tensor(losses['val_ssim'], device=torch.float32))
 
         return losses
 
@@ -294,7 +294,7 @@ class rcGAN(pl.LightningModule):
         if psnr_diff > 0.25:
             avg_psnr = 0
 
-        self.log('final_val_psnr', avg_psnr)
+        self.log('final_val_psnr', torch.Tensor(avg_psnr, device=torch.float32))
 
         if self.global_rank == 0:
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE", f"Metrics:\nPSNR: {np.mean(psnrs):.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}", file_name="variation_gif.gif")
