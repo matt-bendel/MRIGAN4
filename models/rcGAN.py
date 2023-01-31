@@ -293,7 +293,7 @@ class rcGAN(pl.LightningModule):
         if psnr_diff > 0.25:
             avg_psnr = torch.tensor(0.000)
 
-        self.log('final_val_psnr', avg_psnr)
+        self.log('final_val_psnr', avg_psnr, prog_bar=True)
 
         if self.global_rank == 0:
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE", f"Metrics:\nPSNR: {np.mean(psnrs):.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}", file_name="variation_gif.gif")
