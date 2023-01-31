@@ -280,11 +280,11 @@ class rcGAN(pl.LightningModule):
             ssims.append(out['ssim'])
             single_psnrs.append(out['single_psnr'])
 
-        gathered_psnr = self.all_gather(psnrs)
-        gathered_single_psnr = self.all_gather(single_psnrs)
+        gathered_psnr = self.all_gather(torch.cat(psnrs))
+        gathered_single_psnr = self.all_gather(torch.cat(single_psnrs))
 
-        avg_psnr = torch.mean(torch.cat(gathered_psnr))
-        avg_single_psnr = torch.mean(torch.cat(gathered_single_psnr))
+        avg_psnr = torch.mean(gathered_psnr)
+        avg_single_psnr = torch.mean(gathered_single_psnr)
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
 
         mu_0 = 2e-2
@@ -293,7 +293,7 @@ class rcGAN(pl.LightningModule):
         if psnr_diff > 0.25:
             avg_psnr = torch.tensor(0.000)
 
-        self.log('final_val_psnr', avg_psnr, prog_bar=True, sync_dist=True)
+        self.log('final_val_psnr', avg_psnr, on_step=False, prog_bar=True, sync_dist=True)
 
         if self.global_rank == 0:
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE", f"Metrics:\nPSNR: {np.mean(psnrs):.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}", file_name="variation_gif.gif")
