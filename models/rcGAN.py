@@ -263,9 +263,9 @@ class rcGAN(pl.LightningModule):
 
     def validation_step_end(self, batch_parts):
         losses = {
-            'psnr': torch.tensor(np.mean(batch_parts['psnr'])),
-            'single_psnr': torch.tensor(np.mean(batch_parts['single_psnr'])),
-            'ssim': torch.tensor(np.mean(batch_parts['ssim']))
+            'psnr': np.mean(batch_parts['psnr']),
+            'single_psnr': np.mean(batch_parts['single_psnr']),
+            'ssim': np.mean(batch_parts['ssim'])
         }
 
         return losses
@@ -280,11 +280,11 @@ class rcGAN(pl.LightningModule):
             ssims.append(out['ssim'])
             single_psnrs.append(out['single_psnr'])
 
-        gathered_psnr = self.all_gather(torch.cat(psnrs))
-        gathered_single_psnr = self.all_gather(torch.cat(single_psnrs))
+        gathered_psnr = self.all_gather(psnrs)
+        gathered_single_psnr = self.all_gather(single_psnrs)
 
-        avg_psnr = torch.mean(gathered_psnr)
-        avg_single_psnr = torch.mean(gathered_single_psnr)
+        avg_psnr = torch.mean(torch.cat(gathered_psnr))
+        avg_single_psnr = torch.mean(torch.cat(gathered_single_psnr))
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
 
         mu_0 = 2e-2
