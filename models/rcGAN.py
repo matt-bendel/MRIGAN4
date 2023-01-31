@@ -280,15 +280,15 @@ class rcGAN(pl.LightningModule):
         ssims = []
 
         for out in validation_step_outputs:
-            psnrs.append(out['psnr'].cpu().numpy())
-            ssims.append(out['ssim'].cpu().numpy())
-            single_psnrs.append(out['single_psnr'].cpu().numpy())
+            psnrs.append(out['psnr'])
+            ssims.append(out['ssim'])
+            single_psnrs.append(out['single_psnr'])
 
         gathered_psnr = self.all_gather(psnrs)
         gathered_single_psnr = self.all_gather(single_psnrs)
 
-        avg_psnr = np.mean(gathered_psnr)
-        avg_single_psnr = np.mean(gathered_single_psnr)
+        avg_psnr = torch.mean(gathered_psnr)
+        avg_single_psnr = torch.mean(gathered_single_psnr)
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
 
         mu_0 = 2e-2
