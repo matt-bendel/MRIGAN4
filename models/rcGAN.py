@@ -291,12 +291,10 @@ class rcGAN(pl.LightningModule):
 
         # if psnr_diff > 0.25:
         # self.log('final_val_psnr', avg_psnr, on_step=False, prog_bar=True, sync_dist=True)
-        print("BEFORE MAIL")
 
         if self.global_rank == 0:
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE", f"Metrics:\nPSNR: {torch.mean(torch.cat(gathered_psnr)):.2f}\nSSIM: {torch.mean(torch.cat(ssims)):.4f}\nPSNR Diff: {psnr_diff}", file_name="variation_gif.gif")
 
-        print("AFTER MAIL")
 
     # def on_training_epoch_end(self):
 
