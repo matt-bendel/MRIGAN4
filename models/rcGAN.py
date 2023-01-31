@@ -284,8 +284,8 @@ class rcGAN(pl.LightningModule):
             ssims.append(out['ssim'])
             single_psnrs.append(out['single_psnr'])
 
-        avg_psnr = np.mean(psnrs)
-        avg_single_psnr = np.mean(single_psnrs)
+        avg_psnr = np.mean(self.all_gather(psnrs))
+        avg_single_psnr = np.mean(self.all_gather(single_psnrs))
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
 
         mu_0 = 2e-2
@@ -296,8 +296,8 @@ class rcGAN(pl.LightningModule):
 
         self.log('final_val_psnr', avg_psnr, sync_dist=True)
 
-        # if self.global_rank == 0:
-        #     send_mail(f"EPOCH {self.current_epoch + 1} UPDATE", f"Metrics:\nPSNR: {np.mean(psnrs):.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}", file_name="variation_gif.gif")
+        if self.global_rank == 0:
+            send_mail(f"EPOCH {self.current_epoch + 1} UPDATE", f"Metrics:\nPSNR: {np.mean(psnrs):.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}", file_name="variation_gif.gif")
 
     # def on_training_epoch_end(self):
 
