@@ -14,7 +14,6 @@ from torch.nn import functional as F
 from data import transforms
 from utils.fftc import ifft2c_new, fft2c_new
 from utils.math import complex_abs, tensor_to_complex_np
-from pathlib import Path
 from models.architectures.our_gen import GeneratorModel
 from models.architectures.patch_disc import PatchDisc
 
@@ -290,11 +289,7 @@ class rcGAN(pl.LightningModule):
         mu_0 = 2e-2
         self.std_mult += mu_0 * psnr_diff
 
-        model_path = Path("/storage/matt_models")
-        self.save_checkpoint(model_path / "model.ckpt")
-        if psnr_diff > 0.25:
-            self.save_checkpoint(model_path / "best_model.ckpt")
-
+        # if psnr_diff > 0.25:
         # self.log('final_val_psnr', avg_psnr, on_step=False, prog_bar=True, sync_dist=True)
         print("BEFORE MAIL")
 

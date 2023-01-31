@@ -19,18 +19,7 @@ if __name__ == '__main__':
     args.in_chans = 16
     args.out_chans = 16
 
-    args.checkpoint_dir = "/home/bendel.8/Git_Repos/full_scale_mrigan/MRIGAN3/trained_models/"
-
-    # train_loader, dev_loader = create_data_loaders(args, big_test=False)
-
-    # init model
-    # checkpoint_callback_best = ModelCheckpoint(
-    #     monitor='final_val_psnr',
-    #     mode='max',
-    #     dirpath=args.checkpoint_dir,
-    #     filename='best_model',
-    #     save_top_k=1
-    # )
+    args.checkpoint_dir = "/storage/matt_models/"
 
     model = rcGAN(args)
 
