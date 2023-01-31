@@ -291,7 +291,7 @@ class rcGAN(pl.LightningModule):
         self.std_mult += mu_0 * psnr_diff
 
         if psnr_diff > 0.25:
-            avg_psnr = 0.000
+            avg_psnr = torch.tensor(0.000)
 
         self.log('final_val_psnr', avg_psnr)
 
