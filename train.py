@@ -9,13 +9,12 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from data_loaders.MRIDataModule import MRIDataModule
 from utils.parse_args import create_arg_parser
 from models.rcGAN import rcGAN
+from pytorch_lightning import seed_everything
 
 if __name__ == '__main__':
     torch.set_float32_matmul_precision('medium')
     args = create_arg_parser().parse_args()
-    random.seed(0)
-    np.random.seed(0)
-    torch.manual_seed(0)
+    seed_everything(1)
 
     args.in_chans = 16
     args.out_chans = 16

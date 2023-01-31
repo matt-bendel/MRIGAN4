@@ -259,10 +259,6 @@ class rcGAN(pl.LightningModule):
         losses['ssim'] = np.mean(losses['ssim'])
         losses['single_psnr'] = np.mean(losses['single_psnr'])
 
-        self.log('val_psnr', losses['psnr'], sync_dist=True, prog_bar=True, on_step=True, on_epoch=False)
-        self.log('val_single_psnr', losses['single_psnr'], sync_dist=True, prog_bar=True, on_step=True, on_epoch=False)
-        self.log('val_ssim', losses['ssim'], sync_dist=True, prog_bar=True, on_step=True, on_epoch=False)
-
         return losses
 
     def validation_step_end(self, batch_parts):
@@ -297,7 +293,7 @@ class rcGAN(pl.LightningModule):
         if psnr_diff > 0.25:
             avg_psnr = 0.000
 
-        self.log('final_val_psnr', avg_psnr, sync_dist=True)
+        self.log('final_val_psnr', avg_psnr)
 
         if self.global_rank == 0:
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE", f"Metrics:\nPSNR: {np.mean(psnrs):.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}", file_name="variation_gif.gif")
