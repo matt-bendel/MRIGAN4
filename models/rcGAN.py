@@ -263,9 +263,9 @@ class rcGAN(pl.LightningModule):
 
     def validation_step_end(self, batch_parts):
         losses = {
-            'psnr': torch.from_numpy(np.mean(batch_parts['psnr'])),
-            'single_psnr': torch.from_numpy(np.mean(batch_parts['single_psnr'])),
-            'ssim': torch.from_numpy(np.mean(batch_parts['ssim']))
+            'psnr': torch.tensor(np.mean(batch_parts['psnr'])),
+            'single_psnr': torch.tensor(np.mean(batch_parts['single_psnr'])),
+            'ssim': torch.tensor(np.mean(batch_parts['ssim']))
         }
 
         return losses
