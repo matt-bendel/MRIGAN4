@@ -45,7 +45,8 @@ if __name__ == '__main__':
     dm = MRIDataModule(args)
     # fit trainer on 128 GPUs
     trainer = pl.Trainer(accelerator="gpu", devices=2, strategy="ddp", default_root_dir=args.checkpoint_dir,
-                         max_epochs=args.num_epochs, callbacks=[checkpoint_callback_best, checkpoint_callback_epoch])
+                         max_epochs=args.num_epochs, callbacks=[checkpoint_callback_best, checkpoint_callback_epoch],
+                         auto_select_gpus=False)
 
     if args.resume:
         trainer.fit(model, dm, ckpt_path=args.checkpoint_dir + 'checkpoint.ckpt')
