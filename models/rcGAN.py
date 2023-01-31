@@ -287,8 +287,8 @@ class rcGAN(pl.LightningModule):
         gathered_psnr = self.all_gather(psnrs)
         gathered_single_psnr = self.all_gather(single_psnrs)
 
-        avg_psnr = torch.mean(gathered_psnr)
-        avg_single_psnr = torch.mean(gathered_single_psnr)
+        avg_psnr = torch.mean(torch.cat(gathered_psnr))
+        avg_single_psnr = torch.mean(torch.cat(gathered_single_psnr))
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
 
         mu_0 = 2e-2
