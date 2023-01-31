@@ -24,29 +24,20 @@ if __name__ == '__main__':
     # train_loader, dev_loader = create_data_loaders(args, big_test=False)
 
     # init model
-    checkpoint_callback_best = ModelCheckpoint(
-        monitor='final_val_psnr',
-        mode='max',
-        dirpath=args.checkpoint_dir,
-        filename='best_model',
-        save_top_k=1
-    )
-
-    checkpoint_callback_epoch = ModelCheckpoint(
-        monitor='epoch',
-        mode='max',
-        dirpath=args.checkpoint_dir,
-        filename='checkpoint',
-        save_top_k=1
-    )
+    # checkpoint_callback_best = ModelCheckpoint(
+    #     monitor='final_val_psnr',
+    #     mode='max',
+    #     dirpath=args.checkpoint_dir,
+    #     filename='best_model',
+    #     save_top_k=1
+    # )
 
     model = rcGAN(args)
 
     dm = MRIDataModule(args)
     # fit trainer on 128 GPUs
     trainer = pl.Trainer(accelerator="gpu", devices=2, strategy="ddp", default_root_dir=args.checkpoint_dir,
-                         max_epochs=args.num_epochs, callbacks=[checkpoint_callback_best, checkpoint_callback_epoch],
-                         auto_select_gpus=False)
+                         max_epochs=args.num_epochs, auto_select_gpus=False)
 
     if args.resume:
         trainer.fit(model, dm, ckpt_path=args.checkpoint_dir + 'checkpoint.ckpt')
