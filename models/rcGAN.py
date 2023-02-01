@@ -259,7 +259,7 @@ class rcGAN(pl.LightningModule):
         losses['ssim'] = np.mean(losses['ssim'])
         losses['single_psnr'] = np.mean(losses['single_psnr'])
 
-        return avg_gen, gt
+        return losses
 
     def validation_step_end(self, batch_parts):
         losses = {
@@ -271,6 +271,7 @@ class rcGAN(pl.LightningModule):
         return losses
 
     def validation_epoch_end(self, validation_step_outputs):
+        # TODO: All gather on PSNR values
         psnrs = []
         single_psnrs = []
         ssims = []
