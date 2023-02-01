@@ -287,13 +287,18 @@ class rcGAN(pl.LightningModule):
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
 
         mu_0 = 2e-2
+        print("STD")
         self.std_mult += mu_0 * psnr_diff
+        print("AFTER STD")
 
         # if psnr_diff > 0.25:
         # self.log('final_val_psnr', avg_psnr, on_step=False, prog_bar=True, sync_dist=True)
 
+        print("EMAIL")
+
         if self.global_rank == 0:
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE", f"Metrics:\nPSNR: {torch.mean(torch.cat(gathered_psnr)):.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}", file_name="variation_gif.gif")
+        print("AFTER EMAIL")
 
 
     # def on_training_epoch_end(self):
@@ -304,6 +309,7 @@ class rcGAN(pl.LightningModule):
         return [opt_g, opt_d], []
 
     def on_save_checkpoint(self, checkpoint):
+        print("ON SAVE")
         checkpoint["beta_std"] = self.std_mult
 
     def on_load_checkpoint(self, checkpoint):
