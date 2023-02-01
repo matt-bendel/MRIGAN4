@@ -14,7 +14,7 @@ from pytorch_lightning import seed_everything
 if __name__ == '__main__':
     torch.set_float32_matmul_precision('medium')
     args = create_arg_parser().parse_args()
-    seed_everything(1)
+    seed_everything(1, workers=True)
 
     args.in_chans = 16
     args.out_chans = 16
