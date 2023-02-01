@@ -131,7 +131,6 @@ class rcGAN(pl.LightningModule):
         return 0.001 * torch.mean(real_pred ** 2)
 
     def training_step(self, batch, batch_idx, optimizer_idx):
-        print(self.device)
         y, x, y_true, mean, std, mask = batch
 
         # train generator
@@ -186,7 +185,7 @@ class rcGAN(pl.LightningModule):
         for j in range(y.size(0)):
             new_y_true = fft2c_new(ifft2c_new(y_true[j]) * std[j] + mean[j])
             maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=self.args.calib_width,
-                                       device=sp.Device(self.global_rank), show_pbar=False, crop=0.70,
+                                       device=sp.Device(int(self.device[-1])), show_pbar=False, crop=0.70,
                                        kernel_width=6).run().get()
             S = sp.linop.Multiply((self.args.im_size, self.args.im_size), maps)
             gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
