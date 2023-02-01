@@ -22,9 +22,12 @@ if __name__ == '__main__':
     args.checkpoint_dir = "/storage/matt_models"
 
     checkpoint_callback = ModelCheckpoint(
+        monitor='epoch',
+        mode='max',
         dirpath='/storage/matt_models/',
         filename='checkpoint-{epoch}.ckpt',
-        save_on_train_epoch_end=False
+        save_on_train_epoch_end=False,
+        save_top_k=100
     )
 
     model = rcGAN(args)
