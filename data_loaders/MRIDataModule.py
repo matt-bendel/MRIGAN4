@@ -63,7 +63,7 @@ class MRIDataModule(pl.LightningDataModule):
         return DataLoader(
             dataset=self.validate,
             batch_size=self.args.batch_size,
-            num_workers=0,
+            num_workers=20,
             drop_last=True,
             pin_memory=False
         )
@@ -72,7 +72,7 @@ class MRIDataModule(pl.LightningDataModule):
         return DataLoader(
             dataset=self.validate,
             batch_size=self.args.batch_size,
-            num_workers=0,
+            num_workers=20,
             drop_last=True,
             pin_memory=False
         )
