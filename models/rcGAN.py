@@ -309,7 +309,6 @@ class rcGAN(pl.LightningModule):
         return [opt_g, opt_d], []
 
     def on_save_checkpoint(self, checkpoint):
-        print("ON SAVE")
         checkpoint["beta_std"] = self.std_mult
 
     def on_load_checkpoint(self, checkpoint):
