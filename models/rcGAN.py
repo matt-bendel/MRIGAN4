@@ -279,11 +279,8 @@ class rcGAN(pl.LightningModule):
             ssims.append(out['ssim'])
             single_psnrs.append(out['single_psnr'])
 
-        gathered_psnr = self.all_gather(psnrs)
-        gathered_single_psnr = self.all_gather(single_psnrs)
-
-        avg_psnr = torch.mean(torch.cat(gathered_psnr))
-        avg_single_psnr = torch.mean(torch.cat(gathered_single_psnr))
+        avg_psnr = np.mean(psnrs)
+        avg_single_psnr = np.mean(single_psnrs)
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
 
         mu_0 = 2e-2
@@ -294,7 +291,7 @@ class rcGAN(pl.LightningModule):
 
 
         if self.global_rank == 0:
-            send_mail(f"EPOCH {self.current_epoch + 1} UPDATE", f"Metrics:\nPSNR: {torch.mean(torch.cat(gathered_psnr)):.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}", file_name="variation_gif.gif")
+            send_mail(f"EPOCH {self.current_epoch + 1} UPDATE", f"Metrics:\nPSNR: {avg_psnr:.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}", file_name="variation_gif.gif")
 
     # def on_training_epoch_end(self):
 
@@ -303,8 +300,8 @@ class rcGAN(pl.LightningModule):
         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.args.lr, betas=(self.args.beta_1, self.args.beta_2))
         return [opt_g, opt_d], []
 
-    # def on_save_checkpoint(self, checkpoint):
-    #     checkpoint["beta_std"] = self.std_mult
-    #
-    # def on_load_checkpoint(self, checkpoint):
-    #     self.std_mult = checkpoint["beta_std"]
+    def on_save_checkpoint(self, checkpoint):
+        checkpoint["beta_std"] = self.std_mult
+
+    def on_load_checkpoint(self, checkpoint):
+        self.std_mult = checkpoint["beta_std"]
