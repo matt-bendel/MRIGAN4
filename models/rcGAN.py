@@ -173,7 +173,7 @@ class rcGAN(pl.LightningModule):
 
         y, x, y_true, mean, std, mask = batch
 
-        gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size)).to(self.device)
+        gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size)).cuda()
         for z in range(8):
             gens[:, z, :, :, :] = self.forward(y, mask)
 
@@ -300,8 +300,8 @@ class rcGAN(pl.LightningModule):
         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.args.lr, betas=(self.args.beta_1, self.args.beta_2))
         return [opt_g, opt_d], []
 
-    def on_save_checkpoint(self, checkpoint):
-        checkpoint["beta_std"] = self.std_mult
-
-    def on_load_checkpoint(self, checkpoint):
-        self.std_mult = checkpoint["beta_std"]
+    # def on_save_checkpoint(self, checkpoint):
+    #     checkpoint["beta_std"] = self.std_mult
+    #
+    # def on_load_checkpoint(self, checkpoint):
+    #     self.std_mult = checkpoint["beta_std"]
