@@ -41,7 +41,7 @@ class rcGAN(pl.LightningModule):
         z_vals = []
         measured_vals = []
         for i in range(2):
-            z = torch.randn(num_vectors, self.resolution, self.resolution, 2).to(self.device)
+            z = torch.randn(num_vectors, self.resolution, self.resolution, 2, device=self.device)
             noise_fft = fft2c_new(z)
             measured_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
             z_vals.append(z.permute(0, 3, 1, 2))
@@ -49,7 +49,7 @@ class rcGAN(pl.LightningModule):
         return measured_vals, z_vals
 
     def reformat(self, samples):
-        reformatted_tensor = torch.zeros(size=(samples.size(0), 8, self.resolution, self.resolution, 2)).to(self.device)
+        reformatted_tensor = torch.zeros(size=(samples.size(0), 8, self.resolution, self.resolution, 2), device=self.device)
         reformatted_tensor[:, :, :, :, 0] = samples[:, 0:8, :, :]
         reformatted_tensor[:, :, :, :, 1] = samples[:, 8:16, :, :]
 
@@ -64,7 +64,7 @@ class rcGAN(pl.LightningModule):
 
         image = ifft2c_new(reconstructed_kspace)
 
-        output_im = torch.zeros(size=samples.shape).to(self.device)
+        output_im = torch.zeros(size=samples.shape, device=self.device)
         output_im[:, 0:8, :, :] = image[:, :, :, :, 0]
         output_im[:, 8:16, :, :] = image[:, :, :, :, 1]
 
@@ -105,9 +105,9 @@ class rcGAN(pl.LightningModule):
 
     def adversarial_loss_generator(self, y, gens):
         patch_out = 30
-        fake_pred = torch.zeros(size=(y.shape[0], self.args.num_z, patch_out, patch_out)).to(self.device)
+        fake_pred = torch.zeros(size=(y.shape[0], self.args.num_z, patch_out, patch_out), device=self.device)
         for k in range(y.shape[0]):
-            cond = torch.zeros(1, gens.shape[2], gens.shape[3], gens.shape[4]).to(self.device)
+            cond = torch.zeros(1, gens.shape[2], gens.shape[3], gens.shape[4], device=self.device)
             cond[0, :, :, :] = y[k, :, :, :]
             cond = cond.repeat(self.args.num_z, 1, 1, 1)
             temp = self.discriminator(input=gens[k], y=cond)
@@ -135,7 +135,7 @@ class rcGAN(pl.LightningModule):
 
         # train generator
         if optimizer_idx == 0:
-            gens = torch.zeros(size=(y.size(0), self.args.num_z, self.args.in_chans, self.args.im_size, self.args.im_size)).to(self.device)
+            gens = torch.zeros(size=(y.size(0), self.args.num_z, self.args.in_chans, self.args.im_size, self.args.im_size), device=self.device)
             for z in range(self.args.num_z):
                 gens[:, z, :, :, :] = self.forward(y, mask)
 
@@ -173,7 +173,7 @@ class rcGAN(pl.LightningModule):
 
         y, x, y_true, mean, std, mask = batch
 
-        gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size)).cuda()
+        gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size), device=self.device)
         for z in range(8):
             gens[:, z, :, :, :] = self.forward(y, mask)
 
