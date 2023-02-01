@@ -23,7 +23,8 @@ if __name__ == '__main__':
 
     checkpoint_callback = ModelCheckpoint(
         dirpath='/storage/matt_models/',
-        filename='checkpoint-{epoch}.ckpt'
+        filename='checkpoint-{epoch}.ckpt',
+        save_on_train_epoch_end=False
     )
 
     model = rcGAN(args)
@@ -31,7 +32,8 @@ if __name__ == '__main__':
     dm = MRIDataModule(args)
     # fit trainer on 128 GPUs
     trainer = pl.Trainer(accelerator="gpu", devices=2, strategy="ddp", default_root_dir=args.checkpoint_dir,
-                         max_epochs=args.num_epochs, auto_select_gpus=False, callbacks=[checkpoint_callback])
+                         max_epochs=args.num_epochs, auto_select_gpus=False, callbacks=[checkpoint_callback],
+                         num_sanity_val_steps=0)
 
     if args.resume:
         trainer.fit(model, dm, ckpt_path=args.checkpoint_dir + 'checkpoint.ckpt')
