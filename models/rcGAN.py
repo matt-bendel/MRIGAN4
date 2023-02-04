@@ -193,9 +193,9 @@ class rcGAN(pl.LightningModule):
 
         for j in range(y.size(0)):
             new_y_true = fft2c_new(ifft2c_new(y_true[j]) * std[j] + mean[j])
-            # maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=self.args.calib_width,
-            #                            device=sp.Device(device_num), show_pbar=False, crop=0.70,
-            #                            kernel_width=6).run().get()
+            maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=self.args.calib_width,
+                                       device=sp.Device(device_num), show_pbar=False, crop=0.70,
+                                       kernel_width=6).run().get()
             # S = sp.linop.Multiply((self.args.im_size, self.args.im_size), maps)
             # gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
             #     (avg_gen[j] * std[j] + mean[j]).cpu())
