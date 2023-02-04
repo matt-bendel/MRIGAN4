@@ -171,137 +171,137 @@ class rcGAN(pl.LightningModule):
 
             return d_loss
 
-    def validation_step(self, batch, batch_idx):
-        losses = {
-            'psnr': [],
-            'single_psnr': [],
-            'ssim': []
-        }
-
-        y, x, y_true, mean, std, mask = batch
-
-        gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size),
-                           device=self.device)
-        for z in range(8):
-            gens[:, z, :, :, :] = self.forward(y, mask)
-
-        avg = torch.mean(gens, dim=1)
-
-        avg_gen = self.reformat(avg)
-        gt = self.reformat(x)
-
-        for j in range(y.size(0)):
-            new_y_true = fft2c_new(ifft2c_new(y_true[j]) * std[j] + mean[j])
-            maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=self.args.calib_width,
-                                       device=sp.Device(y.get_device()), show_pbar=False, crop=0.70,
-                                       kernel_width=6).run().get()
-            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), maps)
-            gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
-                (avg_gen[j] * std[j] + mean[j]).cpu())
-
-            avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
-            gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
-
-            single_gen = torch.zeros(8, self.args.im_size, self.args.im_size, 2, device=self.device)
-            single_gen[:, :, :, 0] = gens[j, 0, 0:8, :, :]
-            single_gen[:, :, :, 1] = gens[j, 0, 8:16, :, :]
-
-            single_gen_complex_np = tensor_to_complex_np((single_gen * std[j] + mean[j]).cpu())
-            single_gen_np = torch.tensor(S.H * single_gen_complex_np).to(self.device).abs().cpu().numpy()
-
-            losses['ssim'].append(ssim(gt_np, avg_gen_np))
-            losses['psnr'].append(psnr(gt_np, avg_gen_np))
-            losses['single_psnr'].append(psnr(gt_np, single_gen_np))
-
-            ind = 1
-
-            if batch_idx == 0 and j == ind and self.global_rank == 0:
-                output = transforms.root_sum_of_squares(
-                    complex_abs(avg_gen[ind] * std[ind] + mean[ind])).cpu().numpy()
-                target = transforms.root_sum_of_squares(
-                    complex_abs(gt[ind] * std[ind] + mean[ind])).cpu().numpy()
-
-                gen_im_list = []
-                for z in range(8):
-                    val_rss = torch.zeros(8, self.args.im_size, self.args.im_size, 2, device=self.device)
-                    val_rss[:, :, :, 0] = gens[ind, z, 0:8, :, :]
-                    val_rss[:, :, :, 1] = gens[ind, z, 8:16, :, :]
-                    gen_im_list.append(transforms.root_sum_of_squares(
-                        complex_abs(val_rss * std[ind] + mean[ind])).cpu().numpy())
-
-                std_dev = np.zeros(output.shape)
-                for val in gen_im_list:
-                    std_dev = std_dev + np.power((val - output), 2)
-
-                std_dev = std_dev / 8
-                std_dev = np.sqrt(std_dev)
-
-                place = 1
-                for r, val in enumerate(gen_im_list):
-                    gif_im(target, val, place, 'image')
-                    place += 1
-
-                generate_gif('image')
-
-                fig = plt.figure()
-                ax = fig.add_subplot(1, 1, 1)
-                im = ax.imshow(std_dev, cmap='viridis')
-                ax.set_xticks([])
-                ax.set_yticks([])
-                fig.subplots_adjust(right=0.85)  # Make room for colorbar
-
-                # Get position of final error map axis
-                [[x10, y10], [x11, y11]] = ax.get_position().get_points()
-
-                pad = 0.01
-                width = 0.02
-                cbar_ax = fig.add_axes([x11 + pad, y10, width, y11 - y10])
-
-                fig.colorbar(im, cax=cbar_ax)
-
-                plt.savefig(f'std_dev_gen.png')
-                plt.close()
-
-        losses['psnr'] = np.mean(losses['psnr'])
-        losses['ssim'] = np.mean(losses['ssim'])
-        losses['single_psnr'] = np.mean(losses['single_psnr'])
-
-        return losses
-
-    def validation_step_end(self, batch_parts):
-        losses = {
-            'psnr': np.mean(batch_parts['psnr']),
-            'single_psnr': np.mean(batch_parts['single_psnr']),
-            'ssim': np.mean(batch_parts['ssim'])
-        }
-
-        return losses
-
-    def validation_epoch_end(self, validation_step_outputs):
-        # TODO: All gather on PSNR values
-        psnrs = []
-        single_psnrs = []
-        ssims = []
-
-        for out in validation_step_outputs:
-            psnrs.append(out['psnr'])
-            ssims.append(out['ssim'])
-            single_psnrs.append(out['single_psnr'])
-
-        avg_psnr = np.mean(psnrs)
-        avg_single_psnr = np.mean(single_psnrs)
-        psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
-
-        mu_0 = 2e-2
-        self.std_mult += mu_0 * psnr_diff
-
-        # if psnr_diff > 0.25:
-        # self.log('final_val_psnr', avg_psnr, on_step=False, prog_bar=True, sync_dist=True)
-
-        if self.global_rank == 0:
-            send_mail(f"EPOCH {self.current_epoch + 1} UPDATE",
-                      f"Metrics:\nPSNR: {avg_psnr:.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}",
-                      file_name="variation_gif.gif")
+    # def validation_step(self, batch, batch_idx):
+    #     losses = {
+    #         'psnr': [],
+    #         'single_psnr': [],
+    #         'ssim': []
+    #     }
+    #
+    #     y, x, y_true, mean, std, mask = batch
+    #
+    #     gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size),
+    #                        device=self.device)
+    #     for z in range(8):
+    #         gens[:, z, :, :, :] = self.forward(y, mask)
+    #
+    #     avg = torch.mean(gens, dim=1)
+    #
+    #     avg_gen = self.reformat(avg)
+    #     gt = self.reformat(x)
+    #
+    #     for j in range(y.size(0)):
+    #         new_y_true = fft2c_new(ifft2c_new(y_true[j]) * std[j] + mean[j])
+    #         maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=self.args.calib_width,
+    #                                    device=sp.Device(y.get_device()), show_pbar=False, crop=0.70,
+    #                                    kernel_width=6).run().get()
+    #         S = sp.linop.Multiply((self.args.im_size, self.args.im_size), maps)
+    #         gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
+    #             (avg_gen[j] * std[j] + mean[j]).cpu())
+    #
+    #         avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
+    #         gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
+    #
+    #         single_gen = torch.zeros(8, self.args.im_size, self.args.im_size, 2, device=self.device)
+    #         single_gen[:, :, :, 0] = gens[j, 0, 0:8, :, :]
+    #         single_gen[:, :, :, 1] = gens[j, 0, 8:16, :, :]
+    #
+    #         single_gen_complex_np = tensor_to_complex_np((single_gen * std[j] + mean[j]).cpu())
+    #         single_gen_np = torch.tensor(S.H * single_gen_complex_np).abs().numpy()
+    #
+    #         losses['ssim'].append(ssim(gt_np, avg_gen_np))
+    #         losses['psnr'].append(psnr(gt_np, avg_gen_np))
+    #         losses['single_psnr'].append(psnr(gt_np, single_gen_np))
+    #
+    #         ind = 1
+    #
+    #         if batch_idx == 0 and j == ind and self.global_rank == 0:
+    #             output = transforms.root_sum_of_squares(
+    #                 complex_abs(avg_gen[ind] * std[ind] + mean[ind])).cpu().numpy()
+    #             target = transforms.root_sum_of_squares(
+    #                 complex_abs(gt[ind] * std[ind] + mean[ind])).cpu().numpy()
+    #
+    #             gen_im_list = []
+    #             for z in range(8):
+    #                 val_rss = torch.zeros(8, self.args.im_size, self.args.im_size, 2, device=self.device)
+    #                 val_rss[:, :, :, 0] = gens[ind, z, 0:8, :, :]
+    #                 val_rss[:, :, :, 1] = gens[ind, z, 8:16, :, :]
+    #                 gen_im_list.append(transforms.root_sum_of_squares(
+    #                     complex_abs(val_rss * std[ind] + mean[ind])).cpu().numpy())
+    #
+    #             std_dev = np.zeros(output.shape)
+    #             for val in gen_im_list:
+    #                 std_dev = std_dev + np.power((val - output), 2)
+    #
+    #             std_dev = std_dev / 8
+    #             std_dev = np.sqrt(std_dev)
+    #
+    #             place = 1
+    #             for r, val in enumerate(gen_im_list):
+    #                 gif_im(target, val, place, 'image')
+    #                 place += 1
+    #
+    #             generate_gif('image')
+    #
+    #             fig = plt.figure()
+    #             ax = fig.add_subplot(1, 1, 1)
+    #             im = ax.imshow(std_dev, cmap='viridis')
+    #             ax.set_xticks([])
+    #             ax.set_yticks([])
+    #             fig.subplots_adjust(right=0.85)  # Make room for colorbar
+    #
+    #             # Get position of final error map axis
+    #             [[x10, y10], [x11, y11]] = ax.get_position().get_points()
+    #
+    #             pad = 0.01
+    #             width = 0.02
+    #             cbar_ax = fig.add_axes([x11 + pad, y10, width, y11 - y10])
+    #
+    #             fig.colorbar(im, cax=cbar_ax)
+    #
+    #             plt.savefig(f'std_dev_gen.png')
+    #             plt.close()
+    #
+    #     losses['psnr'] = np.mean(losses['psnr'])
+    #     losses['ssim'] = np.mean(losses['ssim'])
+    #     losses['single_psnr'] = np.mean(losses['single_psnr'])
+    #
+    #     return losses
+    #
+    # def validation_step_end(self, batch_parts):
+    #     losses = {
+    #         'psnr': np.mean(batch_parts['psnr']),
+    #         'single_psnr': np.mean(batch_parts['single_psnr']),
+    #         'ssim': np.mean(batch_parts['ssim'])
+    #     }
+    #
+    #     return losses
+    #
+    # def validation_epoch_end(self, validation_step_outputs):
+    #     # TODO: All gather on PSNR values
+    #     psnrs = []
+    #     single_psnrs = []
+    #     ssims = []
+    #
+    #     for out in validation_step_outputs:
+    #         psnrs.append(out['psnr'])
+    #         ssims.append(out['ssim'])
+    #         single_psnrs.append(out['single_psnr'])
+    #
+    #     avg_psnr = np.mean(psnrs)
+    #     avg_single_psnr = np.mean(single_psnrs)
+    #     psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
+    #
+    #     mu_0 = 2e-2
+    #     self.std_mult += mu_0 * psnr_diff
+    #
+    #     # if psnr_diff > 0.25:
+    #     # self.log('final_val_psnr', avg_psnr, on_step=False, prog_bar=True, sync_dist=True)
+    #
+    #     if self.global_rank == 0:
+    #         send_mail(f"EPOCH {self.current_epoch + 1} UPDATE",
+    #                   f"Metrics:\nPSNR: {avg_psnr:.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}",
+    #                   file_name="variation_gif.gif")
 
 
     def configure_optimizers(self):
@@ -311,8 +311,8 @@ class rcGAN(pl.LightningModule):
                                  betas=(self.args.beta_1, self.args.beta_2))
         return [opt_g, opt_d], []
 
-    # def on_save_checkpoint(self, checkpoint):
-    #     checkpoint["beta_std"] = self.std_mult
-    #
-    # def on_load_checkpoint(self, checkpoint):
-    #     self.std_mult = checkpoint["beta_std"]
+    def on_save_checkpoint(self, checkpoint):
+        checkpoint["beta_std"] = self.std_mult
+
+    def on_load_checkpoint(self, checkpoint):
+        self.std_mult = checkpoint["beta_std"]
