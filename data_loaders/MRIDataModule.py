@@ -1,7 +1,7 @@
-from torch.utils.data import random_split, DataLoader
+from torch.utils.data import DataLoader
 import pytorch_lightning as pl
 from typing import Optional
-from data.mri_data import SelectiveSliceData, SelectiveSliceData_Val
+from data.mri_data import SelectiveSliceData, SelectiveSliceData_Val, SelectiveSliceData_Test
 from data_loaders.prepare_data import DataTransform
 
 class MRIDataModule(pl.LightningDataModule):
@@ -24,38 +24,39 @@ class MRIDataModule(pl.LightningDataModule):
         """
 
         # Assign train/val datasets for use in dataloaders
-        # the stage is used in the Pytorch Lightning trainer method, which you can call as fit (training, evaluation) or test, also you can use it for predict, not implemented here
-        if stage == "fit" or stage is None:
-            train_data = SelectiveSliceData(
-                root=self.args.data_path / 'multicoil_train',
-                transform=DataTransform(self.args),
-                challenge='multicoil',
-                sample_rate=1,
-                use_top_slices=True,
-                number_of_top_slices=self.args.num_of_top_slices,
-                restrict_size=False,
-            )
+        train_data = SelectiveSliceData(
+            root=self.args.data_path / 'multicoil_train',
+            transform=DataTransform(self.args),
+            challenge='multicoil',
+            sample_rate=1,
+            use_top_slices=True,
+            number_of_top_slices=self.args.num_of_top_slices,
+            restrict_size=False,
+        )
 
-            dev_data = SelectiveSliceData_Val(
-                root=self.args.data_path / 'multicoil_val',
-                transform=DataTransform(self.args, test=True),
-                challenge='multicoil',
-                sample_rate=1,
-                use_top_slices=True,
-                number_of_top_slices=self.args.num_of_top_slices,
-                restrict_size=False,
-                big_test=False
-            )
-            self.train, self.validate = train_data, dev_data
+        dev_data = SelectiveSliceData_Val(
+            root=self.args.data_path / 'multicoil_val',
+            transform=DataTransform(self.args, test=True),
+            challenge='multicoil',
+            sample_rate=1,
+            use_top_slices=True,
+            number_of_top_slices=self.args.num_of_top_slices,
+            restrict_size=False,
+            big_test=False
+        )
 
-        # Assign test dataset for use in dataloader(s)
-        # if stage == "test" or stage is None:
-        #     self.test = YourCustomDataset(
-        #         root_path="/Users/yourusername/path/to/data/test_set/",
-        #         ipt="input/",
-        #         tgt="target/",
-        #         tgt_scale=25,
-        #         train_transform=False)
+        test_data = SelectiveSliceData_Test(
+            root=self.args.data_path / 'small_T2_test',
+            transform=DataTransform(self.args, test=True),
+            challenge='multicoil',
+            sample_rate=1,
+            use_top_slices=True,
+            number_of_top_slices=6,
+            restrict_size=False,
+            big_test=True
+        )
+
+            self.train, self.validate, self.test = train_data, dev_data, test_data
 
     # define your dataloaders
     # again, here defined for train, validate and test, not for predict as the project is not there yet.
@@ -78,4 +79,10 @@ class MRIDataModule(pl.LightningDataModule):
         )
 
     def test_dataloader(self):
-        return None
+        return DataLoader(
+            dataset=self.test,
+            batch_size=4,
+            num_workers=4,
+            pin_memory=True,
+            drop_last=False
+        )

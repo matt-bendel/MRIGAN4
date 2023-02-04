@@ -198,7 +198,7 @@ class CFIDMetric:
                     maps.append(S)
 
                 for l in range(self.num_samps):
-                    recon = self.gan(condition, true_cond, mask=mask)
+                    recon = self.gan(condition, mask)
 
                     image = self._get_embed_im(recon, mean, std, maps)
                     condition_im = self._get_embed_im(condition, mean, std, maps)

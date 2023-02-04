@@ -21,6 +21,7 @@ from evaluation_scripts.metrics import psnr, ssim
 from evaluation_scripts.plotting_scripts import gif_im, generate_gif
 from mail import send_mail
 
+
 class rcGAN(pl.LightningModule):
     def __init__(self, args):
         super().__init__()
@@ -36,6 +37,7 @@ class rcGAN(pl.LightningModule):
 
         self.std_mult = 1
         self.resolution = self.args.im_size
+        self.save_hyperparameters()  # Save passed values
 
     def get_noise(self, num_vectors, mask):
         z_vals = []
@@ -49,7 +51,8 @@ class rcGAN(pl.LightningModule):
         return measured_vals, z_vals
 
     def reformat(self, samples):
-        reformatted_tensor = torch.zeros(size=(samples.size(0), 8, self.resolution, self.resolution, 2), device=self.device)
+        reformatted_tensor = torch.zeros(size=(samples.size(0), 8, self.resolution, self.resolution, 2),
+                                         device=self.device)
         reformatted_tensor[:, :, :, :, 0] = samples[:, 0:8, :, :]
         reformatted_tensor[:, :, :, :, 1] = samples[:, 8:16, :, :]
 
@@ -78,7 +81,8 @@ class rcGAN(pl.LightningModule):
         # Get random interpolation between real and fake samples
         interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
         d_interpolates = self.discriminator(input=interpolates, y=y)
-        fake = Tensor(real_samples.shape[0], 1, d_interpolates.shape[-1], d_interpolates.shape[-1]).fill_(1.0).to(self.device)
+        fake = Tensor(real_samples.shape[0], 1, d_interpolates.shape[-1], d_interpolates.shape[-1]).fill_(1.0).to(
+            self.device)
 
         # Get gradient w.r.t. interpolates
         gradients = autograd.grad(
@@ -120,7 +124,8 @@ class rcGAN(pl.LightningModule):
         return - 1e-2 * gen_pred_loss.mean()
 
     def l1_std_p(self, avg_recon, gens, x):
-        return F.l1_loss(avg_recon, x) - self.std_mult * np.sqrt(2 / (np.pi * self.args.num_z * (self.args.num_z + 1))) * torch.std(gens, dim=1).mean()
+        return F.l1_loss(avg_recon, x) - self.std_mult * np.sqrt(
+            2 / (np.pi * self.args.num_z * (self.args.num_z + 1))) * torch.std(gens, dim=1).mean()
 
     def gradient_penalty(self, x_hat, x, y):
         gradient_penalty = self.compute_gradient_penalty(x.data, x_hat.data, y.data)
@@ -135,7 +140,9 @@ class rcGAN(pl.LightningModule):
 
         # train generator
         if optimizer_idx == 0:
-            gens = torch.zeros(size=(y.size(0), self.args.num_z, self.args.in_chans, self.args.im_size, self.args.im_size), device=self.device)
+            gens = torch.zeros(
+                size=(y.size(0), self.args.num_z, self.args.in_chans, self.args.im_size, self.args.im_size),
+                device=self.device)
             for z in range(self.args.num_z):
                 gens[:, z, :, :, :] = self.forward(y, mask)
 
@@ -173,7 +180,8 @@ class rcGAN(pl.LightningModule):
 
         y, x, y_true, mean, std, mask = batch
 
-        gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size), device=self.device)
+        gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size),
+                           device=self.device)
         for z in range(8):
             gens[:, z, :, :, :] = self.forward(y, mask)
 
@@ -291,19 +299,21 @@ class rcGAN(pl.LightningModule):
         # if psnr_diff > 0.25:
         # self.log('final_val_psnr', avg_psnr, on_step=False, prog_bar=True, sync_dist=True)
 
-
         if self.global_rank == 0:
-            send_mail(f"EPOCH {self.current_epoch + 1} UPDATE", f"Metrics:\nPSNR: {avg_psnr:.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}", file_name="variation_gif.gif")
+            send_mail(f"EPOCH {self.current_epoch + 1} UPDATE",
+                      f"Metrics:\nPSNR: {avg_psnr:.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}",
+                      file_name="variation_gif.gif")
 
-    # def on_training_epoch_end(self):
 
     def configure_optimizers(self):
-        opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.args.lr, betas=(self.args.beta_1, self.args.beta_2))
-        opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.args.lr, betas=(self.args.beta_1, self.args.beta_2))
+        opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.args.lr,
+                                 betas=(self.args.beta_1, self.args.beta_2))
+        opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.args.lr,
+                                 betas=(self.args.beta_1, self.args.beta_2))
         return [opt_g, opt_d], []
 
-    # def on_save_checkpoint(self, checkpoint):
-    #     checkpoint["beta_std"] = self.std_mult
-    #
-    # def on_load_checkpoint(self, checkpoint):
-    #     self.std_mult = checkpoint["beta_std"]
+    def on_save_checkpoint(self, checkpoint):
+        checkpoint["beta_std"] = self.std_mult
+
+    def on_load_checkpoint(self, checkpoint):
+        self.std_mult = checkpoint["beta_std"]
