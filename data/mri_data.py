@@ -629,9 +629,8 @@ class SliceDataset(torch.utils.data.Dataset):
             attrs.update(metadata)
 
         maps = None
-        with open(f'/storage/fastMRI_brain/sense_maps/val/{fname}_{dataslice}.pkl', 'rb') as inp:
+        with open(f'/storage/fastMRI_brain/sense_maps/val/{fname.name}_{dataslice}.pkl', 'rb') as inp:
             maps = pickle.load(inp)
-            print(type(maps))
 
         if self.transform is None:
             sample = (kspace, mask, target, attrs, fname.name, dataslice)
