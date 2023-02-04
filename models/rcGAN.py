@@ -189,10 +189,8 @@ class rcGAN(pl.LightningModule):
 
         avg_gen = self.reformat(avg)
         gt = self.reformat(x)
-        device_num = int(str(self.device)[-1])
 
         for j in range(y.size(0)):
-            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), maps[j])
             gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
                 (avg_gen[j] * std[j] + mean[j]).cpu())
 
