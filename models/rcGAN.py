@@ -190,7 +190,7 @@ class rcGAN(pl.LightningModule):
         avg_gen = self.reformat(avg)
         gt = self.reformat(x)
         device_num = int(str(self.device)[-1])
-        print(f"{self.device}")
+        print(f"PID {os.getpid()}: {self.device};{device_num}")
 
         for j in range(y.size(0)):
             new_y_true = fft2c_new(ifft2c_new(y_true[j]) * std[j] + mean[j])
