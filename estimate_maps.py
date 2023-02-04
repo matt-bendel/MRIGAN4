@@ -33,7 +33,6 @@ if __name__ == '__main__':
             maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=args.calib_width,
                                        device=sp.Device(0), crop=0.70,
                                        kernel_width=6).run().get()
-            S = sp.linop.Multiply((args.im_size, args.im_size), maps)
 
             with open(f'/storage/fastMRI_brain/sense_maps/val/{fname[j]}_{slice[j]}.pkl', 'wb') as outp:
-                pickle.dump(S, outp, pickle.HIGHEST_PROTOCOL)
+                pickle.dump(maps, outp, pickle.HIGHEST_PROTOCOL)

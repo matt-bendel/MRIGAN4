@@ -178,7 +178,7 @@ class rcGAN(pl.LightningModule):
             'ssim': []
         }
 
-        y, x, y_true, mean, std, mask, Sense = batch
+        y, x, y_true, mean, std, mask, maps = batch
 
         gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size),
                            device=self.device)
@@ -191,7 +191,7 @@ class rcGAN(pl.LightningModule):
         gt = self.reformat(x)
 
         for j in range(y.size(0)):
-            S = Sense[j]
+            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), maps[j])
             gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
                 (avg_gen[j] * std[j] + mean[j]).cpu())
 
@@ -264,41 +264,40 @@ class rcGAN(pl.LightningModule):
 
         return losses
 
-    # def validation_step_end(self, batch_parts):
-    #     losses = {
-    #         'psnr': np.mean(batch_parts['psnr']),
-    #         'single_psnr': np.mean(batch_parts['single_psnr']),
-    #         'ssim': np.mean(batch_parts['ssim'])
-    #     }
-    #
-    #     return losses
-    #
-    # def validation_epoch_end(self, validation_step_outputs):
-    #     # TODO: All gather on PSNR values
-    #     psnrs = []
-    #     single_psnrs = []
-    #     ssims = []
-    #
-    #     for out in validation_step_outputs:
-    #         psnrs.append(out['psnr'])
-    #         ssims.append(out['ssim'])
-    #         single_psnrs.append(out['single_psnr'])
-    #
-    #     avg_psnr = np.mean(psnrs)
-    #     avg_single_psnr = np.mean(single_psnrs)
-    #     psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
-    #
-    #     mu_0 = 2e-2
-    #     self.std_mult += mu_0 * psnr_diff
-    #
-    #     # if psnr_diff > 0.25:
-    #     # self.log('final_val_psnr', avg_psnr, on_step=False, prog_bar=True, sync_dist=True)
-    #
-    #     if self.global_rank == 0:
-    #         send_mail(f"EPOCH {self.current_epoch + 1} UPDATE",
-    #                   f"Metrics:\nPSNR: {avg_psnr:.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}",
-    #                   file_name="variation_gif.gif")
+    def validation_step_end(self, batch_parts):
+        losses = {
+            'psnr': np.mean(batch_parts['psnr']),
+            'single_psnr': np.mean(batch_parts['single_psnr']),
+            'ssim': np.mean(batch_parts['ssim'])
+        }
 
+        return losses
+
+    def validation_epoch_end(self, validation_step_outputs):
+        # TODO: All gather on PSNR values
+        psnrs = []
+        single_psnrs = []
+        ssims = []
+
+        for out in validation_step_outputs:
+            psnrs.append(out['psnr'])
+            ssims.append(out['ssim'])
+            single_psnrs.append(out['single_psnr'])
+
+        avg_psnr = np.mean(psnrs)
+        avg_single_psnr = np.mean(single_psnrs)
+        psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
+
+        mu_0 = 2e-2
+        self.std_mult += mu_0 * psnr_diff
+
+        # if psnr_diff > 0.25:
+        # self.log('final_val_psnr', avg_psnr, on_step=False, prog_bar=True, sync_dist=True)
+
+        if self.global_rank == 0:
+            send_mail(f"EPOCH {self.current_epoch + 1} UPDATE",
+                      f"Metrics:\nPSNR: {avg_psnr:.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}",
+                      file_name="variation_gif.gif")
 
     def configure_optimizers(self):
         opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.args.lr,
