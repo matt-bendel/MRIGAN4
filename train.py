@@ -25,7 +25,7 @@ if __name__ == '__main__':
         monitor='epoch',
         mode='max',
         dirpath='/storage/matt_models/',
-        filename='checkpoint-{epoch}.ckpt',
+        filename='checkpoint-{epoch}',
         save_top_k=100
     )
 
