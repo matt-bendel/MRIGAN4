@@ -62,7 +62,7 @@ class MRIDataModule(pl.LightningDataModule):
     # again, here defined for train, validate and test, not for predict as the project is not there yet.
     def train_dataloader(self):
         return DataLoader(
-            dataset=self.train,
+            dataset=self.validate,
             batch_size=self.args.batch_size,
             num_workers=20,
             drop_last=True,

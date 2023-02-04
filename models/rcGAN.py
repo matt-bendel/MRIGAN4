@@ -193,7 +193,7 @@ class rcGAN(pl.LightningModule):
         for j in range(y.size(0)):
             new_y_true = fft2c_new(ifft2c_new(y_true[j]) * std[j] + mean[j])
             maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=self.args.calib_width,
-                                       device=sp.Device(gt.get_device()), show_pbar=False, crop=0.70,
+                                       device=sp.Device(self.device), show_pbar=False, crop=0.70,
                                        kernel_width=6).run().get()
             S = sp.linop.Multiply((self.args.im_size, self.args.im_size), maps)
             gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
@@ -300,7 +300,7 @@ class rcGAN(pl.LightningModule):
         # self.log('final_val_psnr', avg_psnr, on_step=False, prog_bar=True, sync_dist=True)
 
         if self.global_rank == 0:
-            self.log('std_mult', self.std_mult)
+            self.log('std_mult', self.std_mult, sync_dist=True)
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE",
                       f"Metrics:\nPSNR: {avg_psnr:.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}",
                       file_name="variation_gif.gif")
