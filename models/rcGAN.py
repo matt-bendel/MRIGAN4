@@ -299,7 +299,6 @@ class rcGAN(pl.LightningModule):
         # self.log('final_val_psnr', avg_psnr, on_step=False, prog_bar=True, sync_dist=True)
 
         if self.global_rank == 0:
-            self.log('std_mult', self.std_mult, sync_dist=True)
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE",
                       f"Metrics:\nPSNR: {avg_psnr:.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}",
                       file_name="variation_gif.gif")
@@ -312,8 +311,8 @@ class rcGAN(pl.LightningModule):
                                  betas=(self.args.beta_1, self.args.beta_2))
         return [opt_g, opt_d], []
 
-    def on_save_checkpoint(self, checkpoint):
-        checkpoint["beta_std"] = self.std_mult
-
-    def on_load_checkpoint(self, checkpoint):
-        self.std_mult = checkpoint["beta_std"]
+    # def on_save_checkpoint(self, checkpoint):
+    #     checkpoint["beta_std"] = self.std_mult
+    #
+    # def on_load_checkpoint(self, checkpoint):
+    #     self.std_mult = checkpoint["beta_std"]
