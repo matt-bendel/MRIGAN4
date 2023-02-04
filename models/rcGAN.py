@@ -300,6 +300,7 @@ class rcGAN(pl.LightningModule):
         # self.log('final_val_psnr', avg_psnr, on_step=False, prog_bar=True, sync_dist=True)
 
         if self.global_rank == 0:
+            self.log('std_mult', self.std_mult)
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE",
                       f"Metrics:\nPSNR: {avg_psnr:.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}",
                       file_name="variation_gif.gif")
