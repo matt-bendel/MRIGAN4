@@ -22,6 +22,7 @@ if __name__ == '__main__':
     seed_everything(1, workers=True)
 
     dm = MRIDataModule(args)
+    dm.setup()
     val_loader = dm.val_dataloader()
 
     for i, data in enumerate(val_loader):
