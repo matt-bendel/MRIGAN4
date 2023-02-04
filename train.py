@@ -26,7 +26,7 @@ if __name__ == '__main__':
         mode='max',
         dirpath='/storage/matt_models/',
         filename='checkpoint-{epoch}',
-        save_top_k=100
+        save_top_k=50
     )
 
     model = rcGAN(args)

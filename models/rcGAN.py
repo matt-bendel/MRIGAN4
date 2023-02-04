@@ -190,83 +190,83 @@ class rcGAN(pl.LightningModule):
         avg_gen = self.reformat(avg)
         gt = self.reformat(x)
 
-        for j in range(y.size(0)):
-            new_y_true = fft2c_new(ifft2c_new(y_true[j]) * std[j] + mean[j])
-            maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=self.args.calib_width,
-                                       device=sp.Device(y.get_device()), show_pbar=False, crop=0.70,
-                                       kernel_width=6).run().get()
-            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), maps)
-            gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
-                (avg_gen[j] * std[j] + mean[j]).cpu())
+        # for j in range(y.size(0)):
+        #     new_y_true = fft2c_new(ifft2c_new(y_true[j]) * std[j] + mean[j])
+        #     maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=self.args.calib_width,
+        #                                device=sp.Device(y.get_device()), show_pbar=False, crop=0.70,
+        #                                kernel_width=6).run().get()
+        #     S = sp.linop.Multiply((self.args.im_size, self.args.im_size), maps)
+        #     gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
+        #         (avg_gen[j] * std[j] + mean[j]).cpu())
+        #
+        #     avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
+        #     gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
+        #
+        #     single_gen = torch.zeros(8, self.args.im_size, self.args.im_size, 2, device=self.device)
+        #     single_gen[:, :, :, 0] = gens[j, 0, 0:8, :, :]
+        #     single_gen[:, :, :, 1] = gens[j, 0, 8:16, :, :]
+        #
+        #     single_gen_complex_np = tensor_to_complex_np((single_gen * std[j] + mean[j]).cpu())
+        #     single_gen_np = torch.tensor(S.H * single_gen_complex_np).abs().numpy()
+        #
+        #     losses['ssim'].append(ssim(gt_np, avg_gen_np))
+        #     losses['psnr'].append(psnr(gt_np, avg_gen_np))
+        #     losses['single_psnr'].append(psnr(gt_np, single_gen_np))
+        #
+        #     ind = 1
+        #
+        #     if batch_idx == 0 and j == ind and self.global_rank == 0:
+        #         output = transforms.root_sum_of_squares(
+        #             complex_abs(avg_gen[ind] * std[ind] + mean[ind])).cpu().numpy()
+        #         target = transforms.root_sum_of_squares(
+        #             complex_abs(gt[ind] * std[ind] + mean[ind])).cpu().numpy()
+        #
+        #         gen_im_list = []
+        #         for z in range(8):
+        #             val_rss = torch.zeros(8, self.args.im_size, self.args.im_size, 2, device=self.device)
+        #             val_rss[:, :, :, 0] = gens[ind, z, 0:8, :, :]
+        #             val_rss[:, :, :, 1] = gens[ind, z, 8:16, :, :]
+        #             gen_im_list.append(transforms.root_sum_of_squares(
+        #                 complex_abs(val_rss * std[ind] + mean[ind])).cpu().numpy())
+        #
+        #         std_dev = np.zeros(output.shape)
+        #         for val in gen_im_list:
+        #             std_dev = std_dev + np.power((val - output), 2)
+        #
+        #         std_dev = std_dev / 8
+        #         std_dev = np.sqrt(std_dev)
+        #
+        #         place = 1
+        #         for r, val in enumerate(gen_im_list):
+        #             gif_im(target, val, place, 'image')
+        #             place += 1
+        #
+        #         generate_gif('image')
+        #
+        #         fig = plt.figure()
+        #         ax = fig.add_subplot(1, 1, 1)
+        #         im = ax.imshow(std_dev, cmap='viridis')
+        #         ax.set_xticks([])
+        #         ax.set_yticks([])
+        #         fig.subplots_adjust(right=0.85)  # Make room for colorbar
+        #
+        #         # Get position of final error map axis
+        #         [[x10, y10], [x11, y11]] = ax.get_position().get_points()
+        #
+        #         pad = 0.01
+        #         width = 0.02
+        #         cbar_ax = fig.add_axes([x11 + pad, y10, width, y11 - y10])
+        #
+        #         fig.colorbar(im, cax=cbar_ax)
+        #
+        #         plt.savefig(f'std_dev_gen.png')
+        #         plt.close()
+        #
+        # losses['psnr'] = np.mean(losses['psnr'])
+        # losses['ssim'] = np.mean(losses['ssim'])
+        # losses['single_psnr'] = np.mean(losses['single_psnr'])
 
-            avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
-            gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
-
-            single_gen = torch.zeros(8, self.args.im_size, self.args.im_size, 2, device=self.device)
-            single_gen[:, :, :, 0] = gens[j, 0, 0:8, :, :]
-            single_gen[:, :, :, 1] = gens[j, 0, 8:16, :, :]
-
-            single_gen_complex_np = tensor_to_complex_np((single_gen * std[j] + mean[j]).cpu())
-            single_gen_np = torch.tensor(S.H * single_gen_complex_np).abs().numpy()
-
-            losses['ssim'].append(ssim(gt_np, avg_gen_np))
-            losses['psnr'].append(psnr(gt_np, avg_gen_np))
-            losses['single_psnr'].append(psnr(gt_np, single_gen_np))
-
-            ind = 1
-
-            if batch_idx == 0 and j == ind and self.global_rank == 0:
-                output = transforms.root_sum_of_squares(
-                    complex_abs(avg_gen[ind] * std[ind] + mean[ind])).cpu().numpy()
-                target = transforms.root_sum_of_squares(
-                    complex_abs(gt[ind] * std[ind] + mean[ind])).cpu().numpy()
-
-                gen_im_list = []
-                for z in range(8):
-                    val_rss = torch.zeros(8, self.args.im_size, self.args.im_size, 2, device=self.device)
-                    val_rss[:, :, :, 0] = gens[ind, z, 0:8, :, :]
-                    val_rss[:, :, :, 1] = gens[ind, z, 8:16, :, :]
-                    gen_im_list.append(transforms.root_sum_of_squares(
-                        complex_abs(val_rss * std[ind] + mean[ind])).cpu().numpy())
-
-                std_dev = np.zeros(output.shape)
-                for val in gen_im_list:
-                    std_dev = std_dev + np.power((val - output), 2)
-
-                std_dev = std_dev / 8
-                std_dev = np.sqrt(std_dev)
-
-                place = 1
-                for r, val in enumerate(gen_im_list):
-                    gif_im(target, val, place, 'image')
-                    place += 1
-
-                generate_gif('image')
-
-                fig = plt.figure()
-                ax = fig.add_subplot(1, 1, 1)
-                im = ax.imshow(std_dev, cmap='viridis')
-                ax.set_xticks([])
-                ax.set_yticks([])
-                fig.subplots_adjust(right=0.85)  # Make room for colorbar
-
-                # Get position of final error map axis
-                [[x10, y10], [x11, y11]] = ax.get_position().get_points()
-
-                pad = 0.01
-                width = 0.02
-                cbar_ax = fig.add_axes([x11 + pad, y10, width, y11 - y10])
-
-                fig.colorbar(im, cax=cbar_ax)
-
-                plt.savefig(f'std_dev_gen.png')
-                plt.close()
-
-        losses['psnr'] = np.mean(losses['psnr'])
-        losses['ssim'] = np.mean(losses['ssim'])
-        losses['single_psnr'] = np.mean(losses['single_psnr'])
-
-        return losses
+        return gt
     #
     # def validation_step_end(self, batch_parts):
     #     losses = {
