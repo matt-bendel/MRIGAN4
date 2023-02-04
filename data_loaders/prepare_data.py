@@ -86,7 +86,7 @@ class DataTransform:
         if sense_maps == None:
             sense_maps = torch.zeros(1)
 
-        return final_input.float(), final_gt.float(), normalized_true_measures.float(), mean.float(), std.float(), mask, fname, slice# sense_maps
+        return final_input.float(), final_gt.float(), normalized_true_measures.float(), mean.float(), std.float(), mask, sense_maps
 
 
 def create_datasets(args, val_only, big_test=False):
