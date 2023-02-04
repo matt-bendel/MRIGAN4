@@ -365,13 +365,18 @@ class SelectiveSliceData_Val(torch.utils.data.Dataset):
         with h5py.File(fname, 'r') as data:
             kspace = data['kspace'][slice]
             target = data[self.recons_key][slice] if self.recons_key in data else None
+
+            maps = None
+            with open(f'/storage/fastMRI_brain/sense_maps/val/{fname.name}_{slice}.pkl', 'rb') as inp:
+                maps = pickle.load(inp)
+
             # if self.test_set:
             #     with h5py.File(pathlib.Path(str(fname).replace('small_T2_test', 'small_T2_test_sense_maps')), 'r') as sense_data:
             #         sense_maps = sense_data['s_maps'][slice]
             # else:
             #     with h5py.File(pathlib.Path(str(fname).replace('multicoil_val', 'multicoil_val_T2_sense_maps')), 'r') as sense_data:
             #         sense_maps = sense_data['s_maps'][slice]
-            return self.transform(kspace, target, data.attrs, fname.name, slice)
+            return self.transform(kspace, target, data.attrs, fname.name, slice, maps)
 
 
 class CombinedSliceDataset(torch.utils.data.Dataset):
@@ -628,15 +633,10 @@ class SliceDataset(torch.utils.data.Dataset):
             attrs = dict(hf.attrs)
             attrs.update(metadata)
 
-        maps = None
-        with open(f'/storage/fastMRI_brain/sense_maps/val/{fname.name}_{dataslice}.pkl', 'rb') as inp:
-            maps = pickle.load(inp)
-            print(type(maps))
-
         if self.transform is None:
             sample = (kspace, mask, target, attrs, fname.name, dataslice)
         else:
-            sample = self.transform(kspace, mask, target, attrs, fname.name, dataslice, maps)
+            sample = self.transform(kspace, mask, target, attrs, fname.name, dataslice)
 
         return sample
 
