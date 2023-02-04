@@ -179,9 +179,9 @@ class rcGAN(pl.LightningModule):
         }
 
         y, x, y_true, mean, std, mask = batch
-        #
-        # gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size),
-        #                    device=self.device)
+
+        gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size),
+                           device=self.device)
         # for z in range(8):
         #     gens[:, z, :, :, :] = self.forward(y, mask)
         #
