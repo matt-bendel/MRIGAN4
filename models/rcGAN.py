@@ -262,7 +262,6 @@ class rcGAN(pl.LightningModule):
                 plt.savefig(f'std_dev_gen.png')
                 plt.close()
 
-        self.log('val_psnr', np.mean(losses['psnr']), prog_bar=True)
         losses['psnr'] = np.mean(losses['psnr'])
         losses['ssim'] = np.mean(losses['ssim'])
         losses['single_psnr'] = np.mean(losses['single_psnr'])
