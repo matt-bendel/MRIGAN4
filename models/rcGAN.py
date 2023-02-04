@@ -182,13 +182,13 @@ class rcGAN(pl.LightningModule):
 
         gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size),
                            device=self.device)
-        # for z in range(8):
-        #     gens[:, z, :, :, :] = self.forward(y, mask)
-        #
-        # avg = torch.mean(gens, dim=1)
-        #
-        # avg_gen = self.reformat(avg)
-        # gt = self.reformat(x)
+        for z in range(8):
+            gens[:, z, :, :, :] = self.forward(y, mask)
+
+        avg = torch.mean(gens, dim=1)
+
+        avg_gen = self.reformat(avg)
+        gt = self.reformat(x)
 
         # for j in range(y.size(0)):
         #     new_y_true = fft2c_new(ifft2c_new(y_true[j]) * std[j] + mean[j])
