@@ -179,16 +179,16 @@ class rcGAN(pl.LightningModule):
         }
 
         y, x, y_true, mean, std, mask = batch
-
-        gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size),
-                           device=self.device)
-        for z in range(8):
-            gens[:, z, :, :, :] = self.forward(y, mask)
-
-        avg = torch.mean(gens, dim=1)
-
-        avg_gen = self.reformat(avg)
-        gt = self.reformat(x)
+        #
+        # gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size),
+        #                    device=self.device)
+        # for z in range(8):
+        #     gens[:, z, :, :, :] = self.forward(y, mask)
+        #
+        # avg = torch.mean(gens, dim=1)
+        #
+        # avg_gen = self.reformat(avg)
+        # gt = self.reformat(x)
 
         # for j in range(y.size(0)):
         #     new_y_true = fft2c_new(ifft2c_new(y_true[j]) * std[j] + mean[j])
@@ -266,7 +266,7 @@ class rcGAN(pl.LightningModule):
         # losses['ssim'] = np.mean(losses['ssim'])
         # losses['single_psnr'] = np.mean(losses['single_psnr'])
 
-        return gt
+        return losses
     #
     # def validation_step_end(self, batch_parts):
     #     losses = {
