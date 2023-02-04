@@ -56,7 +56,7 @@ class MRIDataModule(pl.LightningDataModule):
             big_test=True
         )
 
-            self.train, self.validate, self.test = train_data, dev_data, test_data
+        self.train, self.validate, self.test = train_data, dev_data, test_data
 
     # define your dataloaders
     # again, here defined for train, validate and test, not for predict as the project is not there yet.
