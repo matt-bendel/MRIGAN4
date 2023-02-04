@@ -179,6 +179,7 @@ class rcGAN(pl.LightningModule):
         }
 
         y, x, y_true, mean, std, mask, Sense = batch
+        print(type(Sense))
 
         gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size),
                            device=self.device)
