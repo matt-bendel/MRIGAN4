@@ -85,6 +85,8 @@ class DataTransform:
 
         if sense_maps == None:
             sense_maps = torch.zeros(1)
+        else:
+            print(type(sense_maps))
 
         return final_input.float(), final_gt.float(), normalized_true_measures.float(), mean.float(), std.float(), mask, sense_maps
 

@@ -179,6 +179,8 @@ class rcGAN(pl.LightningModule):
         }
 
         y, x, y_true, mean, std, mask, Sense = batch
+        print(type(Sense))
+        print(Sense.shape)
 
         gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size),
                            device=self.device)
@@ -263,7 +265,7 @@ class rcGAN(pl.LightningModule):
         losses['single_psnr'] = np.mean(losses['single_psnr'])
 
         return losses
-    #
+
     # def validation_step_end(self, batch_parts):
     #     losses = {
     #         'psnr': np.mean(batch_parts['psnr']),
