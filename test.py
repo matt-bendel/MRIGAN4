@@ -68,7 +68,7 @@ if __name__ == "__main__":
                 avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
                 gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
 
-                gens_np = np.zeros((32, 384, 384))
+                gens_np = np.zeros((32, args.im_size, args.im_size))
                 for z in range(32):
                     single_gen = torch.zeros(8, args.im_size, args.im_size, 2).cuda()
                     single_gen[:, :, :, 0] = gens[j, z, 0:8, :, :]
