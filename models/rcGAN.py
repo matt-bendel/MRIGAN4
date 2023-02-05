@@ -315,4 +315,4 @@ class rcGAN(pl.LightningModule):
 
     def on_load_checkpoint(self, checkpoint):
         self.std_mult = checkpoint["beta_std"]
-        # self.is_good_model = checkpoint["is_valid"]
+        self.is_good_model = checkpoint["is_valid"]
