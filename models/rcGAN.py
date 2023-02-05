@@ -275,7 +275,6 @@ class rcGAN(pl.LightningModule):
         return losses
 
     def validation_epoch_end(self, validation_step_outputs):
-        # TODO: All gather on PSNR values
         psnrs = []
         single_psnrs = []
         ssims = []
