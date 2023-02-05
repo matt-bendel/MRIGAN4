@@ -28,75 +28,75 @@ if __name__ == "__main__":
     dm = MRIDataModule(args)
     dm.setup()
     val_loader = dm.val_dataloader()
-    best_epoch = 100
+    best_epoch = -1
     inception_embedding = VGG16Embedding()
     best_cfid = 10000000
 
     with torch.no_grad():
         for epoch in range(50):
-        print(f"VALIDATING EPOCH: {epoch+1}")
-        model = rcGAN.load_from_checkpoint(checkpoint_path=args.checkpoint_dir + f'/checkpoint-epoch={epoch}.ckpt')
-        model = model.cuda()
-        model.eval()
+            print(f"VALIDATING EPOCH: {epoch+1}")
+            model = rcGAN.load_from_checkpoint(checkpoint_path=args.checkpoint_dir + f'/checkpoint-epoch={epoch}.ckpt')
+            model = model.cuda()
+            model.eval()
 
-        psnrs = []
-        single_psnrs = []
+            psnrs = []
+            single_psnrs = []
 
-        for i, data in enumerate(val_loader):
-            y, x, y_true, mean, std, mask, maps = data
-            y = y.cuda()
-            x = x.cuda()
-            y_true = y_true.cuda()
-            mean = mean.cuda()
-            std = std.cuda()
-            mask = mask.cuda()
+            for i, data in enumerate(val_loader):
+                y, x, y_true, mean, std, mask, maps = data
+                y = y.cuda()
+                x = x.cuda()
+                y_true = y_true.cuda()
+                mean = mean.cuda()
+                std = std.cuda()
+                mask = mask.cuda()
 
-            gens = torch.zeros(size=(y.size(0), 8, args.in_chans, args.im_size, args.im_size)).cuda()
-            for z in range(8):
-                gens[:, z, :, :, :] = model(y, mask)
+                gens = torch.zeros(size=(y.size(0), 8, args.in_chans, args.im_size, args.im_size)).cuda()
+                for z in range(8):
+                    gens[:, z, :, :, :] = model(y, mask)
 
-            avg = torch.mean(gens, dim=1)
+                avg = torch.mean(gens, dim=1)
 
-            avg_gen = model.reformat(avg)
-            gt = model.reformat(x)
+                avg_gen = model.reformat(avg)
+                gt = model.reformat(x)
 
-            for j in range(y.size(0)):
-                new_y_true = fft2c_new(ifft2c_new(y_true[j]) * std[j] + mean[j])
-                S = sp.linop.Multiply((args.im_size, args.im_size), maps[j].cpu().numpy())
-                gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
-                    (avg_gen[j] * std[j] + mean[j]).cpu())
+                for j in range(y.size(0)):
+                    new_y_true = fft2c_new(ifft2c_new(y_true[j]) * std[j] + mean[j])
+                    S = sp.linop.Multiply((args.im_size, args.im_size), maps[j].cpu().numpy())
+                    gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
+                        (avg_gen[j] * std[j] + mean[j]).cpu())
 
-                avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
-                gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
+                    avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
+                    gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
 
-                single_gen = torch.zeros(8, args.im_size, args.im_size, 2).cuda()
-                single_gen[:, :, :, 0] = gens[j, 0, 0:8, :, :]
-                single_gen[:, :, :, 1] = gens[j, 0, 8:16, :, :]
+                    single_gen = torch.zeros(8, args.im_size, args.im_size, 2).cuda()
+                    single_gen[:, :, :, 0] = gens[j, 0, 0:8, :, :]
+                    single_gen[:, :, :, 1] = gens[j, 0, 8:16, :, :]
 
-                single_gen_complex_np = tensor_to_complex_np((single_gen * std[j] + mean[j]).cpu())
-                single_gen_np = torch.tensor(S.H * single_gen_complex_np).abs().numpy()
+                    single_gen_complex_np = tensor_to_complex_np((single_gen * std[j] + mean[j]).cpu())
+                    single_gen_np = torch.tensor(S.H * single_gen_complex_np).abs().numpy()
 
-                psnrs.append(psnr(gt_np, avg_gen_np))
-                single_psnrs.append(psnr(gt_np, single_gen_np))
+                    psnrs.append(psnr(gt_np, avg_gen_np))
+                    single_psnrs.append(psnr(gt_np, single_gen_np))
 
-        psnr_diff = (np.mean(single_psnrs) + 2.5) - np.mean(psnrs)
+            psnr_diff = (np.mean(single_psnrs) + 2.5) - np.mean(psnrs)
 
-        if np.abs(psnr_diff) <= 0.25:
-            cfid_metric = CFIDMetric(gan=model,
-                                     loader=val_loader,
-                                     image_embedding=inception_embedding,
-                                     condition_embedding=inception_embedding,
-                                     cuda=True,
-                                     args=args,
-                                     ref_loader=False,
-                                     num_samps=1)
+            if np.abs(psnr_diff) <= 0.25:
+                cfid_metric = CFIDMetric(gan=model,
+                                         loader=val_loader,
+                                         image_embedding=inception_embedding,
+                                         condition_embedding=inception_embedding,
+                                         cuda=True,
+                                         args=args,
+                                         ref_loader=False,
+                                         num_samps=1)
 
-            cfids = cfid_metric.get_cfid_torch_pinv()
+                cfids = cfid_metric.get_cfid_torch_pinv()
 
-            cfid_val = np.mean(cfids)
+                cfid_val = np.mean(cfids)
 
-            if cfid_val < best_cfid:
-                best_epoch = epoch
-                best_cfid = cfid_val
+                if cfid_val < best_cfid:
+                    best_epoch = epoch
+                    best_cfid = cfid_val
 
     print(f"BEST EPOCH: {best_epoch}")
