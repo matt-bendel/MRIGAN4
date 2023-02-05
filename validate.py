@@ -33,6 +33,7 @@ if __name__ == "__main__":
     best_cfid = 10000000
 
     for epoch in range(50):
+        print(f"VALIDATING EPOCH: {epoch+1}")
         model = rcGAN.load_from_checkpoint(checkpoint_path=args.checkpoint_dir + f'/checkpoint-epoch={epoch}.ckpt')
         model = model.cuda()
         model.eval()
