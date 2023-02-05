@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
     dm = MRIDataModule(args)
     dm.setup()
-    val_loader = dm.val_dataloader()
+    val_loader = dm.test_dataloader()
 
     for i, data in enumerate(val_loader):
         y, x, y_true, mean, std, mask, fname, slice = data
@@ -34,5 +34,5 @@ if __name__ == '__main__':
                                        device=sp.Device(0), crop=0.70,
                                        kernel_width=6).run().get()
 
-            with open(f'/storage/fastMRI_brain/sense_maps/val/{fname[j]}_{slice[j]}.pkl', 'wb') as outp:
+            with open(f'/storage/fastMRI_brain/sense_maps/test/{fname[j]}_{slice[j]}.pkl', 'wb') as outp:
                 pickle.dump(maps, outp, pickle.HIGHEST_PROTOCOL)

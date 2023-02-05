@@ -29,7 +29,7 @@ if __name__ == "__main__":
     dm.setup()
     val_loader = dm.val_dataloader()
     best_epoch = 100
-    inception_embedding = VGG16Embedding(parallel=True).cuda()
+    inception_embedding = VGG16Embedding()
     best_cfid = 10000000
 
     for epoch in range(50):
