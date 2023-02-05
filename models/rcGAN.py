@@ -36,13 +36,14 @@ class rcGAN(pl.LightningModule):
         )
 
         self.std_mult = 1
+        self.is_good_model = 0
         self.resolution = self.args.im_size
         self.save_hyperparameters()  # Save passed values
 
     def get_noise(self, num_vectors, mask):
         z_vals = []
         measured_vals = []
-        for i in range(2):
+        for i in range(4):
             z = torch.randn(num_vectors, self.resolution, self.resolution, 2, device=self.device)
             noise_fft = fft2c_new(z)
             measured_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
@@ -291,8 +292,10 @@ class rcGAN(pl.LightningModule):
         mu_0 = 2e-2
         self.std_mult += mu_0 * psnr_diff
 
-        # if psnr_diff > 0.25:
-        # self.log('final_val_psnr', avg_psnr, on_step=False, prog_bar=True, sync_dist=True)
+        if np.abs(psnr_diff) <= 0.25:
+            self.is_good_model = 1
+        else:
+            self.is_good_model = 0
 
         if self.global_rank == 0:
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE",
@@ -308,6 +311,8 @@ class rcGAN(pl.LightningModule):
 
     def on_save_checkpoint(self, checkpoint):
         checkpoint["beta_std"] = self.std_mult
+        checkpoint["is_valid"] = self.is_good_model
 
     def on_load_checkpoint(self, checkpoint):
         self.std_mult = checkpoint["beta_std"]
+        self.is_good_model = checkpoint["is_valid"]
