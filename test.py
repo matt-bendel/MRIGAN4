@@ -50,7 +50,7 @@ if __name__ == "__main__":
             std = std.cuda()
             mask = mask.cuda()
 
-            gens = torch.zeros(size=(y.size(0), 8, args.in_chans, args.im_size, args.im_size)).cuda()
+            gens = torch.zeros(size=(y.size(0), 32, args.in_chans, args.im_size, args.im_size)).cuda()
             for z in range(32):
                 gens[:, z, :, :, :] = model(y, mask)
 
