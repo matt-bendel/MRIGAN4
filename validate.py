@@ -32,8 +32,8 @@ if __name__ == "__main__":
     inception_embedding = VGG16Embedding(parallel=True).cuda()
     best_cfid = 10000000
 
-    for epoch in range(100, 200):
-        model = rcGAN.load_from_checkpoint(checkpoint_path=args.checkpoint_dir + f'/checkpoint-{epoch}.ckpt')
+    for epoch in range(50):
+        model = rcGAN.load_from_checkpoint(checkpoint_path=args.checkpoint_dir + f'/checkpoint-epoch={epoch}.ckpt')
         model = model.cuda()
         model.eval()
 
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
             for j in range(y.size(0)):
                 new_y_true = fft2c_new(ifft2c_new(y_true[j]) * std[j] + mean[j])
-                S = sp.linop.Multiply((args.im_size, args.im_size), maps)
+                S = sp.linop.Multiply((args.im_size, args.im_size), maps[j].cpu().numpy())
                 gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
                     (avg_gen[j] * std[j] + mean[j]).cpu())
 
