@@ -27,7 +27,7 @@ if __name__ == "__main__":
     args.checkpoint_dir = "/storage/matt_models"
     dm = MRIDataModule(args)
     dm.setup()
-    val_loader = dm.test_dataloader()
+    test_loader = dm.test_dataloader()
     best_epoch = 49
     inception_embedding = VGG16Embedding()
 
@@ -41,7 +41,7 @@ if __name__ == "__main__":
         ssims = []
         apsds = []
 
-        for i, data in enumerate(val_loader):
+        for i, data in enumerate(test_loader):
             y, x, y_true, mean, std, mask, maps = data
             y = y.cuda()
             x = x.cuda()
