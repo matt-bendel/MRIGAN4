@@ -3,16 +3,14 @@ import torch
 import numpy as np
 import pytorch_lightning as pl
 import sigpy as sp
-import sigpy.mri as mr
 
 from data_loaders.MRIDataModule import MRIDataModule
 from utils.parse_args import create_arg_parser
 from models.rcGAN import rcGAN
 from pytorch_lightning import seed_everything
 from evaluation_scripts.metrics import psnr, ssim
-from data import transforms
 from utils.fftc import ifft2c_new, fft2c_new
-from utils.math import complex_abs, tensor_to_complex_np
+from utils.math import tensor_to_complex_np
 from evaluation_scripts.fid.embeddings import VGG16Embedding
 from evaluation_scripts.cfid.cfid_metric import CFIDMetric
 
@@ -85,7 +83,7 @@ if __name__ == "__main__":
                 ssims.append(ssim(gt_np, avg_gen_np))
 
         cfid_metric = CFIDMetric(gan=model,
-                                 loader=val_loader,
+                                 loader=test_loader,
                                  image_embedding=inception_embedding,
                                  condition_embedding=inception_embedding,
                                  cuda=True,

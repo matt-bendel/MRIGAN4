@@ -1,18 +1,13 @@
 import torch
+import os
 
 import numpy as np
 import pytorch_lightning as pl
-import sigpy as sp
-import sigpy.mri as mr
 
 from data_loaders.MRIDataModule import MRIDataModule
 from utils.parse_args import create_arg_parser
 from models.rcGAN import rcGAN
 from pytorch_lightning import seed_everything
-from evaluation_scripts.metrics import psnr
-from data import transforms
-from utils.fftc import ifft2c_new, fft2c_new
-from utils.math import complex_abs, tensor_to_complex_np
 from evaluation_scripts.fid.embeddings import VGG16Embedding
 from evaluation_scripts.cfid.cfid_metric import CFIDMetric
 
@@ -33,8 +28,8 @@ if __name__ == "__main__":
     best_cfid = 10000000
 
     with torch.no_grad():
-        for epoch in range(50):
-            print(f"VALIDATING EPOCH: {epoch+1}")
+        for epoch in range(150, 200):
+            print(f"VALIDATING EPOCH: {epoch + 1}")
             model = rcGAN.load_from_checkpoint(checkpoint_path=args.checkpoint_dir + f'/checkpoint-epoch={epoch}.ckpt')
             if model.is_good_model == 0:
                 print("NO GOOD: SKIPPING...")
@@ -61,3 +56,7 @@ if __name__ == "__main__":
                 best_cfid = cfid_val
 
     print(f"BEST EPOCH: {best_epoch}")
+
+    for epoch in range(150, 200):
+        if epoch != best_epoch:
+            os.remove(args.checkpoint_dir + f'/checkpoint-epoch={epoch}.ckpt')
