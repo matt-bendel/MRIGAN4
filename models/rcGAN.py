@@ -27,7 +27,7 @@ class rcGAN(pl.LightningModule):
         super().__init__()
         self.args = args
         self.generator = GeneratorModel(
-            in_chans=args.in_chans + 2,
+            in_chans=args.in_chans + 4,
             out_chans=args.out_chans,
         )
 
@@ -41,15 +41,17 @@ class rcGAN(pl.LightningModule):
         self.save_hyperparameters()  # Save passed values
 
     def get_noise(self, num_vectors, mask):
-        z_vals = []
-        measured_vals = []
-        for i in range(4):
-            z = torch.randn(num_vectors, self.resolution, self.resolution, 2, device=self.device)
-            noise_fft = fft2c_new(z)
-            measured_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
-            z_vals.append(z.permute(0, 3, 1, 2))
-            measured_vals.append(measured_noise)
-        return measured_vals, z_vals
+        z = torch.randn(num_vectors, 2, self.resolution, self.resolution, device=self.device)
+        point_spread = ifft2c_new(mask[:, 0, :, :, :]).permute(0, 3, 1, 2)
+        # z_vals = []
+        # measured_vals = []
+        # for i in range(4):
+        #     z = torch.randn(num_vectors, self.resolution, self.resolution, 2, device=self.device)
+        #     noise_fft = fft2c_new(z)
+        #     measured_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
+        #     z_vals.append(z.permute(0, 3, 1, 2))
+        #     measured_vals.append(measured_noise)
+        return point_spread, z
 
     def reformat(self, samples):
         reformatted_tensor = torch.zeros(size=(samples.size(0), 8, self.resolution, self.resolution, 2),
