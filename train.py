@@ -11,6 +11,11 @@ from utils.parse_args import create_arg_parser
 from models.rcGAN import rcGAN
 from pytorch_lightning import seed_everything
 
+# TODO:
+# GRO Baseline: in_chans + 2 for gen, 128 ch, 100 epochs, just noise
+# Random Mask Baseline: in_chans + 2 for gen, 128 ch, 100 epochs, just noise
+# Best Agnostic Model: in_chans + 2 for gen, 256 ch, 300 epochs, measured noise
+
 if __name__ == '__main__':
     torch.set_float32_matmul_precision('medium')
     args = create_arg_parser().parse_args()
