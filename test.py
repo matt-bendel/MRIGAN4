@@ -26,7 +26,7 @@ if __name__ == "__main__":
     dm = MRIDataModule(args)
     dm.setup()
     test_loader = dm.test_dataloader()
-    best_epoch = 191
+    best_epoch = 173
     inception_embedding = VGG16Embedding()
 
     with torch.no_grad():
