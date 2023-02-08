@@ -30,7 +30,11 @@ if __name__ == "__main__":
     with torch.no_grad():
         for epoch in range(150, 200):
             print(f"VALIDATING EPOCH: {epoch + 1}")
-            model = rcGAN.load_from_checkpoint(checkpoint_path=args.checkpoint_dir + f'/checkpoint-epoch={epoch}.ckpt')
+            try:
+                model = rcGAN.load_from_checkpoint(checkpoint_path=args.checkpoint_dir + f'/checkpoint-epoch={epoch}.ckpt')
+            except:
+                continue
+
             if model.is_good_model == 0:
                 print("NO GOOD: SKIPPING...")
                 continue
