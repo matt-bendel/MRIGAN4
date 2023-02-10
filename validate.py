@@ -28,7 +28,7 @@ if __name__ == "__main__":
     best_cfid = 10000000
 
     with torch.no_grad():
-        for epoch in range(150, 200):
+        for epoch in range(250, 300):
             print(f"VALIDATING EPOCH: {epoch + 1}")
             try:
                 model = rcGAN.load_from_checkpoint(checkpoint_path=args.checkpoint_dir + f'/checkpoint-epoch={epoch}.ckpt')
