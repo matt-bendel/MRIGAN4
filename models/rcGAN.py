@@ -54,7 +54,7 @@ class rcGAN(pl.LightningModule):
         #     measured_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
         #     z_vals.append(z.permute(0, 3, 1, 2))
         #     measured_vals.append(measured_noise)
-        return z, measured_noise
+        return z.permute(0, 3, 1, 2), measured_noise
 
     def reformat(self, samples):
         reformatted_tensor = torch.zeros(size=(samples.size(0), 8, self.resolution, self.resolution, 2),
