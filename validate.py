@@ -26,9 +26,11 @@ if __name__ == "__main__":
     best_epoch = -1
     inception_embedding = VGG16Embedding()
     best_cfid = 10000000
+    start_epoch = 40
+    end_epoch = 90
 
     with torch.no_grad():
-        for epoch in range(250, 300):
+        for epoch in range(start_epoch, end_epoch):
             print(f"VALIDATING EPOCH: {epoch + 1}")
             try:
                 model = rcGAN.load_from_checkpoint(checkpoint_path=args.checkpoint_dir + f'/checkpoint-epoch={epoch}.ckpt')
@@ -61,6 +63,6 @@ if __name__ == "__main__":
 
     print(f"BEST EPOCH: {best_epoch}")
 
-    for epoch in range(250, 300):
+    for epoch in range(start_epoch, end_epoch):
         if epoch != best_epoch:
             os.remove(args.checkpoint_dir + f'/checkpoint-epoch={epoch}.ckpt')
