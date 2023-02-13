@@ -64,18 +64,18 @@ class MRIDataModule(pl.LightningDataModule):
         return DataLoader(
             dataset=self.train,
             batch_size=self.args.batch_size,
-            num_workers=112,
+            num_workers=10,
             drop_last=True,
-            pin_memory=False
+            pin_memory=True
         )
 
     def val_dataloader(self):
         return DataLoader(
             dataset=self.validate,
             batch_size=self.args.batch_size,
-            num_workers=112,
+            num_workers=10,
             drop_last=True,
-            pin_memory=False
+            pin_memory=True
         )
 
     def test_dataloader(self):
