@@ -9,12 +9,12 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None):
     m = np.zeros((resolution, resolution))
 
     # TODO: RANDOM MASK GENERATION
-    # midway = resolution // 2
-    # s = midway - args.calib_width // 2
-    # e = s + args.calib_width
-    # m[:, s:e] = True
-    # a = np.random.choice(resolution - args.calib_width, total_lines, replace=False)
-    # a = np.where(a < s, a, a + args.calib_width)
+    midway = resolution // 2
+    s = midway - args.calib_width // 2
+    e = s + args.calib_width
+    m[:, s:e] = True
+    a = np.random.choice(resolution - args.calib_width, total_lines, replace=False)
+    a = np.where(a < s, a, a + args.calib_width)
 
     # TODO: LOW DIM GRO:
     # a = np.array(
@@ -25,12 +25,12 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None):
     # )
 
     # TODO: LOW DIM RANDOM R=4 MASK:
-    a = np.array(
-        [
-            0, 2, 4, 10, 24, 25, 36, 39, 49, 50, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 72, 76, 80, 87, 90, 91, 95,
-            96, 108, 115, 125
-        ]
-    )
+    # a = np.array(
+    #     [
+    #         0, 2, 4, 10, 24, 25, 36, 39, 49, 50, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 72, 76, 80, 87, 90, 91, 95,
+    #         96, 108, 115, 125
+    #     ]
+    # )
 
     # a = np.array(
     #     [0, 10, 19, 28, 37, 46, 54, 61, 69, 76, 83, 89, 95, 101, 107, 112, 118, 122, 127, 132, 136, 140, 144, 148,
