@@ -175,7 +175,7 @@ class GeneratorModel(nn.Module):
         # self.preprocess_unet = UNET()
         self.in_chans = in_chans
         self.out_chans = out_chans
-        self.chans = 128
+        self.chans = 256
         self.num_pool_layers = 4
 
         num_pool_layers = self.num_pool_layers
@@ -227,7 +227,7 @@ class GeneratorModel(nn.Module):
             (torch.Tensor): Output tensor of shape [batch_size, self.out_chans, height, width]
         """
         # inp_noise = torch.cat([z, measured], dim=1) #self.preprocess_unet(torch.cat(measured, dim=1))
-        output = torch.cat([input, z], dim=1)
+        output = torch.cat([input, measured], dim=1)
         stack = []
         # Apply down-sampling layers
         for layer in self.down_sample_layers:
