@@ -66,7 +66,7 @@ class MRIDataModule(pl.LightningDataModule):
             batch_size=self.args.batch_size,
             num_workers=20,
             drop_last=True,
-            pin_memory=False
+            pin_memory=True
         )
 
     def val_dataloader(self):
@@ -75,7 +75,7 @@ class MRIDataModule(pl.LightningDataModule):
             batch_size=self.args.batch_size,
             num_workers=20,
             drop_last=True,
-            pin_memory=False
+            pin_memory=True
         )
 
     def test_dataloader(self):

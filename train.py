@@ -10,11 +10,7 @@ from data_loaders.MRIDataModule import MRIDataModule
 from utils.parse_args import create_arg_parser
 from models.rcGAN import rcGAN
 from pytorch_lightning import seed_everything
-
-# TODO:
-# GRO Baseline: in_chans + 2 for gen, 128 ch, 100 epochs, just noise
-# Random Mask Baseline: in_chans + 2 for gen, 128 ch, 100 epochs, just noise
-# Best Agnostic Model: in_chans + 2 for gen, 256 ch, 300 epochs, measured noise
+from pytorch_lightning.strategies import DDPStrategy
 
 if __name__ == '__main__':
     torch.set_float32_matmul_precision('medium')
@@ -37,7 +33,7 @@ if __name__ == '__main__':
     model = rcGAN(args)
 
     dm = MRIDataModule(args)
-    trainer = pl.Trainer(accelerator="gpu", devices=2, strategy="ddp",
+    trainer = pl.Trainer(precision=16, accelerator="gpu", devices=2, strategy=DDPStrategy(find_unused_parameters=False, static_graph=True),
                          max_epochs=args.num_epochs, auto_select_gpus=False, callbacks=[checkpoint_callback],
                          num_sanity_val_steps=0)
 
