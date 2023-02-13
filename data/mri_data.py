@@ -366,7 +366,7 @@ class SelectiveSliceData_Val(torch.utils.data.Dataset):
             target = data[self.recons_key][slice] if self.recons_key in data else None
 
             maps = None
-            with open(f'/storage/fastMRI_brain/sense_maps/val_full_res/{fname.name}_{slice}.pkl', 'rb') as inp:
+            with open(f'/storage/fastMRI_brain/sense_maps/val/{fname.name}_{slice}.pkl', 'rb') as inp:
                 maps = pickle.load(inp)
 
             return self.transform(kspace, target, data.attrs, fname.name, slice, maps)
