@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     dm = MRIDataModule(args)
     trainer = pl.Trainer(accelerator="gpu", devices=4, strategy='ddp',
-                         max_epochs=args.num_epochs, auto_select_gpus=False, callbacks=[checkpoint_callback],
+                         max_epochs=args.num_epochs, callbacks=[checkpoint_callback],
                          num_sanity_val_steps=0)
 
     if args.resume:
