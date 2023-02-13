@@ -22,11 +22,11 @@ if __name__ == "__main__":
     args.in_chans = 16
     args.out_chans = 16
 
-    args.checkpoint_dir = "/storage/matt_models"
+    args.checkpoint_dir = "/storage/matt_models/one_realization_measured_BEST"
     dm = MRIDataModule(args)
     dm.setup()
     test_loader = dm.test_dataloader()
-    best_epoch = 55
+    best_epoch = 274
     inception_embedding = VGG16Embedding()
 
     with torch.no_grad():
