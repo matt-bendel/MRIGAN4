@@ -33,9 +33,9 @@ if __name__ == '__main__':
     model = rcGAN(args)
 
     dm = MRIDataModule(args)
-    trainer = pl.Trainer(accelerator="gpu", devices=3, strategy='ddp',
+    trainer = pl.Trainer(accelerator="gpu", devices=4, strategy='ddp',
                          max_epochs=args.num_epochs, callbacks=[checkpoint_callback],
-                         num_sanity_val_steps=0)
+                         num_sanity_val_steps=0, profiler="simple")
 
     if args.resume:
         trainer.fit(model, dm, ckpt_path=args.checkpoint_dir + 'checkpoint.ckpt')
