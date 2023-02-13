@@ -33,7 +33,7 @@ if __name__ == '__main__':
     model = rcGAN(args)
 
     dm = MRIDataModule(args)
-    trainer = pl.Trainer(accelerator="gpu", devices=2, strategy='ddp',
+    trainer = pl.Trainer(accelerator="gpu", devices=3, strategy='ddp',
                          max_epochs=args.num_epochs, callbacks=[checkpoint_callback],
                          num_sanity_val_steps=0)
 
