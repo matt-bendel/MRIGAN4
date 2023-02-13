@@ -114,7 +114,7 @@ class rcGAN(pl.LightningModule):
         return fake_pred.mean() - real_pred.mean()
 
     def adversarial_loss_generator(self, y, gens):
-        patch_out = 30
+        patch_out = 94
         fake_pred = torch.zeros(size=(y.shape[0], self.args.num_z, patch_out, patch_out), device=self.device)
         for k in range(y.shape[0]):
             cond = torch.zeros(1, gens.shape[2], gens.shape[3], gens.shape[4], device=self.device)
