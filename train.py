@@ -30,7 +30,7 @@ if __name__ == '__main__':
 
     dm = MRIDataModule(args)
     model = MRIUnet(args, 0)
-    trainer = pl.Trainer(accelerator="gpu", devices=2, strategy='ddp',
+    trainer = pl.Trainer(accelerator="gpu", devices=1, strategy='ddp',
                          max_epochs=args.num_epochs, callbacks=[checkpoint_callback_unet],
                          num_sanity_val_steps=0, profiler="simple")
     trainer.fit(model, dm)
