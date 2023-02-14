@@ -17,23 +17,24 @@ if __name__ == '__main__':
     args.in_chans = 16
     args.out_chans = 16
 
-    args.checkpoint_dir = "/storage/matt_models/gro_baseline/"
+    for i in range(3):
+        args.checkpoint_dir = f"/storage/matt_models/new_approach_{2**i}_realizations/"
 
-    # TODO: MODULARITY ARGS
-    checkpoint_callback_unet = ModelCheckpoint(
-        monitor='val_psnr',
-        mode='max',
-        dirpath=args.checkpoint_dir,
-        filename='checkpoint-{epoch}',
-        save_top_k=1
-    )
+        # TODO: MODULARITY ARGS
+        checkpoint_callback_unet = ModelCheckpoint(
+            monitor='val_psnr',
+            mode='max',
+            dirpath=args.checkpoint_dir,
+            filename='checkpoint-{epoch}',
+            save_top_k=1
+        )
 
-    dm = MRIDataModule(args)
-    model = MRIUnet(args, 0)
-    trainer = pl.Trainer(accelerator="gpu", devices=1, strategy='ddp',
-                         max_epochs=args.num_epochs, callbacks=[checkpoint_callback_unet],
-                         num_sanity_val_steps=0, profiler="simple")
-    trainer.fit(model, dm)
+        dm = MRIDataModule(args)
+        model = MRIUnet(args, 2**i)
+        trainer = pl.Trainer(accelerator="gpu", devices=1, strategy='ddp',
+                             max_epochs=args.num_epochs, callbacks=[checkpoint_callback_unet],
+                             num_sanity_val_steps=0, profiler="simple")
+        trainer.fit(model, dm)
 
     # checkpoint_callback_gan = ModelCheckpoint(
     #     monitor='epoch',

@@ -153,7 +153,7 @@ class MRIUnet(pl.LightningModule):
         self.log('val_psnr', np.mean(psnrs), sync_dist=True)
 
         if self.global_rank == 0 and self.current_epoch % 5 == 0:
-            send_mail(f"EPOCH {self.current_epoch + 1} UPDATE - MRI UNET",
+            send_mail(f"EPOCH {self.current_epoch + 1} UPDATE - MRI UNET - NOISE GUIDED - {self.num_realizations} REALIZATIONS",
                       f"Metrics:\nPSNR: {np.mean(psnrs):.2f}\nSSIM: {np.mean(ssims):.4f}\n",
                       file_name="variation_gif.gif")
 
