@@ -85,8 +85,12 @@ class MRIUnet(pl.LightningModule):
 
     def forward(self, y, mask):
         num_vectors = y.size(0)
-        noise = self.get_noise(num_vectors, mask)
-        samples = self.unet(torch.cat([y, torch.cat(noise, dim=1)], dim=1))
+        if self.num_realizations > 0:
+            noise = self.get_noise(num_vectors, mask)
+            samples = self.unet(torch.cat([y, torch.cat(noise, dim=1)], dim=1))
+        else:
+            samples = self.unet(y)
+
         samples = self.readd_measures(samples, y, mask)
         return samples
 
