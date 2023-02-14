@@ -17,7 +17,7 @@ if __name__ == '__main__':
     args.in_chans = 16
     args.out_chans = 16
 
-    args.checkpoint_dir = "/storage/matt_models/gro_baseline/"
+    args.checkpoint_dir = "/storage/matt_models/random_baseline/"
 
     # TODO: MODULARITY ARGS
     checkpoint_callback_unet = ModelCheckpoint(
