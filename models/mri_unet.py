@@ -94,7 +94,7 @@ class MRIUnet(pl.LightningModule):
         samples = self.readd_measures(samples, y, mask)
         return samples
 
-    def training_step(self, batch, batch_idx, optimizer_idx):
+    def training_step(self, batch, batch_idx):
         y, x, _, mean, std, mask, _ = batch
 
         # train generator
