@@ -1,6 +1,8 @@
 import torch
 import os
 import yaml
+import types
+import json
 
 import pytorch_lightning as pl
 
@@ -14,6 +16,8 @@ from models.inpaint_unet import InpaintUNet
 from pytorch_lightning import seed_everything
 
 # TODO: REFACTOR UNET INTO BASE PL MODULE
+def load_object(dct):
+    return types.SimpleNamespace(**dct)
 
 if __name__ == '__main__':
     torch.set_float32_matmul_precision('medium')
@@ -26,8 +30,8 @@ if __name__ == '__main__':
     if args.mri:
         with open('configs/mri/config.yml', 'r') as f:
             cfg = yaml.load(f, Loader=yaml.FullLoader)
+            cfg = json.loads(json.dumps(cfg), object_hook=load_object)
 
-        print(cfg)
         checkpoint_callback = ModelCheckpoint(
             monitor='val_psnr',
             mode='max',
@@ -41,6 +45,7 @@ if __name__ == '__main__':
     elif args.inpaint:
         with open('configs/inpaint/config.yml', 'r') as f:
             cfg = yaml.load(f, Loader=yaml.FullLoader)
+            cfg = json.loads(json.dumps(cfg), object_hook=load_object)
 
         checkpoint_callback = ModelCheckpoint(
             monitor='val_ssim',

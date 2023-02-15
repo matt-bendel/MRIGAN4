@@ -1,23 +1,21 @@
 import torch
 import yaml
 import os
+import types
+import json
 
 import numpy as np
-import pytorch_lightning as pl
-import sigpy as sp
 
 from data_loaders.MRIDataModule import MRIDataModule
 from data_loaders.CelebAHQDataModule import CelebAHQDataModule
 from utils.parse_args import create_arg_parser
-from models.rcGAN import rcGAN
 from pytorch_lightning import seed_everything
-from evaluation_scripts.metrics import psnr, ssim
-from utils.fftc import ifft2c_new, fft2c_new
-from utils.math import tensor_to_complex_np
 from evaluation_scripts.fid.embeddings import VGG16Embedding
-from evaluation_scripts.cfid.cfid_metric import CFIDMetric
 from models.mri_unet import MRIUnet
 from models.inpaint_unet import InpaintUNet
+
+def load_object(dct):
+    return types.SimpleNamespace(**dct)
 
 if __name__ == "__main__":
     torch.set_float32_matmul_precision('medium')
@@ -30,6 +28,7 @@ if __name__ == "__main__":
     if args.mri:
         with open(os.path.join('configs/mri', 'config.yml'), 'r') as f:
             cfg = yaml.load(f)
+            cfg = json.loads(json.dumps(cfg), object_hook=load_object)
 
         dm = MRIDataModule(cfg)
         dm.setup()
@@ -38,6 +37,7 @@ if __name__ == "__main__":
     elif args.inpaint:
         with open(os.path.join('configs/inpaint', 'config.yml'), 'r') as f:
             cfg = yaml.load(f)
+            cfg = json.loads(json.dumps(cfg), object_hook=load_object)
 
         dm = CelebAHQDataModule(cfg)
         dm.setup()
