@@ -30,8 +30,6 @@ if __name__ == '__main__':
 
     if args.default_model_descriptor:
         print("USING DEFAULT MODEL DESCRIPTOR...")
-
-    if args.default_model_descriptor:
         args.num_noise = 1
 
     if args.mri:
