@@ -1,9 +1,7 @@
 from data.mri_data import SelectiveSliceData_Val
 from evaluation_scripts.fid.embeddings import VGG16Embedding
 from evaluation_scripts.cfid.cfid_metric import CFIDMetric
-from data_loaders.prepare_data import create_data_loaders, DataTransform
-from data_loaders.prepare_data_ls import create_data_loaders_ls
-from wrappers.our_gen_wrapper import load_best_gan
+from data_loaders.MRIDataModule import DataTransform
 from torch.utils.data import DataLoader
 import numpy as np
 

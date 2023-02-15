@@ -1,0 +1,21 @@
+checkpoint_dir_root: "/storage/matt_models/mri/"
+num_of_top_slices: 8
+use-middle-slices: false
+
+calib_width: 32
+
+in_chans: 16
+out_chans: 16
+num_coils: 8
+channels: 16
+data_path: "/storage/fastMRI_brain/data"
+im_size: 128
+R: 4
+
+#optimizer:
+#  lr: 0.001
+#  beta_1: 0
+#  beta_2: 0.99
+
+batch_size: 20
+num_epochs: 100
