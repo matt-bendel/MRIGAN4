@@ -9,9 +9,9 @@ from models.architectures.mri_unet import Unet
 from evaluation_scripts.metrics import psnr, ssim
 from mail import send_mail
 
-class CoModGAN(pl.LightningModule):
+class InpaintUNet(pl.LightningModule):
     def __init__(
-            self, args, num_realizations,
+            self, args, num_realizations, default_model_descriptor,
             chans=64,
             num_pool_layers=5,
             drop_prob=0.0,
@@ -24,6 +24,7 @@ class CoModGAN(pl.LightningModule):
         self.args = args
         self.loss_weight = loss_weight
         self.num_realizations = num_realizations
+        self.default_model_descriptor = default_model_descriptor
 
         self.in_chans = args.in_chans + self.num_realizations * 2
         self.out_chans = args.out_chans

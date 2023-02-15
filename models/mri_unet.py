@@ -15,7 +15,7 @@ from mail import send_mail
 
 class MRIUnet(pl.LightningModule):
     def __init__(
-            self, args, num_realizations,
+            self, args, num_realizations, default_model_descriptor,
             chans=256,
             num_pool_layers=4,
             drop_prob=0.0,
@@ -26,6 +26,7 @@ class MRIUnet(pl.LightningModule):
         super().__init__()
         self.args = args
         self.num_realizations = num_realizations
+        self.default_model_descriptor = default_model_descriptor
 
         self.in_chans = args.in_chans + self.num_realizations * 2
         self.out_chans = args.out_chans
