@@ -3,6 +3,7 @@ import pytorch_lightning as pl
 from typing import Optional
 from data.mri_data import SelectiveSliceData, SelectiveSliceData_Val, SelectiveSliceData_Test
 
+import pathlib
 import cv2
 import torch
 import numpy as np
@@ -152,7 +153,7 @@ class MRIDataModule(pl.LightningDataModule):
 
         # Assign train/val datasets for use in dataloaders
         train_data = SelectiveSliceData(
-            root=self.args.data_path / 'multicoil_train',
+            root=pathlib.Path(self.args.data_path) / 'multicoil_train',
             transform=DataTransform(self.args, self.mask_type),
             challenge='multicoil',
             sample_rate=1,
@@ -162,7 +163,7 @@ class MRIDataModule(pl.LightningDataModule):
         )
 
         dev_data = SelectiveSliceData_Val(
-            root=self.args.data_path / 'multicoil_val',
+            root=pathlib.Path(self.args.data_path) / 'multicoil_val',
             transform=DataTransform(self.args, self.mask_type, test=True),
             challenge='multicoil',
             sample_rate=1,
@@ -173,7 +174,7 @@ class MRIDataModule(pl.LightningDataModule):
         )
 
         test_data = SelectiveSliceData_Test(
-            root=self.args.data_path / 'small_T2_test',
+            root=pathlib.Path(self.args.data_path) / 'small_T2_test',
             transform=DataTransform(self.args, self.mask_type, test=True),
             challenge='multicoil',
             sample_rate=1,
