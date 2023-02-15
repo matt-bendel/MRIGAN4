@@ -24,6 +24,13 @@ if __name__ == '__main__':
     args = create_arg_parser().parse_args()
     seed_everything(1, workers=True)
 
+    print(f"Experiment Name: {args.exp_name}")
+    print(f"Number of Noise Realizations: {args.num_noise}")
+    print(f"Number of GPUs: {args.num_gpus}")
+
+    if args.default_model_descriptor:
+        print("USING DEFAULT MODEL DESCRIPTOR...")
+
     if args.default_model_descriptor:
         args.num_noise = 1
 
@@ -88,7 +95,7 @@ if __name__ == '__main__':
     #                      max_epochs=args.num_epochs, callbacks=[checkpoint_callback],
     #                      num_sanity_val_steps=0, profiler="simple")
     #
-    if args.resume:
-        trainer.fit(model, dm, ckpt_path=args.checkpoint_dir + 'checkpoint.ckpt')
-    else:
-        trainer.fit(model, dm)
+    # if args.resume:
+    #     trainer.fit(model, dm, ckpt_path=args.checkpoint_dir + 'checkpoint.ckpt')
+    # else:
+    #     trainer.fit(model, dm)
