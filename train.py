@@ -40,7 +40,7 @@ if __name__ == '__main__':
             save_top_k=1
         )
 
-        dm = MRIDataModule(cfg)
+        dm = MRIDataModule(cfg, args.mask_type)
         model = MRIUnet(cfg, args.num_noise, args.default_model_descriptor)
     elif args.inpaint:
         with open('configs/inpaint/config.yml', 'r') as f:
@@ -55,7 +55,7 @@ if __name__ == '__main__':
             save_top_k=1
         )
 
-        dm = CelebAHQDataModule(cfg)
+        dm = CelebAHQDataModule(cfg, args.mask_type)
         model = InpaintUNet(cfg, args.num_noise, args.default_model_descriptor)
     elif args.cs:
         args.checkpoint_dir = "/storage/matt_models/cs_baseline/"

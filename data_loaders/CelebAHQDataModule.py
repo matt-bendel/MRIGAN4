@@ -13,7 +13,7 @@ class DataTransform:
     Data Transformer for training U-Net models.
     """
 
-    def __init__(self, args):
+    def __init__(self, args, mask_type):
         """
         Args:
             mask_func (common.subsample.MaskFunc): A function that can create  a mask of
@@ -25,11 +25,12 @@ class DataTransform:
                 a given volume every time.
         """
         self.args = args
+        self.mask_type = mask_type
 
     def __call__(self, gt_im):
         mean = torch.tensor([0.5, 0.5, 0.5])
         std = torch.tensor([0.5, 0.5, 0.5])
-        mask = get_mask(self.args.im_size)
+        mask = get_mask(self.args.im_size, mask_type=self.mask_type)
         gt = (gt_im - mean[:, None, None]) / std[:, None, None]
         masked_im = gt * mask[None, :, :]
 
@@ -41,10 +42,11 @@ class CelebAHQDataModule(pl.LightningDataModule):
     DataModule used for semantic segmentation in geometric generalization project
     """
 
-    def __init__(self, args):
+    def __init__(self, args, mask_type):
         super().__init__()
         self.prepare_data_per_node = True
         self.args = args
+        self.mask_type = mask_type
 
     def prepare_data(self):
         pass
@@ -56,7 +58,7 @@ class CelebAHQDataModule(pl.LightningDataModule):
         """
 
         # Assign train/val datasets for use in dataloaders
-        transform = transforms.Compose([transforms.ToTensor(), DataTransform(self.args)])
+        transform = transforms.Compose([transforms.ToTensor(), DataTransform(self.args, self.mask_type)])
         dataset = datasets.ImageFolder(self.args.data_path, transform=transform)
         train_data, dev_data, test_data = torch.utils.data.random_split(
             dataset, [27000, 2000, 1000],

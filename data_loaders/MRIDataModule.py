@@ -18,7 +18,7 @@ class DataTransform:
     Data Transformer for training U-Net models.
     """
 
-    def __init__(self, args, use_seed=False, test=False):
+    def __init__(self, args, mask_type, use_seed=False, test=False):
         """
         Args:
             mask_func (common.subsample.MaskFunc): A function that can create  a mask of
@@ -33,6 +33,7 @@ class DataTransform:
         self.args = args
         self.mask = None
         self.test = test
+        self.mask_type = mask_type
 
     def __call__(self, kspace, target, attrs, fname, slice, sense_maps=None):
         """
@@ -52,7 +53,7 @@ class DataTransform:
                 norm (float): L2 norm of the entire volume.
         """
         # GRO Sampling mask:
-        mask, inds = get_mask(self.args.im_size, return_mask=True, R=self.args.R, args=self.args)
+        mask, inds = get_mask(self.args.im_size, return_mask=True, R=self.args.R, args=self.args, mask_type=self.mask_type)
         kspace = kspace.transpose(1, 2, 0)
         x = ifft(kspace, (0, 1))  # (768, 396, 16)
         coil_compressed_x = ImageCropandKspaceCompression(x)  # (384, 384, 8)
@@ -134,10 +135,11 @@ class MRIDataModule(pl.LightningDataModule):
     DataModule used for semantic segmentation in geometric generalization project
     """
 
-    def __init__(self, args):
+    def __init__(self, args, mask_type):
         super().__init__()
         self.prepare_data_per_node = True
         self.args = args
+        self.mask_type = mask_type
 
     def prepare_data(self):
         pass
@@ -151,7 +153,7 @@ class MRIDataModule(pl.LightningDataModule):
         # Assign train/val datasets for use in dataloaders
         train_data = SelectiveSliceData(
             root=self.args.data_path / 'multicoil_train',
-            transform=DataTransform(self.args),
+            transform=DataTransform(self.args, self.mask_type),
             challenge='multicoil',
             sample_rate=1,
             use_top_slices=True,
@@ -161,7 +163,7 @@ class MRIDataModule(pl.LightningDataModule):
 
         dev_data = SelectiveSliceData_Val(
             root=self.args.data_path / 'multicoil_val',
-            transform=DataTransform(self.args, test=True),
+            transform=DataTransform(self.args, self.mask_type, test=True),
             challenge='multicoil',
             sample_rate=1,
             use_top_slices=True,
@@ -172,7 +174,7 @@ class MRIDataModule(pl.LightningDataModule):
 
         test_data = SelectiveSliceData_Test(
             root=self.args.data_path / 'small_T2_test',
-            transform=DataTransform(self.args, test=True),
+            transform=DataTransform(self.args, self.mask_type, test=True),
             challenge='multicoil',
             sample_rate=1,
             use_top_slices=True,

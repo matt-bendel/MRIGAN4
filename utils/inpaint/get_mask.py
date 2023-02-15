@@ -80,11 +80,11 @@ def RandomMask(s, hole_range=[0,1]):
 def BatchRandomMask(batch_size, s, hole_range=[0, 1]):
     return np.stack([RandomMask(s, hole_range=hole_range) for _ in range(batch_size)], axis = 0)
 
-def get_mask(s, hole_range=[0, 1], square_only=False):
+def get_mask(s, hole_range=[0, 1], mask_type=2):
     # TODO: Transform to tensor (pytorch)
-    if square_only:
+    if mask_type == 1:
         arr = np.ones((s, s))
         arr[s // 4: 3 * s // 4, s // 4: 3 * s // 4] = 0
         return torch.tensor(np.reshape(arr, (s, s)), dtype=torch.float)
-    else:
+    elif mask_type == 2:
         return torch.tensor(RandomMask(s, hole_range=hole_range), dtype=torch.float)

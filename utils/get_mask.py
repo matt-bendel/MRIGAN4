@@ -4,33 +4,37 @@ import numpy as np
 from data import transforms
 
 
-def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None):
+def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type=2):
     total_lines = resolution // R - args.calib_width
     m = np.zeros((resolution, resolution))
+    a = None
 
-    # TODO: RANDOM MASK GENERATION
-    # midway = resolution // 2
-    # s = midway - args.calib_width // 2
-    # e = s + args.calib_width
-    # m[:, s:e] = True
-    # a = np.random.choice(resolution - args.calib_width, total_lines, replace=False)
-    # a = np.where(a < s, a, a + args.calib_width)
+    # RANDOM MASK GENERATION
+    if mask_type == 2:
+        midway = resolution // 2
+        s = midway - args.calib_width // 2
+        e = s + args.calib_width
+        m[:, s:e] = True
+        a = np.random.choice(resolution - args.calib_width, total_lines, replace=False)
+        a = np.where(a < s, a, a + args.calib_width)
 
-    # TODO: LOW DIM GRO:
-    a = np.array(
-        [
-            1, 10, 18, 25, 31, 37, 42, 46, 50, 54, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 72, 76, 80, 84, 88,
-            93, 99, 105, 112, 120
-        ]
-    )
+    # LOW DIM GRO:
+    if mask_type == 1:
+        a = np.array(
+            [
+                1, 10, 18, 25, 31, 37, 42, 46, 50, 54, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 72, 76, 80, 84, 88,
+                93, 99, 105, 112, 120
+            ]
+        )
 
-    # TODO: LOW DIM RANDOM R=4 MASK:
-    # a = np.array(
-    #     [
-    #         0, 2, 4, 10, 24, 25, 36, 39, 49, 50, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 72, 76, 80, 87, 90, 91, 95,
-    #         96, 108, 115, 125
-    #     ]
-    # )
+    # LOW DIM RANDOM R=4 MASK:
+    if mask_type == 3:
+        a = np.array(
+            [
+                0, 2, 4, 10, 24, 25, 36, 39, 49, 50, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 72, 76, 80, 87, 90, 91, 95,
+                96, 108, 115, 125
+            ]
+        )
 
     # a = np.array(
     #     [0, 10, 19, 28, 37, 46, 54, 61, 69, 76, 83, 89, 95, 101, 107, 112, 118, 122, 127, 132, 136, 140, 144, 148,
