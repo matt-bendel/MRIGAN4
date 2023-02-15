@@ -32,9 +32,6 @@ if __name__ == '__main__':
             cfg = yaml.load(f, Loader=yaml.FullLoader)
             cfg = json.loads(json.dumps(cfg), object_hook=load_object)
 
-        print(cfg.checkpoint_dir + args.exp_name + '/')
-        exit()
-
         checkpoint_callback = ModelCheckpoint(
             monitor='val_psnr',
             mode='max',
