@@ -1,6 +1,5 @@
 checkpoint_dir: "/storage/matt_models/inpainting/"
 
-channels: 3
 data_path: "/storage/celebA-HQ/celeba_hq_128"
 im_size: 128
 
