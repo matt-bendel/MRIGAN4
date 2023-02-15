@@ -15,7 +15,7 @@ from mail import send_mail
 
 class MRIUnet(pl.LightningModule):
     def __init__(
-            self, args, num_realizations, default_model_descriptor,
+            self, args, num_realizations, default_model_descriptor, exp_name,
             chans=256,
             num_pool_layers=4,
             drop_prob=0.0,
@@ -27,6 +27,7 @@ class MRIUnet(pl.LightningModule):
         self.args = args
         self.num_realizations = num_realizations
         self.default_model_descriptor = default_model_descriptor
+        self.exp_name = exp_name
 
         self.in_chans = args.in_chans + self.num_realizations * 2
         self.out_chans = args.out_chans
@@ -158,7 +159,7 @@ class MRIUnet(pl.LightningModule):
         self.log('val_psnr', np.mean(psnrs), sync_dist=True)
 
         if self.global_rank == 0 and self.current_epoch % 5 == 0:
-            send_mail(f"EPOCH {self.current_epoch + 1} UPDATE - MRI UNET",
+            send_mail(f"EPOCH {self.current_epoch + 1} UPDATE - MRI UNET - {self.exp_name}",
                       f"Metrics:\nPSNR: {np.mean(psnrs):.2f}\nSSIM: {np.mean(ssims):.4f}\n",
                       file_name="variation_gif.gif")
 

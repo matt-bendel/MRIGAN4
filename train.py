@@ -41,7 +41,7 @@ if __name__ == '__main__':
         )
 
         dm = MRIDataModule(cfg, args.mask_type)
-        model = MRIUnet(cfg, args.num_noise, args.default_model_descriptor)
+        model = MRIUnet(cfg, args.num_noise, args.default_model_descriptor, args.exp_name)
     elif args.inpaint:
         with open('configs/inpaint/config.yml', 'r') as f:
             cfg = yaml.load(f, Loader=yaml.FullLoader)
