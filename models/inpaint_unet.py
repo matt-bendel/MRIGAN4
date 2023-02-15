@@ -52,9 +52,13 @@ class InpaintUNet(pl.LightningModule):
     def get_noise(self, num_vectors, mask):
         noise_vals = []
         for i in range(self.num_realizations):
+            if self.default_model_descriptor:
+                noise_vals.append(mask)
+                break
+
             z = torch.empty(num_vectors, 1, self.resolution, self.resolution, device=self.device).uniform_(0, 1)
             z = 2 * torch.bernoulli(z) - 1
-            noise = z * mask [:, None, :, :]
+            noise = z * mask[:, None, :, :]
             noise_vals.append(noise)
 
         return noise_vals
