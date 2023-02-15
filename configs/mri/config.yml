@@ -1,4 +1,4 @@
-checkpoint_dir_root: "/storage/matt_models/mri/"
+checkpoint_dir: "/storage/matt_models/mri/"
 num_of_top_slices: 8
 use-middle-slices: false
 
