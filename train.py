@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     if args.mri:
         with open(os.path.join('configs/mri', 'config.yml'), 'r') as f:
-            cfg = yaml.load(f)
+            cfg = yaml.safe_load(f)
 
         checkpoint_callback = ModelCheckpoint(
             monitor='val_psnr',
@@ -39,7 +39,7 @@ if __name__ == '__main__':
         model = MRIUnet(cfg, args.num_noise, args.default_model_descriptor)
     elif args.inpaint:
         with open(os.path.join('configs/inpaint', 'config.yml'), 'r') as f:
-            cfg = yaml.load(f)
+            cfg = yaml.safe_load(f)
 
         checkpoint_callback = ModelCheckpoint(
             monitor='val_ssim',
