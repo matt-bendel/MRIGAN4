@@ -65,7 +65,7 @@ if __name__ == "__main__":
         ssims = []
 
         for i, data in enumerate(test_loader):
-            losses = model.validation_step(data, i)
+            losses = model.external_test_step(data, i)
             psnrs.append(losses['psnr'])
             ssims.append(losses['ssim'])
 

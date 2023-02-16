@@ -140,6 +140,18 @@ class MRIUnet(pl.LightningModule):
 
         return losses
 
+    def external_test_step(self, batch, batch_idx):
+        y, x, _, mean, std, mask, maps = batch
+        y = y.cuda()
+        x = x.cuda()
+        mean = mean.cuda()
+        std = std.cuda()
+        mask = mask.cuda()
+
+        new_batch = y, x, _, mean, std, mask, maps
+
+        return self.validation_step(new_batch, batch_idx)
+
     def validation_step_end(self, batch_parts):
         losses = {
             'psnr': np.mean(batch_parts['psnr']),

@@ -11,3 +11,6 @@ adv_weight: 0.00003
 num_iters_discriminator: 1
 gp_weight: 10
 drift_weight: 0.001
+lr: 0.001
+beta_1: 0
+beta_2: 0.99

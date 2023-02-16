@@ -91,6 +91,6 @@ def get_mask(s, hole_range=[0, 1], mask_type=2):
     if mask_type == 1:
         arr = np.ones((s, s))
         arr[s // 4: 3 * s // 4, s // 4: 3 * s // 4] = 0
-        return torch.tensor(np.reshape(arr, (s, s)), dtype=torch.float)
+        return torch.tensor(np.reshape(arr, (s, s)), dtype=torch.float).unsqueeze(0)
     elif mask_type == 2:
-        return torch.tensor(RandomMask(s, hole_range=hole_range), dtype=torch.float)
+        return torch.tensor(RandomMask(s, hole_range=hole_range), dtype=torch.float).unsqueeze(0)
