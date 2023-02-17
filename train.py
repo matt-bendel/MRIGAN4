@@ -73,7 +73,7 @@ if __name__ == '__main__':
 
     trainer = pl.Trainer(accelerator="gpu", devices=args.num_gpus, strategy='ddp',
                          max_epochs=cfg.num_epochs, callbacks=[checkpoint_callback],
-                         num_sanity_val_steps=0, profiler="simple")
+                         num_sanity_val_steps=2, profiler="simple")
 
     if args.resume:
         trainer.fit(model, dm, ckpt_path=cfg.checkpoint_dir + args.exp_name + f'/checkpoint-{args.resume_epoch}.ckpt')
