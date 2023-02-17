@@ -34,7 +34,7 @@ def mse(gt: np.ndarray, pred: np.ndarray) -> np.ndarray:
 
 
 def ssim(
-        gt: np.ndarray, pred: np.ndarray, maxval: Optional[float] = None
+        gt: np.ndarray, pred: np.ndarray, maxval: Optional[float] = None, multichannel: bool = False
 ) -> np.ndarray:
     """Compute Structural Similarity Index Metric (SSIM)"""
     # if not gt.ndim == 3:
@@ -45,7 +45,7 @@ def ssim(
     maxval = gt.max() if maxval is None else maxval
 
     ssim = structural_similarity(
-        gt, pred, data_range=maxval
+        gt, pred, data_range=maxval, multichannel=multichannel
     )
 
     return ssim

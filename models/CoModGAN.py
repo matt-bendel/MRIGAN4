@@ -135,7 +135,7 @@ class InpaintUNet(pl.LightningModule):
         print(x_hat.shape)
 
         for j in range(y.size(0)):
-            losses['ssim'].append(ssim(x[j].cpu().numpy(), x_hat[j].cpu().numpy()))
+            losses['ssim'].append(ssim(x[j].cpu().numpy().transpose(1, 2, 0), x_hat[j].cpu().numpy().transpose(1, 2, 0)))
             losses['psnr'].append(psnr(x[j].cpu().numpy(), x_hat[j].cpu().numpy()))
 
         losses['psnr'] = np.mean(losses['psnr'])
@@ -172,6 +172,8 @@ class InpaintUNet(pl.LightningModule):
             ssims.append(out['ssim'])
 
         avg_psnr = np.mean(psnrs)
+
+        self.log('val_ssim', np.mean(ssim), sync_dist=True)
 
         if self.global_rank == 0:
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE - CoModGAN - {self.exp_name}",
