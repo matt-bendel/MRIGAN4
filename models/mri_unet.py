@@ -178,13 +178,5 @@ class MRIUnet(pl.LightningModule):
     def configure_optimizers(self):
         optim = torch.optim.Adam(self.generator.parameters(), lr=self.args.lr,
                                  betas=(self.args.beta_1, self.args.beta_2))
-        # optim = torch.optim.RMSprop(
-        #     self.parameters(),
-        #     lr=self.lr,
-        #     weight_decay=self.weight_decay,
-        # )
-        # scheduler = torch.optim.lr_scheduler.StepLR(
-        #     optim, self.lr_step_size, self.lr_gamma
-        # )
 
         return optim
