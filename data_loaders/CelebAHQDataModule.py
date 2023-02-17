@@ -73,6 +73,7 @@ class CelebAHQDataModule(pl.LightningDataModule):
         return DataLoader(
             dataset=self.train,
             batch_size=self.args.batch_size,
+            drop_last=True,
             num_workers=20,
             pin_memory=True,
         )
@@ -81,6 +82,7 @@ class CelebAHQDataModule(pl.LightningDataModule):
         return DataLoader(
             dataset=self.validate,
             batch_size=self.args.batch_size,
+            drop_last=True,
             num_workers=20,
             pin_memory=True,
         )
