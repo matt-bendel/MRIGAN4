@@ -46,6 +46,13 @@ if __name__ == "__main__":
             }
 
             y, x, _, mean, std, mask, maps = data
+            y = y.cuda()
+            x = x.cuda()
+            mean = mean.cuda()
+            std = std.cuda()
+            mask = mask.cuda()
+            maps = maps.cuda()
+
             x_hat = model.forward(y, mask)
 
             avg_gen = model.reformat(x_hat)
