@@ -48,7 +48,7 @@ class InpaintUNet(pl.LightningModule):
         alpha = Tensor(np.random.random((real_samples.size(0), 1, 1, 1))).to(self.device)
         # Get random interpolation between real and fake samples
         interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
-        d_interpolates = self.discriminator(input=interpolates, y=y)
+        d_interpolates = self.discriminator(input=interpolates, label=y)
         fake = Tensor(real_samples.shape[0], 1).fill_(1.0).to(
             self.device)
 
@@ -94,9 +94,6 @@ class InpaintUNet(pl.LightningModule):
 
     def training_step(self, batch, batch_idx, optimizer_idx):
         y, x, mean, std, mask = batch[0]
-        print(y.shape)
-        print(x.shape)
-        print(mask.shape)
 
         # train generator
         if optimizer_idx == 0:
