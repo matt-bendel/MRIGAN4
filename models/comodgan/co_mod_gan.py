@@ -255,7 +255,7 @@ class G_synthesis_co_mod_gan(nn.Module):
                     Block(res))
 
     def forward(self, images_in, masks_in, dlatents_in):
-        y = images_in * masks_in
+        y = images_in
         E_features = {}
         x_global, E_features = self.E((y, E_features))
         x = x_global
@@ -264,8 +264,7 @@ class G_synthesis_co_mod_gan(nn.Module):
             block = getattr(self, 'G_%dx%d' % (2**res, 2**res))
             x, y = block(x, y, dlatents_in, x_global, E_features)
         raw_out = y
-        images_out = raw_out * (1 - masks_in) + images_in * masks_in
-        return images_out, raw_out
+        return raw_out
 
 #----------------------------------------------------------------------------
 # Main generator network.
@@ -323,7 +322,7 @@ class Generator(BaseNetwork):
         if return_latents:
             return dlatent
 
-        output, raw_out = self.G_synthesis(images_in, masks_in, dlatent)
+        output = self.G_synthesis(images_in, masks_in, dlatent)
         return output
 
 #----------------------------------------------------------------------------
