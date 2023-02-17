@@ -131,9 +131,6 @@ class InpaintUNet(pl.LightningModule):
         x_hat = self.forward(y, mask) * std[:, :, None, None] + mean[:, :, None, None]
         x = x * std[:, :, None, None] + mean[:, :, None, None]
 
-        print(x.shape)
-        print(x_hat.shape)
-
         for j in range(y.size(0)):
             losses['ssim'].append(ssim(x[j].cpu().numpy().transpose(1, 2, 0), x_hat[j].cpu().numpy().transpose(1, 2, 0)))
             losses['psnr'].append(psnr(x[j].cpu().numpy(), x_hat[j].cpu().numpy()))
