@@ -93,7 +93,7 @@ class InpaintUNet(pl.LightningModule):
         return 0.001 * torch.mean(real_pred ** 2)
 
     def training_step(self, batch, batch_idx, optimizer_idx):
-        y, x, mean, std, mask = batch
+        y, x, mean, std, mask = batch[0]
 
         # train generator
         if optimizer_idx == 0:
@@ -127,7 +127,7 @@ class InpaintUNet(pl.LightningModule):
             'ssim': []
         }
 
-        y, x, mean, std, mask = batch
+        y, x, mean, std, mask = batch[0]
         x_hat = self.forward(y, mask) * std[:, :, None, None] + mean[:, :, None, None]
         x = x * std[:, :, None, None] + mean[:, :, None, None]
 

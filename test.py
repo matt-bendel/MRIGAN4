@@ -12,7 +12,7 @@ from utils.parse_args import create_arg_parser
 from pytorch_lightning import seed_everything
 from evaluation_scripts.fid.embeddings import VGG16Embedding
 from models.mri_unet import MRIUnet
-from models.inpaint_unet import InpaintUNet
+from models.CoModGAN import InpaintUNet
 
 def load_object(dct):
     return types.SimpleNamespace(**dct)

@@ -12,7 +12,7 @@ from data_loaders.CelebAHQDataModule import CelebAHQDataModule
 from utils.parse_args import create_arg_parser
 # from models.rcGAN import rcGAN
 from models.mri_unet import MRIUnet
-from models.inpaint_unet import InpaintUNet
+from models.CoModGAN import InpaintUNet
 from pytorch_lightning import seed_everything
 
 # TODO: REFACTOR UNET INTO BASE PL MODULE
