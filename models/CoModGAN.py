@@ -69,9 +69,9 @@ class InpaintUNet(pl.LightningModule):
         num_vectors = y.size(0)
         if self.num_realizations > 0:
             noise = self.get_noise(num_vectors, mask)
-            samples = self.generator(torch.cat([y, torch.cat(noise, dim=1)], dim=1), mask, [torch.randn(y.size(0), 512, device=y.device)], return_latents=False, truncation=False, truncation_latent=None)
+            samples = self.generator(torch.cat([y, torch.cat(noise, dim=1)], dim=1), mask, [torch.randn(y.size(0), 512, device=y.device)])
         else:
-            samples = self.generator(y, mask, [torch.randn(y.size(0), 512, device=y.device)], return_latents=False, truncation=False, truncation_latent=None)
+            samples = self.generator(y, mask, [torch.randn(y.size(0), 512, device=y.device)])
 
         samples = self.readd_measures(samples, y, mask)
         return samples
