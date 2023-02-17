@@ -26,20 +26,20 @@ if __name__ == "__main__":
         args.num_noise = 1
 
     if args.mri:
-        with open(os.path.join('configs/mri', 'config.yml'), 'r') as f:
-            cfg = yaml.load(f)
+        with open('configs/mri/config.yml', 'r') as f:
+            cfg = yaml.load(f, Loader=yaml.FullLoader)
             cfg = json.loads(json.dumps(cfg), object_hook=load_object)
 
-        dm = MRIDataModule(cfg)
+        dm = MRIDataModule(cfg, args.mask_type)
         dm.setup()
         test_loader = dm.test_dataloader
         model_alias = MRIUnet
     elif args.inpaint:
-        with open(os.path.join('configs/inpaint', 'config.yml'), 'r') as f:
-            cfg = yaml.load(f)
+        with open('configs/inpaint/config.yml', 'r') as f:
+            cfg = yaml.load(f, Loader=yaml.FullLoader)
             cfg = json.loads(json.dumps(cfg), object_hook=load_object)
 
-        dm = CelebAHQDataModule(cfg)
+        dm = CelebAHQDataModule(cfg, args.mask_type)
         dm.setup()
         test_loader = dm.test_dataloader
         model_alias = InpaintUNet
