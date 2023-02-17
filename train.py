@@ -9,6 +9,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 from data_loaders.MRIDataModule import MRIDataModule
 from data_loaders.CelebAHQDataModule import CelebAHQDataModule
+from data_loaders.BSD400DataModule import BSD400DataModule
 from utils.parse_args import create_arg_parser
 # from models.rcGAN import rcGAN
 from models.mri_unet import MRIUnet
@@ -63,8 +64,19 @@ if __name__ == '__main__':
         dm = CelebAHQDataModule(cfg, args.mask_type)
         model = InpaintUNet(cfg, args.num_noise, args.default_model_descriptor, args.exp_name)
     elif args.cs:
-        args.checkpoint_dir = "/storage/matt_models/cs_baseline/"
-        # TODO: LSUN?? data module
+        with open('configs/cs/config.yml', 'r') as f:
+            cfg = yaml.load(f, Loader=yaml.FullLoader)
+            cfg = json.loads(json.dumps(cfg), object_hook=load_object)
+
+        checkpoint_callback = ModelCheckpoint(
+            monitor='val_psnr',
+            mode='max',
+            dirpath=cfg.checkpoint_dir + args.exp_name + '/',
+            filename='best_model',
+            save_top_k=1
+        )
+
+        dm = BSD400DataModule(cfg, args.mask_type)
         # TODO: CS Lighnting Module
         pass
     else:

@@ -136,7 +136,6 @@ class InpaintUNet(pl.LightningModule):
                       f"Metrics:\nPSNR: {np.mean(psnrs):.2f}\nSSIM: {np.mean(ssims):.4f}\n",
                       file_name="variation_gif.gif")
 
-    # TODO: MAYBE UPDATE??
     def configure_optimizers(self):
         optim = torch.optim.RMSprop(
             self.parameters(),

@@ -398,7 +398,6 @@ class Discriminator(BaseNetwork):
                         )
                     )
         self.convs = nn.Sequential(OrderedDict(layers))
-        # TODO: OURS:
         self.Conv4x4 = ConvLayer(nf(1), nf(1), kernel_size=3, activate=True)
 
         # self.Conv4x4 = ConvLayer(nf(1)+1, nf(1), kernel_size=3, activate=True)
