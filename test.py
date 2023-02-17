@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
         dm = MRIDataModule(cfg, args.mask_type)
         dm.setup()
-        test_loader = dm.test_dataloader
+        test_loader = dm.test_dataloader()
         model_alias = MRIUnet
     elif args.inpaint:
         with open('configs/inpaint/config.yml', 'r') as f:
@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
         dm = CelebAHQDataModule(cfg, args.mask_type)
         dm.setup()
-        test_loader = dm.test_dataloader
+        test_loader = dm.test_dataloader()
         model_alias = InpaintUNet
     elif args.cs:
         args.checkpoint_dir = "/storage/matt_models/cs_baseline/"
@@ -52,11 +52,9 @@ if __name__ == "__main__":
         print("No valid application selected. Please include one of the following args: --mri, --inpaint, --cs.")
         exit()
 
-    best_epoch = 274
     inception_embedding = VGG16Embedding()
 
     with torch.no_grad():
-        print(f"TESTING EPOCH: {best_epoch+1}")
         model = model_alias.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + args.exp_name + '/best_model.ckpt')
         model = model.cuda()
         model.eval()
