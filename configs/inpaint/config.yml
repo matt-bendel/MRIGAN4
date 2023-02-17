@@ -5,7 +5,7 @@ im_size: 128
 
 in_chans: 3
 out_chans: 3
-batch_size: 25
+batch_size: 50
 num_epochs: 100
 adv_weight: 0.00003
 num_iters_discriminator: 1

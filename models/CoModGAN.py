@@ -94,6 +94,7 @@ class InpaintUNet(pl.LightningModule):
 
     def training_step(self, batch, batch_idx, optimizer_idx):
         y, x, mean, std, mask = batch[0]
+        print(mask.shape)
 
         # train generator
         if optimizer_idx == 0:
