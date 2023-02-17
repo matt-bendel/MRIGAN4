@@ -32,7 +32,7 @@ class DataTransform:
         std = torch.tensor([0.5, 0.5, 0.5])
         mask = get_mask(self.args.im_size, mask_type=self.mask_type)
         gt = (gt_im - mean[:, None, None]) / std[:, None, None]
-        masked_im = gt * mask[None, :, :]
+        masked_im = gt * mask
 
         return gt, masked_im, mean, std, mask
 
