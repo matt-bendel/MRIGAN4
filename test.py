@@ -22,6 +22,8 @@ if __name__ == "__main__":
     args = create_arg_parser().parse_args()
     seed_everything(1, workers=True)
 
+    args.mask_type = 1
+
     if args.default_model_descriptor:
         args.num_noise = 1
 
