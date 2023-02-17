@@ -61,7 +61,7 @@ if __name__ == '__main__':
         )
 
         dm = CelebAHQDataModule(cfg, args.mask_type)
-        model = InpaintUNet(cfg, args.num_noise, args.default_model_descriptor)
+        model = InpaintUNet(cfg, args.num_noise, args.default_model_descriptor, args.exp_name)
     elif args.cs:
         args.checkpoint_dir = "/storage/matt_models/cs_baseline/"
         # TODO: LSUN?? data module
