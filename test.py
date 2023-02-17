@@ -23,7 +23,7 @@ if __name__ == "__main__":
     args.in_chans = 16
     args.out_chans = 16
 
-    args.checkpoint_dir = "/storage/matt_models/genie"
+    args.checkpoint_dir = "/storage/matt_models/mri/genie"
     dm = MRIDataModule(args)
     dm.setup()
     test_loader = dm.test_dataloader()
