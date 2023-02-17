@@ -172,7 +172,7 @@ class InpaintUNet(pl.LightningModule):
 
         self.log('val_ssim', np.mean(ssims), sync_dist=True)
 
-        if self.global_rank == 0:
+        if self.global_rank == 0 and self.current_epoch % 5 == 0:
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE - CoModGAN - {self.exp_name}",
                       f"Metrics:\nPSNR: {avg_psnr:.2f}\nSSIM: {np.mean(ssims):.4f}",
                       file_name="variation_gif.gif")
