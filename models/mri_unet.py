@@ -176,7 +176,7 @@ class MRIUnet(pl.LightningModule):
                       file_name="variation_gif.gif")
 
     def configure_optimizers(self):
-        optim = torch.optim.Adam(self.generator.parameters(), lr=self.args.lr,
+        optim = torch.optim.Adam(self.unet.parameters(), lr=self.args.lr,
                                  betas=(self.args.beta_1, self.args.beta_2))
 
         return optim
