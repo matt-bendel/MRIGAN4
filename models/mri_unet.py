@@ -8,6 +8,7 @@ from torch.nn import functional as F
 from utils.fftc import ifft2c_new, fft2c_new
 from utils.math import complex_abs, tensor_to_complex_np
 from models.architectures.mri_unet import Unet
+from models.architectures.our_gen_unet_only import UNetModel
 
 from evaluation_scripts.metrics import psnr, ssim
 from mail import send_mail
@@ -39,13 +40,15 @@ class MRIUnet(pl.LightningModule):
         self.lr_gamma = lr_gamma
         self.weight_decay = weight_decay
 
-        self.unet = Unet(
-            in_chans=self.in_chans,
-            out_chans=self.out_chans,
-            chans=self.chans,
-            num_pool_layers=self.num_pool_layers,
-            drop_prob=self.drop_prob,
-        )
+        # self.unet = Unet(
+        #     in_chans=self.in_chans,
+        #     out_chans=self.out_chans,
+        #     chans=self.chans,
+        #     num_pool_layers=self.num_pool_layers,
+        #     drop_prob=self.drop_prob,
+        # )
+
+        self.unet = UNetModel(self.in_chans, self.out_chans)
 
         self.resolution = self.args.im_size
         self.save_hyperparameters()  # Save passed values

@@ -54,8 +54,6 @@ if __name__ == "__main__":
         print("No valid application selected. Please include one of the following args: --mri, --inpaint, --cs.")
         exit()
 
-    inception_embedding = VGG16Embedding()
-
     with torch.no_grad():
         model = model_alias.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + args.exp_name + '/best_model.ckpt')
         model = model.cuda()
