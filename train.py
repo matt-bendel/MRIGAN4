@@ -96,7 +96,7 @@ if __name__ == '__main__':
                          num_sanity_val_steps=0, profiler="simple")
 
     if args.resume:
-        trainer.fit(model, dm, ckpt_path=cfg.checkpoint_dir + args.exp_name + f'/checkpoint-{args.resume_epoch}.ckpt')
+        trainer.fit(model, dm, ckpt_path=cfg.checkpoint_dir + 'proposed_1_exp_3/awbn' + f'/checkpoint-{args.resume_epoch}.ckpt')
     else:
         trainer.fit(model, dm)
 
