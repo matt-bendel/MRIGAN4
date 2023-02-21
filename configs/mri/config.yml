@@ -17,4 +17,4 @@ beta_1: 0
 beta_2: 0.99
 
 batch_size: 20
-num_epochs: 200
+num_epochs: 100
