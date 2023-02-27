@@ -30,7 +30,7 @@ class MRIUnet(pl.LightningModule):
         self.default_model_descriptor = default_model_descriptor
         self.exp_name = exp_name
 
-        self.in_chans = args.in_chans + self.num_realizations * 2
+        self.in_chans = args.in_chans + 2 * self.num_realizations * 2
         self.out_chans = args.out_chans
         self.chans = chans
         self.num_pool_layers = num_pool_layers
@@ -39,14 +39,6 @@ class MRIUnet(pl.LightningModule):
         self.lr_step_size = lr_step_size
         self.lr_gamma = lr_gamma
         self.weight_decay = weight_decay
-
-        # self.unet = Unet(
-        #     in_chans=self.in_chans,
-        #     out_chans=self.out_chans,
-        #     chans=self.chans,
-        #     num_pool_layers=self.num_pool_layers,
-        #     drop_prob=self.drop_prob,
-        # )
 
         self.unet = UNetModel(self.in_chans, self.out_chans)
 
@@ -64,9 +56,10 @@ class MRIUnet(pl.LightningModule):
             z = torch.empty(num_vectors, self.resolution, self.resolution, 2, device=self.device).uniform_(0, 1)
             z = 2 * torch.bernoulli(z) - 1
             noise_fft = fft2c_new(z)
-            # noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
-            noise = ifft2c_new((1 - mask[:, 0, :, :, :]) * noise_fft).permute(0, 3, 1, 2)
-            noise_vals.append(noise)
+            meas_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
+            non_noise = ifft2c_new((1 - mask[:, 0, :, :, :]) * noise_fft).permute(0, 3, 1, 2)
+            noise_vals.append(meas_noise)
+            noise_vals.append(non_noise)
 
         return noise_vals
 
