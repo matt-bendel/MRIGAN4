@@ -97,10 +97,5 @@ if __name__ == "__main__":
                 losses['ssim'].append(ssim(gt_np, avg_gen_np))
                 losses['psnr'].append(psnr(gt_np, avg_gen_np))
 
-            losses['psnr'] = np.mean(losses['psnr'])
-            losses['ssim'] = np.mean(losses['ssim'])
-            psnrs.append(losses['psnr'])
-            ssims.append(losses['ssim'])
-
-    print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
-    print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
+    print(f'PSNR: {np.mean(np.mean(losses["psnr"]))}')
+    print(f'SSIM: {np.mean(np.mean(losses["ssim"]))}')
