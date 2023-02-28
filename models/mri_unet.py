@@ -59,8 +59,8 @@ class MRIUnet(pl.LightningModule):
             # meas_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
             non_noise = ifft2c_new((1 - mask[:, 0, :, :, :]) * noise_fft).permute(0, 3, 1, 2)
             # noise_vals.append(z.permute(0, 3, 1, 2))
-            noise_vals.append(meas_noise)
-            # noise_vals.append(non_noise)
+            # noise_vals.append(meas_noise)
+            noise_vals.append(non_noise)
 
         return noise_vals
 
