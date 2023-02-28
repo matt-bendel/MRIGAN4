@@ -53,8 +53,8 @@ class MRIUnet(pl.LightningModule):
                 noise_vals.append(ifft2c_new(mask[:, 0, :, :, :]).permute(0, 3, 1, 2))
                 break
 
-            # z = torch.empty(num_vectors, self.resolution, self.resolution, 2, device=self.device).uniform_(0, 1)
-            # z = 2 * torch.bernoulli(z) - 1
+            z = torch.empty(num_vectors, self.resolution, self.resolution, 2, device=self.device).uniform_(0, 1)
+            z = 2 * torch.bernoulli(z) - 1
             noise_fft = fft2c_new(z)
             # meas_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
             non_noise = ifft2c_new((1 - mask[:, 0, :, :, :]) * noise_fft).permute(0, 3, 1, 2)

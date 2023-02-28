@@ -77,7 +77,11 @@ if __name__ == "__main__":
             std = std.cuda()
             mask = mask.cuda()
 
-            recons = torch.zeros(y.size(0), 4, )
+            num_code = 4
+            recons = torch.zeros(y.size(0), num_code, 8, 128, 128, 2).cuda()
+
+            for z in range(num_code):
+                recons[:, z, :, :, :, :] = model.reformat(model.forward(y, mask))
             x_hat = model.forward(y, mask)
 
             avg_gen = model.reformat(x_hat)
