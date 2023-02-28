@@ -30,7 +30,7 @@ class MRIUnet(pl.LightningModule):
         self.default_model_descriptor = default_model_descriptor
         self.exp_name = exp_name
 
-        self.in_chans = args.in_chans + 2 * self.num_realizations * 2
+        self.in_chans = args.in_chans + self.num_realizations * 2
         self.out_chans = args.out_chans
         self.chans = chans
         self.num_pool_layers = num_pool_layers
@@ -48,17 +48,17 @@ class MRIUnet(pl.LightningModule):
     def get_noise(self, num_vectors, mask):
         noise_vals = []
         for i in range(self.num_realizations):
-            # z = torch.randn(num_vectors, self.resolution, self.resolution, 2, device=self.device)
+            z = torch.randn(num_vectors, self.resolution, self.resolution, 2, device=self.device)
             if self.default_model_descriptor:
                 noise_vals.append(ifft2c_new(mask[:, 0, :, :, :]).permute(0, 3, 1, 2))
                 break
 
-            z = torch.empty(num_vectors, self.resolution, self.resolution, 2, device=self.device).uniform_(0, 1)
-            z = 2 * torch.bernoulli(z) - 1
+            # z = torch.empty(num_vectors, self.resolution, self.resolution, 2, device=self.device).uniform_(0, 1)
+            # z = 2 * torch.bernoulli(z) - 1
             noise_fft = fft2c_new(z)
-            meas_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
-            # non_noise = ifft2c_new((1 - mask[:, 0, :, :, :]) * noise_fft).permute(0, 3, 1, 2)
-            noise_vals.append(z.permute(0, 3, 1, 2))
+            # meas_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
+            non_noise = ifft2c_new((1 - mask[:, 0, :, :, :]) * noise_fft).permute(0, 3, 1, 2)
+            # noise_vals.append(z.permute(0, 3, 1, 2))
             noise_vals.append(meas_noise)
             # noise_vals.append(non_noise)
 
