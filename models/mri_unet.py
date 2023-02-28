@@ -48,7 +48,7 @@ class MRIUnet(pl.LightningModule):
     def get_noise(self, num_vectors, mask):
         noise_vals = []
         for i in range(self.num_realizations):
-            z = torch.randn(num_vectors, self.resolution, self.resolution, 2, device=self.device)
+            # z = torch.randn(num_vectors, self.resolution, self.resolution, 2, device=self.device)
             if self.default_model_descriptor:
                 noise_vals.append(ifft2c_new(mask[:, 0, :, :, :]).permute(0, 3, 1, 2))
                 break

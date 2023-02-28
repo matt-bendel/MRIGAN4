@@ -82,9 +82,8 @@ if __name__ == "__main__":
 
             for z in range(num_code):
                 recons[:, z, :, :, :, :] = model.reformat(model.forward(y, mask))
-            x_hat = model.forward(y, mask)
 
-            avg_gen = model.reformat(x_hat)
+            avg_gen = torch.mean(recons, dim=1)
             gt = model.reformat(x)
 
             for j in range(y.size(0)):
