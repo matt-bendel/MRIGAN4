@@ -30,7 +30,7 @@ class MRIUnet(pl.LightningModule):
         self.default_model_descriptor = default_model_descriptor
         self.exp_name = exp_name
 
-        self.in_chans = args.in_chans + 2 * self.num_realizations * 2
+        self.in_chans = args.in_chans + self.num_realizations * 2
         self.out_chans = args.out_chans
         self.chans = chans
         self.num_pool_layers = num_pool_layers
@@ -56,11 +56,11 @@ class MRIUnet(pl.LightningModule):
             z = torch.empty(num_vectors, self.resolution, self.resolution, 2, device=self.device).uniform_(0, 1)
             z = 2 * torch.bernoulli(z) - 1
             noise_fft = fft2c_new(z)
-            meas_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
-            # non_noise = ifft2c_new((1 - mask[:, 0, :, :, :]) * noise_fft).permute(0, 3, 1, 2)
+            # meas_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
+            non_noise = ifft2c_new((1 - mask[:, 0, :, :, :]) * noise_fft).permute(0, 3, 1, 2)
             # noise_vals.append(z.permute(0, 3, 1, 2))
-            noise_vals.append(meas_noise)
-            noise_vals.append(meas_noise)
+            noise_vals.append(non_noise)
+            # noise_vals.append(meas_noise)
             # noise_vals.append(non_noise)
 
         return noise_vals
@@ -118,7 +118,7 @@ class MRIUnet(pl.LightningModule):
         }
 
         y, x, _, mean, std, mask, maps = batch
-        x_hat = self.forward(y, mask)
+        x_hat = self.forward(x, mask)
 
         avg_gen = self.reformat(x_hat)
         gt = self.reformat(x)
