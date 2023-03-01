@@ -108,7 +108,7 @@ class MRIUnet(pl.LightningModule):
             for z in range(self.args.num_samps):
                 recons[:, z, :, :, :] = self.forward(y, mask)
 
-            loss = F.l1_loss(torch.mean(recons, dim=1), x) - 0.self.args.var_weight * torch.var(recons, dim=1).mean()
+            loss = F.l1_loss(torch.mean(recons, dim=1), x) - self.args.var_weight * torch.var(recons, dim=1).mean()
         else:
             recons = self.forward(y, mask)
             loss = F.l1_loss(torch.mean(recons, dim=1), x)
