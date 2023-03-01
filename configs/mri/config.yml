@@ -3,6 +3,7 @@ num_of_top_slices: 8
 use-middle-slices: false
 
 calib_width: 10
+num_sampls: 2
 
 in_chans: 16
 out_chans: 16
@@ -16,5 +17,6 @@ lr: 0.001
 beta_1: 0
 beta_2: 0.99
 
+var_weight: 0.012
 batch_size: 20
 num_epochs: 100

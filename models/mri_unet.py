@@ -92,7 +92,7 @@ class MRIUnet(pl.LightningModule):
         num_vectors = y.size(0)
         if self.num_realizations > 0:
             noise = self.get_noise(num_vectors, mask)
-            samples = self.unet(y, noise[0])
+            samples = self.unet(torch.cat([y, torch.cat(noise, dim=1)], dim=1))
         else:
             samples = self.unet(y)
 
@@ -103,8 +103,15 @@ class MRIUnet(pl.LightningModule):
         y, x, _, mean, std, mask, _ = batch
 
         # train generator
-        x_hat = self.forward(y, mask)
-        loss = F.l1_loss(x_hat, x)
+        if self.num_realizations > 0:
+            recons = torch.zeros(x.shape, device=self.device).unsqueeze(1).repeat(1, self.args.num_samps, 1, 1, 1)
+            for z in range(self.args.num_samps):
+                recons[:, z, :, :, :] = self.forward(y, mask)
+
+            loss = F.l1_loss(torch.mean(recons, dim=1), x) - 0.self.args.var_weight * torch.var(recons, dim=1).mean()
+        else:
+            recons = self.forward(y, mask)
+            loss = F.l1_loss(torch.mean(recons, dim=1), x)
 
         self.log('train_loss', loss, prog_bar=True)
 
@@ -118,9 +125,11 @@ class MRIUnet(pl.LightningModule):
         }
 
         y, x, _, mean, std, mask, maps = batch
-        x_hat = self.forward(y, mask)
+        recons = torch.zeros(x.shape, device=self.device).unsqueeze(1).repeat(1, self.args.num_samps, 1, 1, 1)
+        for z in range(self.args.num_samps):
+            recons[:, z, :, :, :] = self.forward(y, mask)
 
-        avg_gen = self.reformat(x_hat)
+        avg_gen = self.reformat(torch.mean(recons, dim=1))
         gt = self.reformat(x)
 
         for j in range(y.size(0)):
