@@ -3,7 +3,7 @@ num_of_top_slices: 8
 use-middle-slices: false
 
 calib_width: 10
-num_sampls: 2
+num_samps: 2
 
 in_chans: 16
 out_chans: 16
