@@ -172,7 +172,7 @@ class UNetModel(nn.Module):
         """
         super().__init__()
 
-        # self.preprocess_unet = UNET()
+        self.preprocess_unet = UNET()
         self.in_chans = in_chans
         self.out_chans = out_chans
         self.chans = 256
@@ -218,7 +218,7 @@ class UNetModel(nn.Module):
             nn.Conv2d(ch // 2, out_chans, kernel_size=1),
         )
 
-    def forward(self, input):
+    def forward(self, input, z):
         """
         Args:
             input (torch.Tensor): Input tensor of shape [batch_size, self.in_chans, height, width]
@@ -226,7 +226,7 @@ class UNetModel(nn.Module):
         Returns:
             (torch.Tensor): Output tensor of shape [batch_size, self.out_chans, height, width]
         """
-        output = input
+        output = torch.cat([input, self.preprocess_unet(z)], dim=1)
         stack = []
         # Apply down-sampling layers
         for layer in self.down_sample_layers:

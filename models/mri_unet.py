@@ -92,7 +92,7 @@ class MRIUnet(pl.LightningModule):
         num_vectors = y.size(0)
         if self.num_realizations > 0:
             noise = self.get_noise(num_vectors, mask)
-            samples = self.unet(torch.cat([y, torch.cat(noise, dim=1)], dim=1))
+            samples = self.unet(y, noise[0])
         else:
             samples = self.unet(y)
 
@@ -118,7 +118,7 @@ class MRIUnet(pl.LightningModule):
         }
 
         y, x, _, mean, std, mask, maps = batch
-        x_hat = self.forward(x, mask)
+        x_hat = self.forward(y, mask)
 
         avg_gen = self.reformat(x_hat)
         gt = self.reformat(x)
