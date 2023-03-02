@@ -56,12 +56,11 @@ class MRIUnet(pl.LightningModule):
             z = torch.empty(num_vectors, self.resolution, self.resolution, 2, device=self.device).uniform_(0, 1)
             z = 2 * torch.bernoulli(z) - 1
             noise_fft = fft2c_new(z)
-            # meas_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
-            non_noise = ifft2c_new((1 - mask[:, 0, :, :, :]) * noise_fft).permute(0, 3, 1, 2)
+            meas_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
+            # non_noise = ifft2c_new((1 - mask[:, 0, :, :, :]) * noise_fft).permute(0, 3, 1, 2)
             # noise_vals.append(z.permute(0, 3, 1, 2))
-            noise_vals.append(non_noise)
-            # noise_vals.append(meas_noise)
             # noise_vals.append(non_noise)
+            noise_vals.append(meas_noise)
 
         return noise_vals
 
@@ -108,8 +107,8 @@ class MRIUnet(pl.LightningModule):
             for z in range(self.args.num_samps):
                 recons[:, z, :, :, :] = self.forward(y, mask)
 
-            # loss = F.l1_loss(torch.mean(recons, dim=1), x) - self.args.var_weight * torch.var(recons, dim=1).mean()
-            loss = F.l1_loss(torch.mean(recons, dim=1), x) - np.sqrt(2 / (np.pi * self.args.num_samps * (self.args.num_samps + 1))) * torch.std(recons, dim=1).mean()
+            loss = F.l1_loss(torch.mean(recons, dim=1), x) - self.args.var_weight * torch.var(recons, dim=1).mean()
+            # loss = F.l1_loss(torch.mean(recons, dim=1), x) - np.sqrt(2 / (np.pi * self.args.num_samps * (self.args.num_samps + 1))) * torch.std(recons, dim=1).mean()
         else:
             recons = self.forward(y, mask)
             loss = F.l1_loss(torch.mean(recons, dim=1), x)
