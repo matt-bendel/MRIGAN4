@@ -71,4 +71,4 @@ if __name__ == "__main__":
 
     print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
     print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
-    print(f'SSIM: {np.mean(l1s)} \pm {np.std(l1s) / np.sqrt(len(l1s))}')
+    print(f'L1: {np.mean(l1s)} \pm {np.std(l1s) / np.sqrt(len(l1s))}')
