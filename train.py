@@ -11,7 +11,7 @@ from data_loaders.MRIDataModule import MRIDataModule
 from data_loaders.CelebAHQDataModule import CelebAHQDataModule
 from data_loaders.BSD400DataModule import BSD400DataModule
 from utils.parse_args import create_arg_parser
-# from models.rcGAN import rcGAN
+from models.rcGAN_no_d import rcGAN
 from models.mri_unet import MRIUnet
 from models.CoModGAN import InpaintUNet
 from pytorch_lightning import seed_everything
@@ -47,7 +47,11 @@ if __name__ == '__main__':
         )
 
         dm = MRIDataModule(cfg, args.mask_type)
-        model = MRIUnet(cfg, args.num_noise, args.default_model_descriptor, args.exp_name)
+        if args.rcgan:
+            noise_structure = {"AWGN": args.awgn, "structure": args.noise_structure}
+            model = rcGAN(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure)
+        else:
+            model = MRIUnet(cfg, args.num_noise, args.default_model_descriptor, args.exp_name)
     elif args.inpaint:
         with open('configs/inpaint/config.yml', 'r') as f:
             cfg = yaml.load(f, Loader=yaml.FullLoader)
@@ -95,25 +99,4 @@ if __name__ == '__main__':
                          max_epochs=cfg.num_epochs, callbacks=[checkpoint_callback, checkpoint_callback_epoch],
                          num_sanity_val_steps=0, profiler="simple")
 
-    if args.resume:
-        trainer.fit(model, dm, ckpt_path=cfg.checkpoint_dir + 'proposed_1_exp_3/awbn' + f'/checkpoint-epoch={args.resume_epoch}.ckpt')
-    else:
-        trainer.fit(model, dm)
-
-    # checkpoint_callback_gan = ModelCheckpoint(
-    #     monitor='epoch',
-    #     mode='max',
-    #     dirpath='/storage/matt_models/',
-    #     filename='checkpoint-{epoch}',
-    #     save_top_k=50
-    # )
-    # model = rcGAN(args)
-
-    # trainer = pl.Trainer(accelerator="gpu", devices=2, strategy='ddp',
-    #                      max_epochs=args.num_epochs, callbacks=[checkpoint_callback],
-    #                      num_sanity_val_steps=0, profiler="simple")
-    #
-    # if args.resume:
-    #     trainer.fit(model, dm, ckpt_path=args.checkpoint_dir + 'checkpoint.ckpt')
-    # else:
-    #     trainer.fit(model, dm)
+    trainer.fit(model, dm)

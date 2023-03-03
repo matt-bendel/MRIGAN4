@@ -4,6 +4,9 @@ use-middle-slices: false
 
 calib_width: 10
 num_samps: 2
+num_z_test: 32
+num_z_valid: 8
+num_z_train: 2
 
 in_chans: 16
 out_chans: 16
