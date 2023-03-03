@@ -15,6 +15,7 @@ from models.mri_unet import MRIUnet
 from models.CoModGAN import InpaintUNet
 from utils.math import complex_abs, tensor_to_complex_np
 from evaluation_scripts.metrics import psnr, ssim
+from utils.fftc import ifft2c_new, fft2c_new
 
 def load_object(dct):
     return types.SimpleNamespace(**dct)
@@ -81,7 +82,13 @@ if __name__ == "__main__":
             recons = torch.zeros(y.size(0), num_code, 8, 128, 128, 2).cuda()
 
             for z in range(num_code):
-                recons[:, z, :, :, :, :] = model.reformat(model.forward(y, mask))
+                z = torch.empty(y.size(0), model.resolution, model.resolution, 2).uniform_(0, 1).cuda()
+                z = 2 * torch.bernoulli(z) - 1
+                noise_fft = fft2c_new(z)
+                # meas_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
+                non_noise = ifft2c_new((1 - mask[:, 0, :, :, :]) * noise_fft).permute(0, 3, 1, 2)
+                noise = non_noise
+                recons[:, z, :, :, :, :] = model.reformat(model.unet(torch.cat([y, noise], dim=1)))
 
             avg_gen = torch.mean(recons, dim=1)
             gt = model.reformat(x)
