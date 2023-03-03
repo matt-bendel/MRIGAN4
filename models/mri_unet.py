@@ -125,11 +125,11 @@ class MRIUnet(pl.LightningModule):
         }
 
         y, x, _, mean, std, mask, maps = batch
-        recons = torch.zeros(x.shape, device=self.device).unsqueeze(1).repeat(1, 8, 1, 1, 1)
-        for z in range(8):
+        n_c = 2
+        recons = torch.zeros(x.shape, device=self.device).unsqueeze(1).repeat(1, n_c, 1, 1, 1)
+        for z in range(n_c):
             recons[:, z, :, :, :] = self.forward(y, mask)
 
-        print(torch.std(recons, dim=1).mean().cpu().numpy())
         avg_gen = self.reformat(torch.mean(recons, dim=1))
         gt = self.reformat(x)
 
