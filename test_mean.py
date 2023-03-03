@@ -81,14 +81,14 @@ if __name__ == "__main__":
             num_code = 4
             recons = torch.zeros(y.size(0), num_code, 8, 128, 128, 2).cuda()
 
-            for z in range(num_code):
+            for k in range(num_code):
                 z = torch.empty(y.size(0), model.resolution, model.resolution, 2).uniform_(0, 1).cuda()
                 z = 2 * torch.bernoulli(z) - 1
                 noise_fft = fft2c_new(z)
                 # meas_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
                 non_noise = ifft2c_new((1 - mask[:, 0, :, :, :]) * noise_fft).permute(0, 3, 1, 2)
                 noise = non_noise
-                recons[:, z, :, :, :, :] = model.reformat(model.unet(torch.cat([y, noise], dim=1)))
+                recons[:, k, :, :, :, :] = model.reformat(model.unet(torch.cat([y, noise], dim=1)))
 
             avg_gen = torch.mean(recons, dim=1)
             gt = model.reformat(x)
