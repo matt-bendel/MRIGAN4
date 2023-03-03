@@ -120,13 +120,13 @@ class MRIUnet(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         losses = {
             'psnr': [],
-            'single_psnr': [],
+            'l1': [],
             'ssim': []
         }
 
         y, x, _, mean, std, mask, maps = batch
-        recons = torch.zeros(x.shape, device=self.device).unsqueeze(1).repeat(1, self.args.num_samps, 1, 1, 1)
-        for z in range(self.args.num_samps):
+        recons = torch.zeros(x.shape, device=self.device).unsqueeze(1).repeat(1, 8, 1, 1, 1)
+        for z in range(8):
             recons[:, z, :, :, :] = self.forward(y, mask)
 
         avg_gen = self.reformat(torch.mean(recons, dim=1))
@@ -142,9 +142,11 @@ class MRIUnet(pl.LightningModule):
 
             losses['ssim'].append(ssim(gt_np, avg_gen_np))
             losses['psnr'].append(psnr(gt_np, avg_gen_np))
+            losses['l1'].append(np.linalg.norm((gt_np - avg_gen_np), ord=1))
 
         losses['psnr'] = np.mean(losses['psnr'])
         losses['ssim'] = np.mean(losses['ssim'])
+        losses['l1'] = np.mean(losses['l1'])
 
         return losses
 

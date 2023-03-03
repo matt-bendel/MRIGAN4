@@ -61,11 +61,14 @@ if __name__ == "__main__":
 
         psnrs = []
         ssims = []
+        l1s = []
 
         for i, data in enumerate(test_loader):
             losses = model.external_test_step(data, i)
             psnrs.append(losses['psnr'])
             ssims.append(losses['ssim'])
+            l1s.append(losses['l1'])
 
     print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
     print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
+    print(f'SSIM: {np.mean(l1s)} \pm {np.std(l1s) / np.sqrt(len(l1s))}')
