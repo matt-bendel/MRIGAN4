@@ -9,7 +9,7 @@ import sigpy as sp
 from torch.nn import functional as F
 from utils.fftc import ifft2c_new, fft2c_new
 from utils.math import complex_abs, tensor_to_complex_np
-from models.architectures.our_gen import GeneratorModel
+from models.architectures.our_gen_unet_only import UNetModel
 
 from evaluation_scripts.metrics import psnr, ssim
 from mail import send_mail
@@ -26,7 +26,7 @@ class rcGAN(pl.LightningModule):
 
         self.in_chans = args.in_chans + self.num_realizations * 2
         self.out_chans = args.out_chans
-        self.generator = GeneratorModel(
+        self.generator = UNetModel(
             in_chans=self.in_chans,
             out_chans=self.out_chans,
         )
