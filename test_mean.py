@@ -85,9 +85,9 @@ if __name__ == "__main__":
                 z = torch.empty(y.size(0), model.resolution, model.resolution, 2).uniform_(0, 1).cuda()
                 z = 2 * torch.bernoulli(z) - 1
                 noise_fft = fft2c_new(z)
-                # meas_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
-                non_noise = ifft2c_new((1 - mask[:, 0, :, :, :]) * noise_fft).permute(0, 3, 1, 2)
-                noise = non_noise
+                meas_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
+                # non_noise = ifft2c_new((1 - mask[:, 0, :, :, :]) * noise_fft).permute(0, 3, 1, 2)
+                noise = meas_noise
                 recons[:, k, :, :, :, :] = model.reformat(model.unet(torch.cat([y, noise], dim=1)))
 
             avg_gen = torch.mean(recons, dim=1)
