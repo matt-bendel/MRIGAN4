@@ -98,7 +98,7 @@ class rcGAN(pl.LightningModule):
 
     def l1_std_p(self, avg_recon, gens, x):
         return F.l1_loss(avg_recon, x) - self.std_mult * np.sqrt(
-            2 / (np.pi * self.args.num_z * (self.args.num_z + 1))) * torch.std(gens, dim=1).mean()
+            2 / (np.pi * self.args.num_z_train * (self.args.num_z_train + 1))) * torch.std(gens, dim=1).mean()
 
     def training_step(self, batch, batch_idx):
         y, x, _, mean, std, mask, _ = batch
