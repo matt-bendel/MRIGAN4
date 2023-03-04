@@ -22,4 +22,4 @@ beta_2: 0.99
 
 var_weight: 0.012
 batch_size: 20
-num_epochs: 100
+num_epochs: 200
