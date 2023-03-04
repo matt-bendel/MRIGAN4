@@ -12,6 +12,7 @@ from utils.parse_args import create_arg_parser
 from pytorch_lightning import seed_everything
 from evaluation_scripts.fid.embeddings import VGG16Embedding
 from models.mri_unet import MRIUnet
+from models.rcGAN_no_d import rcGAN
 from models.CoModGAN import InpaintUNet
 
 def load_object(dct):
@@ -35,7 +36,10 @@ if __name__ == "__main__":
         dm = MRIDataModule(cfg, args.mask_type)
         dm.setup()
         test_loader = dm.test_dataloader()
-        model_alias = MRIUnet
+        if args.rcgan:
+            model_alias = rcGAN
+        else:
+            model_alias = MRIUnet
     elif args.inpaint:
         with open('configs/inpaint/config.yml', 'r') as f:
             cfg = yaml.load(f, Loader=yaml.FullLoader)

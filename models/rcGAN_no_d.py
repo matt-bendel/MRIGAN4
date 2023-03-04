@@ -122,7 +122,8 @@ class rcGAN(pl.LightningModule):
         losses = {
             'psnr': [],
             'single_psnr': [],
-            'ssim': []
+            'ssim': [],
+            'l1': []
         }
 
         if external_test:
@@ -160,10 +161,12 @@ class rcGAN(pl.LightningModule):
             losses['ssim'].append(ssim(gt_np, avg_gen_np))
             losses['psnr'].append(psnr(gt_np, avg_gen_np))
             losses['single_psnr'].append(psnr(gt_np, single_gen_np))
+            losses['l1'].append(np.linalg.norm((gt_np - avg_gen_np), ord=1))
 
         losses['psnr'] = np.mean(losses['psnr'])
         losses['ssim'] = np.mean(losses['ssim'])
         losses['single_psnr'] = np.mean(losses['single_psnr'])
+        losses['l1'] = np.mean(losses['l1'])
 
         return losses
 
