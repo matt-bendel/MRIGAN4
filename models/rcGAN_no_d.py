@@ -93,7 +93,7 @@ class rcGAN(pl.LightningModule):
         else:
             samples = self.generator(y)
 
-        # samples = self.readd_measures(samples, y, mask)
+        samples = self.readd_measures(samples, y, mask)
         return samples
 
     def l1_std_p(self, avg_recon, gens, x):

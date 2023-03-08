@@ -57,11 +57,14 @@ class DataTransform:
         mask, inds = get_mask(self.args.im_size, return_mask=True, R=self.args.R, args=self.args, mask_type=self.mask_type)
         kspace = kspace.transpose(1, 2, 0)
         x = ifft(kspace, (0, 1))  # (768, 396, 16)
+
+        # TODO: Save SVD matrix offline
         coil_compressed_x = ImageCropandKspaceCompression(x)  # (384, 384, 8)
 
         im_tensor = transforms.to_tensor(coil_compressed_x).permute(2, 0, 1, 3)
 
         if self.args.im_size == 128:
+            # TODO: Save resized image offline
             im_tensor = reduce_resolution(im_tensor)
 
         true_image = torch.clone(im_tensor)
