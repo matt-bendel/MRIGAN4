@@ -99,4 +99,10 @@ if __name__ == '__main__':
                          max_epochs=cfg.num_epochs, callbacks=[checkpoint_callback, checkpoint_callback_epoch],
                          num_sanity_val_steps=0, profiler="simple")
 
-    trainer.fit(model, dm)
+    if args.resume:
+        trainer.fit(model, dm,
+                    ckpt_path=cfg.checkpoint_dir + args.exp_name + f'/checkpoint-epoch={args.resume_epoch}.ckpt')
+    else:
+        trainer.fit(model, dm)
+
+    # trainer.fit(model, dm)
