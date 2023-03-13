@@ -73,8 +73,10 @@ if __name__ == '__main__':
             kspace = ks[j].transpose(1, 2, 0)
             x = ifft(kspace, (0, 1))  # (768, 396, 16)
 
+            print("crop")
             coil_compressed_x = ImageCropandKspaceCompression(x)  # (384, 384, 8)
 
+            print("resize")
             im_tensor = transforms.to_tensor(coil_compressed_x).permute(2, 0, 1, 3)
 
             new_ksp[j] = reduce_resolution(im_tensor)
