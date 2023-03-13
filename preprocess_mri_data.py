@@ -69,7 +69,7 @@ if __name__ == '__main__':
             num_slices = 8  # kspace.shape[0]
 
         new_ksp = np.zeros(ks.shape)
-        for j in range(kspace.shape[0]):
+        for j in range(ks.shape[0]):
             kspace = ks[j].transpose(1, 2, 0)
             x = ifft(kspace, (0, 1))  # (768, 396, 16)
 
