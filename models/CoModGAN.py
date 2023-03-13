@@ -33,7 +33,9 @@ class InpaintUNet(pl.LightningModule):
 
             z = torch.empty(num_vectors, 1, self.resolution, self.resolution, device=self.device).uniform_(0, 1)
             z = 2 * torch.bernoulli(z) - 1
+            print(z.shape)
             noise = z * mask[:, None, :, :]
+            print(noise.shape)
             noise_vals.append(noise)
 
         return noise_vals
