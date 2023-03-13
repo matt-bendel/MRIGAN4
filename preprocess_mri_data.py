@@ -52,7 +52,7 @@ if __name__ == '__main__':
     for fname in sorted(files):
         h5_file = h5py.File(fname, 'r')
         print(fname)
-        if h5_file.attrs['acquisition'] == 'AXT2':
+        if h5_file.attrs['acquisition'] != 'AXT2':
             print("CONTINUE")
             continue
 
@@ -79,7 +79,7 @@ if __name__ == '__main__':
 
             new_ksp[j] = reduce_resolution(im_tensor)
 
-        hf = h5py.File(f'/storage/fastMRI_brain/preprocessed_data/multicoil_val/{fname}.h5', 'w')
+        hf = h5py.File(f'/storage/fastMRI_brain/preprocessed_data/multicoil_val/{fname}', 'w')
         hf.attrs = h5_file.attrs
         hf.create_dataset('kspace', new_ksp)
         hf.create_dataset('reconstruction_rss', h5_file['reconstruction_rss'])
