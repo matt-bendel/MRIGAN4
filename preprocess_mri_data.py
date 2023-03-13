@@ -68,14 +68,14 @@ if __name__ == '__main__':
         else:
             num_slices = 8  # kspace.shape[0]
 
-        new_ksp = np.zeros(ks.shape)
+        new_ksp = np.zeros((ks.shape[0], 128, 128, 2))
         for j in range(ks.shape[0]):
             kspace = ks[j].transpose(1, 2, 0)
             x = ifft(kspace, (0, 1))  # (768, 396, 16)
 
-            # coil_compressed_x = ImageCropandKspaceCompression(x)  # (384, 384, 8)
+            coil_compressed_x = ImageCropandKspaceCompression(x)  # (384, 384, 8)
 
-            im_tensor = transforms.to_tensor(x).permute(2, 0, 1, 3)
+            im_tensor = transforms.to_tensor(coil_compressed_x).permute(2, 0, 1, 3)
 
             new_ksp[j] = reduce_resolution(im_tensor)
 
