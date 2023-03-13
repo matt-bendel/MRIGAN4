@@ -78,6 +78,7 @@ if __name__ == '__main__':
             new_ksp[j] = reduce_resolution(im_tensor)
 
         hf = h5py.File(f'/storage/fastMRI_brain/preprocessed_data/multicoil_val/{fname}.h5', 'w')
+        hf.attrs = h5_file.attrs
         hf.create_dataset('kspace', new_ksp)
         hf.create_dataset('reconstruction_rss', h5_file['reconstruction_rss'])
         hf.close()
