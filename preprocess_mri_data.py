@@ -51,6 +51,9 @@ if __name__ == '__main__':
 
     for fname in sorted(files):
         h5_file = h5py.File(fname, 'r')
+        if h5_file.attrs['acquisition'] == 'AXT2':
+            continue
+
         ks = h5_file['kspace']
 
         if ks.shape[-1] <= 384 or ks.shape[1] < 8 or str(
