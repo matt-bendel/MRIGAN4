@@ -48,11 +48,12 @@ def ImageCropandKspaceCompression(x):
 if __name__ == '__main__':
     root = '/storage/fastMRI_brain/data/multicoil_val'
     files = list(pathlib.Path(root).iterdir())
-    print(files)
 
     for fname in sorted(files):
         h5_file = h5py.File(fname, 'r')
+        print(fname)
         if h5_file.attrs['acquisition'] == 'AXT2':
+            print("CONTINUE")
             continue
 
         ks = h5_file['kspace']
