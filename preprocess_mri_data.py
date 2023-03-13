@@ -70,7 +70,7 @@ if __name__ == '__main__':
         else:
             num_slices = 8  # kspace.shape[0]
 
-        new_ksp = np.zeros((ks.shape[0], 128, 128, 2))
+        new_ksp = np.zeros((ks.shape[0], 8, 128, 128, 2))
         for j in range(ks.shape[0]):
             kspace = ks[j]
             print(kspace.shape)
