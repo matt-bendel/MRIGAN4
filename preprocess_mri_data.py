@@ -46,7 +46,7 @@ def ImageCropandKspaceCompression(x):
     return coil_compressed_x
 
 if __name__ == '__main__':
-    root = '/storage/fastMRI_brain/data/multicoil_vaL'
+    root = '/storage/fastMRI_brain/data/multicoil_val'
     files = list(pathlib.Path(root).iterdir())
 
     for fname in sorted(files):
