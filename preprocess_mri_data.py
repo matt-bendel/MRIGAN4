@@ -46,6 +46,46 @@ def ImageCropandKspaceCompression(x):
     return coil_compressed_x
 
 if __name__ == '__main__':
+    root = '/storage/fastMRI_brain/data/multicoil_train'
+    files = list(pathlib.Path(root).iterdir())
+
+    for fname in sorted(files):
+        h5_file = h5py.File(fname, 'r')
+        print(fname)
+        if h5_file.attrs['acquisition'] != 'AXT2':
+            print("CONTINUE")
+            continue
+
+        ks = h5_file['kspace']
+
+        if ks.shape[-1] < 384 or ks.shape[1] < 8 or str(
+                fname) == '/storage/fastMRI_brain/data/multicoil_val/file_brain_AXT2_209_2090296.h5' or str(
+            fname) == '/storage/fastMRI_brain/data/multicoil_val/file_brain_AXT2_200_2000250.h5' or str(
+            fname) == '/storage/fastMRI_brain/data/multicoil_val/file_brain_AXT2_201_2010106.h5' or str(
+            fname) == '/storage/fastMRI_brain/data/multicoil_val/file_brain_AXT2_204_2130024.h5' or str(
+            fname) == '/storage/fastMRI_brain/data/multicoil_val/file_brain_AXT2_210_2100025.h5':
+            continue
+        else:
+            num_slices = 8  # kspace.shape[0]
+
+        new_ksp = np.zeros(ks.shape)
+        for j in range(ks.shape[0]):
+            kspace = ks[j].transpose(1, 2, 0)
+            x = ifft(kspace, (0, 1))  # (768, 396, 16)
+
+            # coil_compressed_x = ImageCropandKspaceCompression(x)  # (384, 384, 8)
+
+            im_tensor = transforms.to_tensor(x).permute(2, 0, 1, 3)
+
+            new_ksp[j] = reduce_resolution(im_tensor)
+
+        hf = h5py.File(f'/storage/fastMRI_brain/preprocessed_data/multicoil_train/{fname}', 'w')
+        hf.attrs = h5_file.attrs
+        hf.create_dataset('kspace', new_ksp)
+        hf.create_dataset('reconstruction_rss', h5_file['reconstruction_rss'])
+        hf.close()
+
+
     root = '/storage/fastMRI_brain/data/multicoil_val'
     files = list(pathlib.Path(root).iterdir())
 
