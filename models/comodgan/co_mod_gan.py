@@ -75,7 +75,7 @@ class G_synthesis_co_mod_gan(nn.Module):
         fmap_decay = 1.0
         fmap_max = 512
         fmap_min = 1
-        num_channels = 4
+        num_channels = 3
         resample_kernel = [1,3,3,1]
         self.num_realizations = num_realizations
 

@@ -33,9 +33,7 @@ class InpaintUNet(pl.LightningModule):
 
             z = torch.empty(num_vectors, 1, self.resolution, self.resolution, device=self.device).uniform_(0, 1)
             z = 2 * torch.bernoulli(z) - 1
-            print(z.shape)
             noise = z * mask
-            print(noise.shape)
             noise_vals.append(noise)
 
         return noise_vals
@@ -71,8 +69,6 @@ class InpaintUNet(pl.LightningModule):
         num_vectors = y.size(0)
         if self.num_realizations > 0:
             noise = self.get_noise(num_vectors, mask)
-            print(torch.cat(noise, dim=1).shape)
-            print(y.shape)
             samples = self.generator(torch.cat([y, torch.cat(noise, dim=1)], dim=1), mask, [torch.randn(y.size(0), 512, device=y.device)])
         else:
             samples = self.generator(y, mask, [torch.randn(y.size(0), 512, device=y.device)])
