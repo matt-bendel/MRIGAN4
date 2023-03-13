@@ -71,9 +71,9 @@ if __name__ == '__main__':
             num_slices = 8  # kspace.shape[0]
 
         new_ksp = np.zeros((ks.shape[0], 128, 128, 2))
-        print(ks.shape)
         for j in range(ks.shape[0]):
             kspace = ks[j].transpose(1, 2, 0)
+            print(kspace.shape)
             x = tensor_to_complex_np(ifft2c_new(transforms.to_tensor(kspace)))
             # x = ifft(kspace, (0, 1))  # (768, 396, 16)
 
