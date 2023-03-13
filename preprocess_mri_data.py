@@ -72,9 +72,9 @@ if __name__ == '__main__':
 
         new_ksp = np.zeros((ks.shape[0], 128, 128, 2))
         for j in range(ks.shape[0]):
-            kspace = ks[j].transpose(1, 2, 0)
+            kspace = ks[j]
             print(kspace.shape)
-            x = tensor_to_complex_np(ifft2c_new(transforms.to_tensor(kspace)))
+            x = tensor_to_complex_np(ifft2c_new(transforms.to_tensor(kspace))).transpose(1, 2, 0)
             # x = ifft(kspace, (0, 1))  # (768, 396, 16)
 
             print("crop")
