@@ -3,8 +3,10 @@ import pathlib
 import cv2
 import numpy as np
 
+from utils.math import tensor_to_complex_np
 from utils.espirit import ifft, fft
 from data import transforms
+from utils.fftc import ifft2c_new, fft2c_new
 
 def reduce_resolution(im):
     reduced_im = np.zeros((8, 128, 128, 2))
@@ -69,9 +71,11 @@ if __name__ == '__main__':
             num_slices = 8  # kspace.shape[0]
 
         new_ksp = np.zeros((ks.shape[0], 128, 128, 2))
+        print(ks.shape)
         for j in range(ks.shape[0]):
             kspace = ks[j].transpose(1, 2, 0)
-            x = ifft(kspace, (0, 1))  # (768, 396, 16)
+            x = tensor_to_complex_np(ifft2c_new(transforms.to_tensor(kspace)))
+            # x = ifft(kspace, (0, 1))  # (768, 396, 16)
 
             print("crop")
             coil_compressed_x = ImageCropandKspaceCompression(x)  # (384, 384, 8)
