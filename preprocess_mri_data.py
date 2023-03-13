@@ -75,6 +75,7 @@ if __name__ == '__main__':
             kspace = ks[j]
             print(kspace.shape)
             x = tensor_to_complex_np(ifft2c_new(transforms.to_tensor(kspace))).transpose(1, 2, 0)
+            print(x.shape)
             # x = ifft(kspace, (0, 1))  # (768, 396, 16)
 
             print("crop")
