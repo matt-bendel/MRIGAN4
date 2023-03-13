@@ -21,26 +21,22 @@ from time import time
 import multiprocessing as mp
 
 if __name__ == '__main__':
-    torch.set_float32_matmul_precision('medium')
-    args = create_arg_parser().parse_args()
-    seed_everything(1, workers=True)
+    for fname in sorted(files):
+        kspace = h5py.File(fname, 'r')['kspace']
 
-    dm = MRIDataModule(args, 2)
-    dm.setup()
-    train_loader = dm.train_dataloader()
-    val_loader = dm.val_dataloader()
-    test_loader = dm.test_dataloader()
+        if kspace.shape[-1] <= 384 or kspace.shape[1] < 8 or str(
+                fname) == '/storage/fastMRI_brain/data/multicoil_val/file_brain_AXT2_209_2090296.h5' or str(
+            fname) == '/storage/fastMRI_brain/data/multicoil_val/file_brain_AXT2_200_2000250.h5' or str(
+            fname) == '/storage/fastMRI_brain/data/multicoil_val/file_brain_AXT2_201_2010106.h5' or str(
+            fname) == '/storage/fastMRI_brain/data/multicoil_val/file_brain_AXT2_204_2130024.h5' or str(
+            fname) == '/storage/fastMRI_brain/data/multicoil_val/file_brain_AXT2_210_2100025.h5':
+            continue
+        else:
+            num_slices = 8  # kspace.shape[0]
+            self.examples += [(fname, slice) for slice in range(num_slices)]
 
-    for num_workers in range(2, mp.cpu_count(), 2):
-        train_loader = DataLoader(dm.train, shuffle=True, num_workers=num_workers, batch_size=20, pin_memory=True)
-        start = time()
-        for epoch in range(1, 3):
-            for i, data in enumerate(train_loader, 0):
-                pass
-        end = time()
-        print("Finish with:{} second, num_workers={}".format(end - start, num_workers))
-    # for i, data in enumerate(val_loader):
-    #     y, x, y_true, mean, std, mask, fname, slice = data
-    #
-    #     for j in range(y.size(0)):
-    #         hf = h5py.File(f'/storage/fastMRI_brain/preprocessed_data/train/{fname[j]}_{slice[j]}.h5', 'w')
+    for i, data in enumerate(val_loader):
+        y, x, y_true, mean, std, mask, fname, slice = data
+
+        for j in range(y.size(0)):
+            hf = h5py.File(f'/storage/fastMRI_brain/preprocessed_data/train/{fname[j]}_{slice[j]}.h5', 'w')
