@@ -43,22 +43,22 @@ class rcGAN(pl.LightningModule):
                 noise_vals.append(ifft2c_new(mask[:, 0, :, :, :]).permute(0, 3, 1, 2))
                 break
 
-            if self.noise_type["AWGN"]:
-                z = torch.randn(num_vectors, self.resolution, self.resolution, 2, device=self.device)
-            else:
-                z = torch.empty(num_vectors, self.resolution, self.resolution, 2, device=self.device).uniform_(0, 1)
-                z = 2 * torch.bernoulli(z) - 1
+            # if self.noise_type["AWGN"]:
+            z = torch.randn(num_vectors, self.resolution, self.resolution, 2, device=self.device)
+            # else:
+            #     z = torch.empty(num_vectors, self.resolution, self.resolution, 2, device=self.device).uniform_(0, 1)
+            #     z = 2 * torch.bernoulli(z) - 1
 
             noise_fft = fft2c_new(z)
 
-            if self.noise_type["structure"] == 1:
-                meas_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
-                noise_vals.append(meas_noise)
-            elif self.noise_type["structure"] == 2:
-                non_noise = ifft2c_new((1 - mask[:, 0, :, :, :]) * noise_fft).permute(0, 3, 1, 2)
-                noise_vals.append(non_noise)
-            else:
-                noise_vals.append(z.permute(0, 3, 1, 2))
+            # if self.noise_type["structure"] == 1:
+            meas_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
+            noise_vals.append(meas_noise)
+            # elif self.noise_type["structure"] == 2:
+            #     non_noise = ifft2c_new((1 - mask[:, 0, :, :, :]) * noise_fft).permute(0, 3, 1, 2)
+            #     noise_vals.append(non_noise)
+            # else:
+            #     noise_vals.append(z.permute(0, 3, 1, 2))
 
         return noise_vals
 

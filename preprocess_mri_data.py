@@ -2,6 +2,7 @@ import os
 import torch
 import random
 import pickle
+import h5py
 
 import numpy as np
 import pytorch_lightning as pl
@@ -31,10 +32,4 @@ if __name__ == '__main__':
         y, x, y_true, mean, std, mask, fname, slice = data
 
         for j in range(y.size(0)):
-            new_y_true = fft2c_new(ifft2c_new(y_true[j]) * std[j] + mean[j])
-            maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=args.calib_width,
-                                       device=sp.Device(0), crop=0.70,
-                                       kernel_width=6).run().get()
-
-            with open(f'/storage/fastMRI_brain/sense_maps/val_full_res/{fname[j]}_{slice[j]}.pkl', 'wb') as outp:
-                pickle.dump(maps, outp, pickle.HIGHEST_PROTOCOL)
+            hf = h5py.File(f'/storage/fastMRI_brain/preprocessed_data/train/{fname[j]}_{slice[j]}.h5', 'w')
