@@ -52,11 +52,11 @@ class rcGAN(pl.LightningModule):
             noise_fft = fft2c_new(z)
 
             # if self.noise_type["structure"] == 1:
-            meas_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
-            noise_vals.append(meas_noise)
+            # meas_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
+            # noise_vals.append(meas_noise)
             # elif self.noise_type["structure"] == 2:
-            #     non_noise = ifft2c_new((1 - mask[:, 0, :, :, :]) * noise_fft).permute(0, 3, 1, 2)
-            #     noise_vals.append(non_noise)
+            non_noise = ifft2c_new((1 - mask[:, 0, :, :, :]) * noise_fft).permute(0, 3, 1, 2)
+            noise_vals.append(non_noise)
             # else:
             #     noise_vals.append(z.permute(0, 3, 1, 2))
 
