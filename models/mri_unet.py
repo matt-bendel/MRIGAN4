@@ -95,7 +95,7 @@ class MRIUnet(pl.LightningModule):
         else:
             samples = self.unet(y)
 
-        # samples = self.readd_measures(samples, y, mask)
+        samples = self.readd_measures(samples, y, mask)
         return samples
 
     def training_step(self, batch, batch_idx):
