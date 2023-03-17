@@ -48,19 +48,19 @@ class MRIUnet(pl.LightningModule):
     def get_noise(self, num_vectors, mask):
         noise_vals = []
         for i in range(self.num_realizations):
-            if self.default_model_descriptor:
-                noise_vals.append(ifft2c_new(mask[:, 0, :, :, :]).permute(0, 3, 1, 2))
-                break
+            # if self.default_model_descriptor:
+            noise_vals.append(ifft2c_new(mask[:, 0, :, :, :]).permute(0, 3, 1, 2))
+            break
 
-            z = torch.randn(num_vectors, self.resolution, self.resolution, 2, device=self.device)
+            # z = torch.randn(num_vectors, self.resolution, self.resolution, 2, device=self.device)
             # z = torch.empty(num_vectors, self.resolution, self.resolution, 2, device=self.device).uniform_(0, 1)
             # z = 2 * torch.bernoulli(z) - 1
-            noise_fft = fft2c_new(z)
-            meas_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
+            # noise_fft = fft2c_new(z)
+            # meas_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
             # non_noise = ifft2c_new((1 - mask[:, 0, :, :, :]) * noise_fft).permute(0, 3, 1, 2)
             # noise_vals.append(z.permute(0, 3, 1, 2))
             # noise_vals.append(non_noise)
-            noise_vals.append(meas_noise)
+            # noise_vals.append(meas_noise)
 
         return noise_vals
 
@@ -111,7 +111,7 @@ class MRIUnet(pl.LightningModule):
             loss = F.l1_loss(torch.mean(recons, dim=1), x) - np.sqrt(2 / (np.pi * self.args.num_samps * (self.args.num_samps + 1))) * torch.std(recons, dim=1).mean()
         else:
             recons = self.forward(y, mask)
-            loss = F.l1_loss(torch.mean(recons, dim=1), x)
+            loss = F.l1_loss(recons, x)
 
         self.log('train_loss', loss, prog_bar=True)
 
