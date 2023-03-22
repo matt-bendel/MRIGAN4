@@ -209,11 +209,11 @@ class rcGAN(pl.LightningModule):
         mu_0 = 2e-2
         self.std_mult += mu_0 * psnr_diff
 
+        self.log('val_psnr', avg_psnr, sync_dist=True)
+
         if np.abs(psnr_diff) <= 0.25:
-            self.log('val_psnr', avg_psnr, sync_dist=True)
             self.is_good_model = 1
         else:
-            self.log('val_psnr', 0, sync_dist=True)
             self.is_good_model = 0
 
         if self.global_rank == 0 and self.current_epoch % 5 == 0:

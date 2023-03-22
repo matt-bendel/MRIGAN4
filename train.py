@@ -92,7 +92,7 @@ if __name__ == '__main__':
         mode='max',
         dirpath=cfg.checkpoint_dir + args.exp_name + '/',
         filename='checkpoint-{epoch}',
-        save_top_k=1
+        save_top_k=50
     )
 
     trainer = pl.Trainer(accelerator="gpu", devices=args.num_gpus, strategy='ddp',
