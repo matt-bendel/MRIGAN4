@@ -1,15 +1,20 @@
 import torch
 import os
-
+import yaml
+import types
+import json
 import numpy as np
 import pytorch_lightning as pl
 
 from data_loaders.MRIDataModule import MRIDataModule
 from utils.parse_args import create_arg_parser
-from models.rcGAN import rcGAN
+from models.rcGAN_no_d import rcGAN
 from pytorch_lightning import seed_everything
 from evaluation_scripts.fid.embeddings import VGG16Embedding
 from evaluation_scripts.cfid.cfid_metric import CFIDMetric
+
+def load_object(dct):
+    return types.SimpleNamespace(**dct)
 
 if __name__ == "__main__":
     torch.set_float32_matmul_precision('medium')
@@ -19,21 +24,24 @@ if __name__ == "__main__":
     args.in_chans = 16
     args.out_chans = 16
 
-    args.checkpoint_dir = "/storage/matt_models"
-    dm = MRIDataModule(args)
+    with open('configs/mri/config.yml', 'r') as f:
+        cfg = yaml.load(f, Loader=yaml.FullLoader)
+        cfg = json.loads(json.dumps(cfg), object_hook=load_object)
+
+    dm = MRIDataModule(cfg, args.mask_type)
     dm.setup()
     val_loader = dm.val_dataloader()
     best_epoch = -1
     inception_embedding = VGG16Embedding()
     best_cfid = 10000000
-    start_epoch = 45
-    end_epoch = 95
+    start_epoch = 242
+    end_epoch = 291
 
     with torch.no_grad():
         for epoch in range(start_epoch, end_epoch):
             print(f"VALIDATING EPOCH: {epoch + 1}")
             try:
-                model = rcGAN.load_from_checkpoint(checkpoint_path=args.checkpoint_dir + f'/checkpoint-epoch={epoch}.ckpt')
+                model = rcGAN.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + args.exp_name + f'/checkpoint-epoch={epoch}.ckpt')
             except:
                 continue
 

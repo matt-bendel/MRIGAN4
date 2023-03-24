@@ -14,7 +14,7 @@ from torch.nn import functional as F
 from data import transforms
 from utils.fftc import ifft2c_new, fft2c_new
 from utils.math import complex_abs, tensor_to_complex_np
-from models.architectures.our_gen import GeneratorModel
+from models.architectures.our_gen_unet_only import GeneratorModel
 from models.architectures.patch_disc import PatchDisc
 
 from evaluation_scripts.metrics import psnr, ssim
@@ -23,9 +23,14 @@ from mail import send_mail
 
 
 class rcGAN(pl.LightningModule):
-    def __init__(self, args):
+    def __init__(self, args, num_realizations, default_model_descriptor, exp_name, noise_type):
         super().__init__()
         self.args = args
+        self.num_realizations = num_realizations
+        self.default_model_descriptor = default_model_descriptor
+        self.exp_name = exp_name
+        self.noise_type = noise_type
+
         self.generator = GeneratorModel(
             in_chans=args.in_chans + 2,
             out_chans=args.out_chans,
@@ -54,7 +59,7 @@ class rcGAN(pl.LightningModule):
         #     measured_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
         #     z_vals.append(z.permute(0, 3, 1, 2))
         #     measured_vals.append(measured_noise)
-        return z.permute(0, 3, 1, 2), measured_noise
+        return [measured_noise]
 
     def reformat(self, samples):
         reformatted_tensor = torch.zeros(size=(samples.size(0), 8, self.resolution, self.resolution, 2),
@@ -105,8 +110,11 @@ class rcGAN(pl.LightningModule):
 
     def forward(self, y, mask):
         num_vectors = y.size(0)
-        z, measured = self.get_noise(num_vectors, mask)
-        samples = self.generator(y, measured, z)
+        if self.num_realizations > 0:
+            noise = self.get_noise(num_vectors, mask)
+            samples = self.generator(torch.cat([y, torch.cat(noise, dim=1)], dim=1))
+        else:
+            samples = self.generator(y)
         samples = self.readd_measures(samples, y, mask)
         return samples
 
