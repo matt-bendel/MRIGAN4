@@ -11,7 +11,7 @@ from data_loaders.MRIDataModule import MRIDataModule
 from data_loaders.CelebAHQDataModule import CelebAHQDataModule
 from data_loaders.BSD400DataModule import BSD400DataModule
 from utils.parse_args import create_arg_parser
-from models.rcGAN import rcGAN
+from models.rcGAN_no_d import rcGAN
 from models.mri_unet import MRIUnet
 from models.CoModGAN import InpaintUNet
 from pytorch_lightning import seed_everything
