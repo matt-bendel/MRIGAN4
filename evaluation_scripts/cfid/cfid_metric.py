@@ -157,7 +157,9 @@ class CFIDMetric:
 
             unnormal_im = tensor_to_complex_np((reformatted * std[i] + mean[i]).cpu())
 
-            im = torch.tensor(maps[i].H * unnormal_im).abs()
+            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), maps[i].cpu().numpy())
+
+            im = torch.tensor(S.H * unnormal_im).abs()
 
             im = (im - torch.min(im)) / (torch.max(im) - torch.min(im))
 
