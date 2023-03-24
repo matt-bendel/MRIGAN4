@@ -149,11 +149,9 @@ class CFIDMetric:
             np.sum(np.square(np.abs(s_maps)), axis=1))
 
     def _get_embed_im(self, multi_coil_inp, mean, std, maps):
-        embed_ims = torch.zeros(size=(multi_coil_inp.size(0), 3, self.args.im_size, self.args.im_size),
-                                device=self.args.device)
+        embed_ims = torch.zeros(size=(multi_coil_inp.size(0), 3, self.args.im_size, self.args.im_size)).cuda()
         for i in range(multi_coil_inp.size(0)):
-            reformatted = torch.zeros(size=(8, self.args.im_size, self.args.im_size, 2),
-                                      device=self.args.device)
+            reformatted = torch.zeros(size=(8, self.args.im_size, self.args.im_size, 2)).cuda()
             reformatted[:, :, :, 0] = multi_coil_inp[i, 0:8, :, :]
             reformatted[:, :, :, 1] = multi_coil_inp[i, 8:16, :, :]
 
@@ -178,10 +176,9 @@ class CFIDMetric:
         for i, data in tqdm(enumerate(self.loader),
                             desc='Computing generated distribution',
                             total=len(self.loader)):
-            condition, gt, true_cond, mean, std, mask, maps = data
+            condition, gt, _, mean, std, mask, maps = data
             condition = condition.cuda()
             gt = gt.cuda()
-            true_cond = true_cond.cuda()
             mean = mean.cuda()
             std = std.cuda()
             mask = mask.cuda()
