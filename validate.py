@@ -57,7 +57,7 @@ if __name__ == "__main__":
                                      image_embedding=inception_embedding,
                                      condition_embedding=inception_embedding,
                                      cuda=True,
-                                     args=args,
+                                     args=cfg,
                                      ref_loader=False,
                                      num_samps=1)
 
