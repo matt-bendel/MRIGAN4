@@ -59,7 +59,7 @@ if __name__ == "__main__":
         exit()
 
     with torch.no_grad():
-        model = model_alias.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + args.exp_name + '/checkpoint-epoch=51.ckpt')
+        model = model_alias.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + args.exp_name + '/best_model.ckpt')
         model = model.cuda()
         model.eval()
 
