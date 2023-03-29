@@ -39,6 +39,9 @@ if __name__ == '__main__':
     for i, data in enumerate(val_loader):
         y, x, mask, max_val, maps, fname, slice = data
         print(y.shape)
+        new_y = torch.zeros(y.size(0), 8, 384, 384, 2)
+        new_y[:, :, :, :, 0] = y[:, 0:8, :, :]
+        new_y[:, :, :, :, 1] = y[:, 8:16, :, :]
 
         for j in range(y.size(0)):
             new_y_true = fft2c_new(ifft2c_new(y[j]) * max_val[j])
