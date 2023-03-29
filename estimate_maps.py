@@ -25,16 +25,16 @@ if __name__ == '__main__':
         cfg = yaml.load(f, Loader=yaml.FullLoader)
         cfg = json.loads(json.dumps(cfg), object_hook=load_object)
 
-    dm = MRIDataModule(cfg, 1)
+    dm = FastMRIDataModule(base_path=cfg.data_path, batch_size=cfg.batch_size)
     dm.setup()
     val_loader = dm.val_dataloader()
 
     for i, data in enumerate(val_loader):
-        y, x, y_true, mean, std, mask, fname, slice = data
+        y, x, mask, max_val, maps, fname, slice = data
 
         for j in range(y.size(0)):
-            new_y_true = fft2c_new(ifft2c_new(y_true[j]) * std[j] + mean[j])
-            maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=args.calib_width,
+            new_y_true = fft2c_new(ifft2c_new(y_true[j]) * max_val[j])
+            maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=16,
                                        device=sp.Device(0), crop=0.70,
                                        kernel_width=6).run().get()
 

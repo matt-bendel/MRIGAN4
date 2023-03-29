@@ -220,7 +220,9 @@ class MulticoilDataset(torch.utils.data.Dataset):
             gt_img.float(),
             mask,
             np.float32(max_val),
-            maps
+            maps,
+            fname.name,
+            dataslice
         )
 
 
