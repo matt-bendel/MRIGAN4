@@ -7,6 +7,7 @@ Created on Mon Apr  4 06:56:12 2022
 """
 import pandas as pd
 import requests
+import pickle
 import torch
 import pytorch_lightning as pl
 import os
