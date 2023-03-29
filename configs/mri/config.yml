@@ -23,4 +23,4 @@ gp_weight: 10
 
 var_weight: 0.012
 batch_size: 5
-num_epochs: 100
+num_epochs: 1
