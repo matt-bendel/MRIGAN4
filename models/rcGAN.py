@@ -142,7 +142,6 @@ class rcGAN(pl.LightningModule):
 
         # train generator
         if optimizer_idx == 0:
-            print("GEN START")
             gens = torch.zeros(
                 size=(y.size(0), self.args.num_z_train, self.args.in_chans, self.args.im_size, self.args.im_size),
                 device=self.device)
@@ -156,13 +155,11 @@ class rcGAN(pl.LightningModule):
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
             self.log('g_loss', g_loss)
-            print("GEN DONE")
 
             return g_loss
 
         # train discriminator
         if optimizer_idx == 1:
-            print("DISC START")
             x_hat = self.forward(y, mask)
 
             real_pred = self.discriminator(input=x, y=y)
@@ -173,7 +170,6 @@ class rcGAN(pl.LightningModule):
             d_loss += self.drift_penalty(real_pred)
 
             self.log('d_loss', d_loss)
-            print("DISC DONE")
 
             return d_loss
 
