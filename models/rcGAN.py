@@ -143,7 +143,7 @@ class rcGAN(pl.LightningModule):
         # train generator
         if optimizer_idx == 0:
             gens = torch.zeros(
-                size=(y.size(0), self.args.num_z, self.args.in_chans, self.args.im_size, self.args.im_size),
+                size=(y.size(0), self.args.num_z_train, self.args.in_chans, self.args.im_size, self.args.im_size),
                 device=self.device)
             for z in range(self.args.num_z):
                 gens[:, z, :, :, :] = self.forward(y, mask)
@@ -173,7 +173,7 @@ class rcGAN(pl.LightningModule):
 
             return d_loss
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch, batch_idx, external_test=False):
         losses = {
             'psnr': [],
             'single_psnr': [],
@@ -182,9 +182,14 @@ class rcGAN(pl.LightningModule):
 
         y, x, mask, max_val, maps = batch
 
+        if external_test:
+            num_code = self.args.num_z_test
+        else:
+            num_code = self.args.num_z_valid
+
         gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size),
                            device=self.device)
-        for z in range(8):
+        for z in range(num_code):
             gens[:, z, :, :, :] = self.forward(y, mask)
 
         avg = torch.mean(gens, dim=1)
