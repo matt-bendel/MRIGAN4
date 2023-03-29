@@ -45,7 +45,8 @@ if __name__ == '__main__':
         for j in range(y.size(0)):
             new_y_true = fft2c_new(ifft2c_new(new_y[j]) * max_val[j])
             maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=16,
-                                       device=sp.Device(0)).run().get()
+                                       device=sp.Device(0), crop=0.5,
+                                       kernel_width=6).run().get()
 
             with open(f'/storage/fastMRI_brain/sense_maps/val_full_res/{fname[j]}_{slice[j]}.pkl', 'wb') as outp:
                 pickle.dump(maps, outp, pickle.HIGHEST_PROTOCOL)

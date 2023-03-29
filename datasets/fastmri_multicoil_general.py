@@ -222,8 +222,8 @@ class MulticoilDataset(torch.utils.data.Dataset):
             mask,
             np.float32(max_val),
             maps,
-            # fname.name,
-            # dataslice
+            fname.name,
+            dataslice
         )
 
 
