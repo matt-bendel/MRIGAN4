@@ -253,7 +253,7 @@ class rcGAN(pl.LightningModule):
         else:
             self.is_good_model = 0
 
-        if self.global_rank == 0 and self.current_epoch % 5 == 0:
+        if self.global_rank == 0 and self.current_epoch % 2 == 0:
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE",
                       f"Metrics:\nPSNR: {avg_psnr:.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}",
                       file_name="variation_gif.gif")
