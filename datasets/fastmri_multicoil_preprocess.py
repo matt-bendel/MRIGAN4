@@ -25,7 +25,7 @@ sys.path.append("..")
 
 import fastmri
 from fastmri.data.transforms import to_tensor, tensor_to_complex_np
-from datasets.masks.mask import get_mask, apply_mask
+from utils.get_mask import get_mask
 
 # Coil compression and image cropping
 # Needs to be [imgsize, imgsize, num_coils]
@@ -117,6 +117,8 @@ def get_normalizing_val(kspace: np.ndarray, img_size, mask_type, accel_rate):
     #kspace_torch = to_tensor(kspace)
     
     #Apply the mask
+    m = np.zeros((384, 384))
+
     a = np.array(
         [1, 23, 42, 60, 77, 92, 105, 117, 128, 138, 147, 155, 162, 169, 176, 182, 184, 185, 186, 187, 188, 189, 190,
          191, 192, 193, 194, 195,
@@ -128,8 +130,8 @@ def get_normalizing_val(kspace: np.ndarray, img_size, mask_type, accel_rate):
     mask = transforms.to_tensor(np.tile(samp, (numcoil, 1, 1)).astype(np.float32))
     mask = torch.unsqueeze(mask, -1).repeat(1, 1, 1, 2)
 
-    mask = get_mask(accel=accel_rate, size=img_size, mask_type=mask_type)
-    masked_kspace = apply_mask(kspace, mask)
+    mask = get_mask(img_size, R=accel_rate)
+    masked_kspace = kspace * mask
     
     #Get the zf imgs
     masked_imgs = fastmri.ifft2c(masked_kspace)
