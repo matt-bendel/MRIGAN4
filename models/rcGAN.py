@@ -140,7 +140,6 @@ class rcGAN(pl.LightningModule):
         return 0.001 * torch.mean(real_pred ** 2)
 
     def training_step(self, batch, batch_idx, optimizer_idx):
-        exit()
         y, x, mask, max_val, _, _, _ = batch
 
         # train generator
@@ -216,21 +215,13 @@ class rcGAN(pl.LightningModule):
             single_gen_np = torch.tensor(S.H * single_gen_complex_np).abs().numpy()
 
             if self.global_rank == 0 and batch_idx == 0 and j == 0:
-                fig = plt.figure()
-
-                generate_image(fig, gt_np, gt_np, f'GT', 1, 2, 1, disc_num=False)
-                im, ax = generate_error_map(fig, gt_np, avg_gen_np, f'Error', 2, 2, 1)
-
-                plt.savefig(f'test.png')
-                plt.close()
-
                 plot_avg_np = (avg_gen_np - np.min(avg_gen_np)) / (np.max(avg_gen_np) - np.min(avg_gen_np))
                 plot_gt_np = (gt_np - np.min(gt_np)) / (np.max(gt_np) - np.min(gt_np))
 
                 self.logger.log_image(
                     key=f"epoch_{self.current_epoch}_img",
                     images=[Image.fromarray(np.uint8(plot_gt_np*255), 'L'), Image.fromarray(np.uint8(plot_avg_np*255), 'L'), Image.fromarray(np.uint8(cm.jet(np.abs(plot_gt_np - plot_avg_np))*255))],
-                    caption=["GT", f"Recon: PSNR: {psnr(gt_np, avg_gen_np):.2f}", "Error"]
+                    caption=["GT", f"Recon: PSNR: {psnr(gt_np, avg_gen_np):.2f; SINGLE PSNR: {psnr(gt_np, single_gen_np):.2f}}", "Error"]
                 )
 
             losses['ssim'].append(ssim(gt_np, avg_gen_np))
