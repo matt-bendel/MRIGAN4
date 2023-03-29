@@ -221,7 +221,7 @@ class rcGAN(pl.LightningModule):
                 self.logger.log_image(
                     key=f"epoch_{self.current_epoch}_img",
                     images=[Image.fromarray(np.uint8(plot_gt_np*255), 'L'), Image.fromarray(np.uint8(plot_avg_np*255), 'L'), Image.fromarray(np.uint8(cm.jet(np.abs(plot_gt_np - plot_avg_np))*255))],
-                    caption=["GT", f"Recon: PSNR: {psnr(gt_np, avg_gen_np):.2f}; SINGLE PSNR: {psnr(gt_np, single_gen_np):.2f}}", "Error"]
+                    caption=["GT", f"Recon: PSNR: {psnr(gt_np, avg_gen_np):.2f}; SINGLE PSNR: {psnr(gt_np, single_gen_np):.2f}", "Error"]
                 )
 
             losses['ssim'].append(ssim(gt_np, avg_gen_np))
