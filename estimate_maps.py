@@ -21,7 +21,11 @@ if __name__ == '__main__':
     args = create_arg_parser().parse_args()
     seed_everything(1, workers=True)
 
-    dm = MRIDataModule(args)
+    with open('configs/mri/config.yml', 'r') as f:
+        cfg = yaml.load(f, Loader=yaml.FullLoader)
+        cfg = json.loads(json.dumps(cfg), object_hook=load_object)
+
+    dm = MRIDataModule(cfg, 1)
     dm.setup()
     val_loader = dm.val_dataloader()
 

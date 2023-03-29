@@ -207,11 +207,11 @@ class MulticoilDataset(torch.utils.data.Dataset):
         maps = 0
 
         if self.val:
-            with open(f'/storage/fastMRI_brain/sense_maps/val/{fname.name}_{dataslice}.pkl', 'rb') as inp:
+            with open(f'/storage/fastMRI_brain/sense_maps/val_full_res/{fname.name}_{dataslice}.pkl', 'rb') as inp:
                 maps = pickle.load(inp)
 
         if self.test:
-            with open(f'/storage/fastMRI_brain/sense_maps/test/{fname.name}_{dataslice}.pkl', 'rb') as inp:
+            with open(f'/storage/fastMRI_brain/sense_maps/test_full_res/{fname.name}_{dataslice}.pkl', 'rb') as inp:
                 maps = pickle.load(inp)
             
                 
