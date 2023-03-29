@@ -14,7 +14,7 @@ from torch.nn import functional as F
 from data import transforms
 from utils.fftc import ifft2c_new, fft2c_new
 from utils.math import complex_abs, tensor_to_complex_np
-from models.architectures.our_gen_unet_only import GeneratorModel
+from models.architectures.our_gen_unet_only import UNetModel
 from models.architectures.patch_disc import PatchDisc
 
 from evaluation_scripts.metrics import psnr, ssim
@@ -31,9 +31,12 @@ class rcGAN(pl.LightningModule):
         self.exp_name = exp_name
         self.noise_type = noise_type
 
-        self.generator = GeneratorModel(
-            in_chans=args.in_chans + 2,
-            out_chans=args.out_chans,
+        self.in_chans = args.in_chans + self.num_realizations * 2
+        self.out_chans = args.out_chans
+
+        self.generator = UNetModel(
+            in_chans=self.in_chans,
+            out_chans=self.out_chans,
         )
 
         self.discriminator = PatchDisc(
