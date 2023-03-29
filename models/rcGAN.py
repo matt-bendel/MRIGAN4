@@ -141,7 +141,7 @@ class rcGAN(pl.LightningModule):
 
     def training_step(self, batch, batch_idx, optimizer_idx):
         exit()
-        y, x, mask, max_val, _ = batch
+        y, x, mask, max_val, _, _, _ = batch
 
         # train generator
         if optimizer_idx == 0:
@@ -183,7 +183,7 @@ class rcGAN(pl.LightningModule):
             'ssim': []
         }
 
-        y, x, mask, max_val, maps = batch
+        y, x, mask, max_val, maps, _, _ = batch
 
         if external_test:
             num_code = self.args.num_z_test
