@@ -46,20 +46,8 @@ class rcGAN(pl.LightningModule):
         self.save_hyperparameters()  # Save passed values
 
     def get_noise(self, num_vectors, mask):
-        # z = torch.randn(num_vectors, 2, self.resolution, self.resolution, device=self.device)
-        # point_spread = ifft2c_new(mask[:, 0, :, :, :]).permute(0, 3, 1, 2)
         z = torch.randn(num_vectors, self.resolution, self.resolution, 2, device=self.device)
-        noise_fft = fft2c_new(z)
-        measured_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
-        # z_vals = []
-        # measured_vals = []
-        # for i in range(4):
-        #     z = torch.randn(num_vectors, self.resolution, self.resolution, 2, device=self.device)
-        #     noise_fft = fft2c_new(z)
-        #     measured_noise = ifft2c_new(mask[:, 0, :, :, :] * noise_fft).permute(0, 3, 1, 2)
-        #     z_vals.append(z.permute(0, 3, 1, 2))
-        #     measured_vals.append(measured_noise)
-        return [measured_noise]
+        return z
 
     def reformat(self, samples):
         reformatted_tensor = torch.zeros(size=(samples.size(0), 8, self.resolution, self.resolution, 2),
@@ -110,11 +98,8 @@ class rcGAN(pl.LightningModule):
 
     def forward(self, y, mask):
         num_vectors = y.size(0)
-        if self.num_realizations > 0:
-            noise = self.get_noise(num_vectors, mask)
-            samples = self.generator(torch.cat([y, torch.cat(noise, dim=1)], dim=1))
-        else:
-            samples = self.generator(y)
+        noise = self.get_noise(num_vectors, mask)
+        samples = self.generator(torch.cat([y, noise], dim=1))
         samples = self.readd_measures(samples, y, mask)
         return samples
 
@@ -150,7 +135,7 @@ class rcGAN(pl.LightningModule):
         return 0.001 * torch.mean(real_pred ** 2)
 
     def training_step(self, batch, batch_idx, optimizer_idx):
-        y, x, _, mean, std, mask, _ = batch
+        y, x, mask, max_val, _ = batch
 
         # train generator
         if optimizer_idx == 0:
@@ -192,7 +177,7 @@ class rcGAN(pl.LightningModule):
             'ssim': []
         }
 
-        y, x, y_true, mean, std, mask, maps = batch
+        y, x, mask, max_val, maps = batch
 
         gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size),
                            device=self.device)
@@ -206,8 +191,8 @@ class rcGAN(pl.LightningModule):
 
         for j in range(y.size(0)):
             S = sp.linop.Multiply((self.args.im_size, self.args.im_size), maps[j].cpu().numpy())
-            gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
-                (avg_gen[j] * std[j] + mean[j]).cpu())
+            gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * max_val[j]).cpu()), tensor_to_complex_np(
+                (avg_gen[j] * max_val[j]).cpu())
 
             avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
             gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
@@ -216,61 +201,12 @@ class rcGAN(pl.LightningModule):
             single_gen[:, :, :, 0] = gens[j, 0, 0:8, :, :]
             single_gen[:, :, :, 1] = gens[j, 0, 8:16, :, :]
 
-            single_gen_complex_np = tensor_to_complex_np((single_gen * std[j] + mean[j]).cpu())
+            single_gen_complex_np = tensor_to_complex_np((single_gen * max_val[j]).cpu())
             single_gen_np = torch.tensor(S.H * single_gen_complex_np).abs().numpy()
 
             losses['ssim'].append(ssim(gt_np, avg_gen_np))
             losses['psnr'].append(psnr(gt_np, avg_gen_np))
             losses['single_psnr'].append(psnr(gt_np, single_gen_np))
-            #
-            # ind = 1
-            #
-            # if batch_idx == 0 and j == ind and self.global_rank == 0:
-            #     output = transforms.root_sum_of_squares(
-            #         complex_abs(avg_gen[ind] * std[ind] + mean[ind])).cpu().numpy()
-            #     target = transforms.root_sum_of_squares(
-            #         complex_abs(gt[ind] * std[ind] + mean[ind])).cpu().numpy()
-            #
-            #     gen_im_list = []
-            #     for z in range(8):
-            #         val_rss = torch.zeros(8, self.args.im_size, self.args.im_size, 2, device=self.device)
-            #         val_rss[:, :, :, 0] = gens[ind, z, 0:8, :, :]
-            #         val_rss[:, :, :, 1] = gens[ind, z, 8:16, :, :]
-            #         gen_im_list.append(transforms.root_sum_of_squares(
-            #             complex_abs(val_rss * std[ind] + mean[ind])).cpu().numpy())
-            #
-            #     std_dev = np.zeros(output.shape)
-            #     for val in gen_im_list:
-            #         std_dev = std_dev + np.power((val - output), 2)
-            #
-            #     std_dev = std_dev / 8
-            #     std_dev = np.sqrt(std_dev)
-            #
-            #     place = 1
-            #     for r, val in enumerate(gen_im_list):
-            #         gif_im(target, val, place, 'image')
-            #         place += 1
-            #
-            #     generate_gif('image')
-            #
-            #     fig = plt.figure()
-            #     ax = fig.add_subplot(1, 1, 1)
-            #     im = ax.imshow(std_dev, cmap='viridis')
-            #     ax.set_xticks([])
-            #     ax.set_yticks([])
-            #     fig.subplots_adjust(right=0.85)  # Make room for colorbar
-            #
-            #     # Get position of final error map axis
-            #     [[x10, y10], [x11, y11]] = ax.get_position().get_points()
-            #
-            #     pad = 0.01
-            #     width = 0.02
-            #     cbar_ax = fig.add_axes([x11 + pad, y10, width, y11 - y10])
-            #
-            #     fig.colorbar(im, cax=cbar_ax)
-            #
-            #     plt.savefig(f'std_dev_gen.png')
-            #     plt.close()
 
         losses['psnr'] = np.mean(losses['psnr'])
         losses['ssim'] = np.mean(losses['ssim'])

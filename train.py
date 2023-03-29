@@ -8,6 +8,7 @@ import pytorch_lightning as pl
 
 from pytorch_lightning.callbacks import ModelCheckpoint
 from data_loaders.MRIDataModule import MRIDataModule
+from datasets.fastmri_multicoil_general import FastMRIDataModule
 from data_loaders.CelebAHQDataModule import CelebAHQDataModule
 from data_loaders.BSD400DataModule import BSD400DataModule
 from utils.parse_args import create_arg_parser
@@ -46,7 +47,9 @@ if __name__ == '__main__':
             save_top_k=1
         )
 
-        dm = MRIDataModule(cfg, args.mask_type)
+        # dm = MRIDataModule(cfg, args.mask_type)
+        dm = FastMRIDataModule(cfg.data_path)
+
         if args.rcgan:
             noise_structure = {"AWGN": args.awgn, "structure": args.noise_structure}
             model = rcGAN(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure)
