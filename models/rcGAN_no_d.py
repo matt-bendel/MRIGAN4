@@ -158,6 +158,13 @@ class rcGAN(pl.LightningModule):
             single_gen_complex_np = tensor_to_complex_np((single_gen * std[j] + mean[j]).cpu())
             single_gen_np = torch.tensor(S.H * single_gen_complex_np).abs().numpy()
 
+            if self.global_rank == 0 and batch_idx == 0 and j == 0:
+                self.logger.log_image(
+                    key=f"epoch_{self.current_epoch}_img",
+                    images=[np.expand_dims(avg_gen_np, axis=2), np.expand_dims(np.abs(avg_gen_np - single_gen_np), axis=2)],
+                    labels=[f"Recon: PSNR: {psnr(gt_np, avg_gen_np):.2f}", "Error"]
+                )
+
             losses['ssim'].append(ssim(gt_np, avg_gen_np))
             losses['psnr'].append(psnr(gt_np, avg_gen_np))
             losses['single_psnr'].append(psnr(gt_np, single_gen_np))
@@ -210,6 +217,7 @@ class rcGAN(pl.LightningModule):
         self.std_mult += mu_0 * psnr_diff
 
         self.log('val_psnr', avg_psnr, sync_dist=True)
+        self.log('val_psnr_diff', psnr_diff, sync_dist=True)
 
         if np.abs(psnr_diff) <= 0.25:
             self.is_good_model = 1

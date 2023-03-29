@@ -393,7 +393,7 @@ if __name__ == '__main__':
 
 
     kwargs = {'center_frac': 0.0807,
-              'accel_rate': 4,
+              'accel_rate': 8,
               'img_size': 384,
               'complex': True,
               'challenge': 'multicoil',

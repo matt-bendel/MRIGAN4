@@ -16,6 +16,7 @@ from models.rcGAN import rcGAN
 from models.mri_unet import MRIUnet
 from models.CoModGAN import InpaintUNet
 from pytorch_lightning import seed_everything
+from pytorch_lightning.loggers import WandbLogger
 
 # TODO: REFACTOR UNET INTO BASE PL MODULE
 def load_object(dct):
@@ -90,6 +91,12 @@ if __name__ == '__main__':
         print("No valid application selected. Please include one of the following args: --mri, --inpaint, --cs.")
         exit()
 
+    wandb_logger = WandbLogger(
+        project="neurips",
+        name=args.exp_name,
+        log_mode="all"
+        save_dir=cfg.checkpoint_dir + args.exp_name + '/wandb_logs'
+    )
     checkpoint_callback_epoch = ModelCheckpoint(
         monitor='epoch',
         mode='max',
@@ -100,7 +107,7 @@ if __name__ == '__main__':
 
     trainer = pl.Trainer(accelerator="gpu", devices=args.num_gpus, strategy='ddp',
                          max_epochs=cfg.num_epochs, callbacks=[checkpoint_callback_epoch],
-                         num_sanity_val_steps=2, profiler="simple")
+                         num_sanity_val_steps=2, profiler="simple", logger=wandb_logger)
 
     if args.resume:
         trainer.fit(model, dm,
