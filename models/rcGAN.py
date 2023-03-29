@@ -224,6 +224,8 @@ class rcGAN(pl.LightningModule):
                     caption=["GT", f"Recon: PSNR: {psnr(gt_np, avg_gen_np):.2f}; SINGLE PSNR: {psnr(gt_np, single_gen_np):.2f}", "Error"]
                 )
 
+            self.trainer.strategy.barrier()
+
             losses['ssim'].append(ssim(gt_np, avg_gen_np))
             losses['psnr'].append(psnr(gt_np, avg_gen_np))
             losses['single_psnr'].append(psnr(gt_np, single_gen_np))
