@@ -16,7 +16,7 @@ from utils.fftc import ifft2c_new, fft2c_new
 from utils.math import complex_abs, tensor_to_complex_np
 from models.architectures.our_gen_unet_only import UNetModel
 from models.architectures.patch_disc import PatchDisc
-
+from evaluation_scripts.plotting_scripts import generate_image, generate_error_map
 from evaluation_scripts.metrics import psnr, ssim
 from evaluation_scripts.plotting_scripts import gif_im, generate_gif
 from mail import send_mail
@@ -214,6 +214,14 @@ class rcGAN(pl.LightningModule):
             single_gen_np = torch.tensor(S.H * single_gen_complex_np).abs().numpy()
 
             if self.global_rank == 0 and batch_idx == 0 and j == 0:
+                fig = plt.figure()
+
+                generate_image(fig, gt_np, avg_gen_np, f'z {index}', 1, 2, 1, disc_num=False)
+                im, ax = generate_error_map(fig, true, gen_im, f'z {index}', 2, 2, 1)
+
+                plt.savefig(f'test.png')
+                plt.close()
+
                 self.logger.log_image(
                     key=f"epoch_{self.current_epoch}_img",
                     images=[np.expand_dims(gt_np, axis=2), np.expand_dims(avg_gen_np, axis=2), np.expand_dims(np.abs(avg_gen_np - single_gen_np), axis=2)],
