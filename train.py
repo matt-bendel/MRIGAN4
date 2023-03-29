@@ -48,7 +48,7 @@ if __name__ == '__main__':
         )
 
         # dm = MRIDataModule(cfg, args.mask_type)
-        dm = FastMRIDataModule(cfg.data_path)
+        dm = FastMRIDataModule(base_path=cfg.data_path, batch_size=cfg.batch_size)
 
         if args.rcgan:
             noise_structure = {"AWGN": args.awgn, "structure": args.noise_structure}
