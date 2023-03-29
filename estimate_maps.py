@@ -38,9 +38,10 @@ if __name__ == '__main__':
 
     for i, data in enumerate(val_loader):
         y, x, mask, max_val, maps, fname, slice = data
+        print(y.shape)
 
         for j in range(y.size(0)):
-            new_y_true = fft2c_new(ifft2c_new(y_true[j]) * max_val[j])
+            new_y_true = fft2c_new(ifft2c_new(y[j]) * max_val[j])
             maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=16,
                                        device=sp.Device(0), crop=0.70,
                                        kernel_width=6).run().get()
