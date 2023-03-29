@@ -111,11 +111,11 @@ class rcGAN(pl.LightningModule):
 
     def adversarial_loss_generator(self, y, gens):
         patch_out = 94
-        fake_pred = torch.zeros(size=(y.shape[0], self.args.num_z, patch_out, patch_out), device=self.device)
+        fake_pred = torch.zeros(size=(y.shape[0], self.args.num_z_train, patch_out, patch_out), device=self.device)
         for k in range(y.shape[0]):
             cond = torch.zeros(1, gens.shape[2], gens.shape[3], gens.shape[4], device=self.device)
             cond[0, :, :, :] = y[k, :, :, :]
-            cond = cond.repeat(self.args.num_z, 1, 1, 1)
+            cond = cond.repeat(self.args.num_z_train, 1, 1, 1)
             temp = self.discriminator(input=gens[k], y=cond)
             fake_pred[k, :, :, :] = temp[:, 0, :, :]
 
@@ -127,7 +127,7 @@ class rcGAN(pl.LightningModule):
 
     def l1_std_p(self, avg_recon, gens, x):
         return F.l1_loss(avg_recon, x) - self.std_mult * np.sqrt(
-            2 / (np.pi * self.args.num_z * (self.args.num_z + 1))) * torch.std(gens, dim=1).mean()
+            2 / (np.pi * self.args.num_z_train * (self.args.num_z_train+ 1))) * torch.std(gens, dim=1).mean()
 
     def gradient_penalty(self, x_hat, x, y):
         gradient_penalty = self.compute_gradient_penalty(x.data, x_hat.data, y.data)
