@@ -4,6 +4,7 @@ import random
 import pickle
 import yaml
 import json
+import types
 
 import numpy as np
 import pytorch_lightning as pl
@@ -18,6 +19,9 @@ import sigpy as sp
 import sigpy.mri as mr
 from utils.fftc import ifft2c_new, fft2c_new
 from utils.math import complex_abs, tensor_to_complex_np
+
+def load_object(dct):
+    return types.SimpleNamespace(**dct)
 
 if __name__ == '__main__':
     torch.set_float32_matmul_precision('medium')
