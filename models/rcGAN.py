@@ -216,8 +216,8 @@ class rcGAN(pl.LightningModule):
             if self.global_rank == 0 and batch_idx == 0 and j == 0:
                 self.logger.log_image(
                     key=f"epoch_{self.current_epoch}_img",
-                    images=[np.expand_dims(avg_gen_np, axis=2), np.expand_dims(np.abs(avg_gen_np - single_gen_np), axis=2)],
-                    caption=[f"Recon: PSNR: {psnr(gt_np, avg_gen_np):.2f}", "Error"]
+                    images=[np.expand_dims(gt_np, axis=2), np.expand_dims(avg_gen_np, axis=2), np.expand_dims(np.abs(avg_gen_np - single_gen_np), axis=2)],
+                    caption=["GT", f"Recon: PSNR: {psnr(gt_np, avg_gen_np):.2f}", "Error"]
                 )
 
             losses['ssim'].append(ssim(gt_np, avg_gen_np))
