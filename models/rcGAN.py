@@ -9,7 +9,9 @@ import torch.autograd as autograd
 import matplotlib.pyplot as plt
 import sigpy as sp
 import sigpy.mri as mr
+from matplotlib import cm
 
+from PIL import Image
 from torch.nn import functional as F
 from data import transforms
 from utils.fftc import ifft2c_new, fft2c_new
@@ -222,9 +224,12 @@ class rcGAN(pl.LightningModule):
                 plt.savefig(f'test.png')
                 plt.close()
 
+                plot_avg_np = (avg_gen_np - np.min(avg_gen_np)) / (np.max(avg_gen_np) - np.min(avg_gen_np))
+                plot_gt_np = (gt_np - np.min(gt_np)) / (np.max(gt_np) - np.min(gt_np))
+
                 self.logger.log_image(
                     key=f"epoch_{self.current_epoch}_img",
-                    images=[np.expand_dims(gt_np, axis=2), np.expand_dims(avg_gen_np, axis=2), np.expand_dims(np.abs(avg_gen_np - single_gen_np), axis=2)],
+                    images=[Image.fromarray(np.uint8(plot_gt_np*255), 'L), Image.fromarray(np.uint8(plot_avg_np*255), 'L'), Image.fromarray(np.uint8(cm.jet(np.abs(plot_gt_np - plot_avg_np))*255))],
                     caption=["GT", f"Recon: PSNR: {psnr(gt_np, avg_gen_np):.2f}", "Error"]
                 )
 
