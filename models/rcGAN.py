@@ -138,6 +138,7 @@ class rcGAN(pl.LightningModule):
         return 0.001 * torch.mean(real_pred ** 2)
 
     def training_step(self, batch, batch_idx, optimizer_idx):
+        exit()
         y, x, mask, max_val, _ = batch
 
         # train generator
@@ -181,8 +182,6 @@ class rcGAN(pl.LightningModule):
         }
 
         y, x, mask, max_val, maps = batch
-        print(mask[0, 0, 0, :, 0].sum().cpu().numpy())
-        exit()
 
         if external_test:
             num_code = self.args.num_z_test
@@ -257,7 +256,7 @@ class rcGAN(pl.LightningModule):
 
         if self.global_rank == 0 and self.current_epoch % 2 == 0:
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE",
-                      f"Metrics:\nPSNR: {avg_psnr:.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}",
+                      f"Metrics:\nPSNR: {avg_psnr:.2f}\nSINGLE PSNR: {avg_single_psnr:.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}",
                       file_name="variation_gif.gif")
 
     def configure_optimizers(self):
