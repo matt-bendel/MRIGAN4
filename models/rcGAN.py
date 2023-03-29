@@ -140,9 +140,6 @@ class rcGAN(pl.LightningModule):
     def training_step(self, batch, batch_idx, optimizer_idx):
         y, x, mask, max_val, _ = batch
 
-        print(mask[0, 0, 0, :, 0].sum().cpu().numpy())
-        exit()
-
         # train generator
         if optimizer_idx == 0:
             gens = torch.zeros(
@@ -184,6 +181,8 @@ class rcGAN(pl.LightningModule):
         }
 
         y, x, mask, max_val, maps = batch
+        print(mask[0, 0, 0, :, 0].sum().cpu().numpy())
+        exit()
 
         if external_test:
             num_code = self.args.num_z_test
