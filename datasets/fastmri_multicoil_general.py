@@ -230,7 +230,7 @@ class MulticoilDataset(torch.utils.data.Dataset):
 
     
 class FastMRIDataModule(pl.LightningDataModule):
-    def __init__(self, base_path, batch_size:int = 32, num_data_loader_workers:int = 4, annotated=False,**kwargs):
+    def __init__(self, base_path, batch_size:int = 32, num_data_loader_workers:int = 0, annotated=False,**kwargs):
         """
         Initialize the data module for the LoDoPaB-CT dataset.
 
@@ -349,7 +349,7 @@ class FastMRIDataModule(pl.LightningDataModule):
         """
         return DataLoader(self.train, batch_size=self.batch_size,
                           num_workers=self.num_data_loader_workers,
-                          shuffle=True, pin_memory=True)
+                          shuffle=True, pin_memory=False)
 
     def val_dataloader(self):
         """
@@ -363,7 +363,7 @@ class FastMRIDataModule(pl.LightningDataModule):
         """
         return DataLoader(self.val, batch_size=self.batch_size,
                           num_workers=self.num_data_loader_workers,
-                          shuffle=False, pin_memory=True)
+                          shuffle=False, pin_memory=False)
     
     def test_dataloader(self):
         """
@@ -377,7 +377,7 @@ class FastMRIDataModule(pl.LightningDataModule):
         """
         return DataLoader(self.test, batch_size=self.batch_size,
                           num_workers=self.num_data_loader_workers,
-                          shuffle=False, pin_memory=True)
+                          shuffle=False, pin_memory=False)
 
 
     
