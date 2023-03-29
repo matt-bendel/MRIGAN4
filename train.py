@@ -94,7 +94,7 @@ if __name__ == '__main__':
     wandb_logger = WandbLogger(
         project="neurips",
         name=args.exp_name,
-        log_mode="all",
+        log_model="all",
         save_dir=cfg.checkpoint_dir + args.exp_name + '/wandb_logs'
     )
     checkpoint_callback_epoch = ModelCheckpoint(
