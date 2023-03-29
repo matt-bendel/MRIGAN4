@@ -99,7 +99,7 @@ if __name__ == '__main__':
     )
 
     trainer = pl.Trainer(accelerator="gpu", devices=args.num_gpus, strategy='ddp',
-                         max_epochs=cfg.num_epochs, callbacks=[checkpoint_callback, checkpoint_callback_epoch],
+                         max_epochs=cfg.num_epochs, callbacks=[checkpoint_callback_epoch],
                          num_sanity_val_steps=0, profiler="simple")
 
     if args.resume:
