@@ -155,7 +155,7 @@ class rcGAN(pl.LightningModule):
             g_loss = self.adversarial_loss_generator(y, gens)
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
-            self.log('g_loss', g_loss, prog_bar=True)
+            self.log('g_loss', g_loss)
             print("GEN DONE")
 
             return g_loss
@@ -172,7 +172,7 @@ class rcGAN(pl.LightningModule):
             d_loss += self.gradient_penalty(x_hat, x, y)
             d_loss += self.drift_penalty(real_pred)
 
-            self.log('d_loss', d_loss, prog_bar=True)
+            self.log('d_loss', d_loss)
             print("DISC DONE")
 
             return d_loss
