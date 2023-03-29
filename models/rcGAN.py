@@ -216,7 +216,7 @@ class rcGAN(pl.LightningModule):
             if self.global_rank == 0 and batch_idx == 0 and j == 0:
                 fig = plt.figure()
 
-                generate_image(fig, gt_np, avg_gen_np, f'Test', 1, 2, 1, disc_num=False)
+                generate_image(fig, gt_np, gt_np, f'GT', 1, 2, 1, disc_num=False)
                 im, ax = generate_error_map(fig, gt_np, avg_gen_np, f'Error', 2, 2, 1)
 
                 plt.savefig(f'test.png')
