@@ -49,7 +49,7 @@ class rcGAN(pl.LightningModule):
         self.save_hyperparameters()  # Save passed values
 
     def get_noise(self, num_vectors, mask):
-        z = torch.randn(num_vectors, self.resolution, self.resolution, 2, device=self.device)
+        z = torch.randn(num_vectors, 2, self.resolution, self.resolution, device=self.device)
         return z
 
     def reformat(self, samples):
