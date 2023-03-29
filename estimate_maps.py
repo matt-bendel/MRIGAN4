@@ -9,6 +9,7 @@ import pytorch_lightning as pl
 
 from pytorch_lightning.callbacks import ModelCheckpoint
 from data_loaders.MRIDataModule import MRIDataModule
+from datasets.fastmri_multicoil_general import FastMRIDataModule
 from utils.parse_args import create_arg_parser
 from models.rcGAN import rcGAN
 from pytorch_lightning import seed_everything
