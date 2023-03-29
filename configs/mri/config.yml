@@ -19,7 +19,8 @@ R: 8
 lr: 0.001
 beta_1: 0
 beta_2: 0.99
+gp_weight: 10
 
 var_weight: 0.012
-batch_size: 4
+batch_size: 5
 num_epochs: 100
