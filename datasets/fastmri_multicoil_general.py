@@ -230,7 +230,7 @@ class MulticoilDataset(torch.utils.data.Dataset):
 
     
 class FastMRIDataModule(pl.LightningDataModule):
-    def __init__(self, base_path, batch_size:int = 32, num_data_loader_workers:int = 10, annotated=False,**kwargs):
+    def __init__(self, base_path, batch_size:int = 32, num_data_loader_workers:int = 5, annotated=False,**kwargs):
         """
         Initialize the data module for the LoDoPaB-CT dataset.
 
