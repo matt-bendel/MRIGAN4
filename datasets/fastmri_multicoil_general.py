@@ -101,7 +101,7 @@ class MulticoilTransform:
 
 
 class MulticoilDataset(torch.utils.data.Dataset):
-    def __init__(self, root, max_val_dir, img_size=320, mask_type = 's4', accel_rate = 4, scan_type = None, num_vcoils = 8, slice_range=None, val=False, test=False  **kwargs):
+    def __init__(self, root, max_val_dir, img_size=320, mask_type = 's4', accel_rate = 4, scan_type = None, num_vcoils = 8, slice_range=None, val=False, test=False):
         ''' 
         scan_type: None, 'CORPD_FBK', 'CORPDFS_FBK' for knee
         scan_type: None, 'AXT2'
