@@ -214,7 +214,7 @@ class rcGAN(pl.LightningModule):
             single_gen_complex_np = tensor_to_complex_np((single_gen * max_val[j]).cpu())
             single_gen_np = torch.tensor(S.H * single_gen_complex_np).abs().numpy()
 
-            if self.global_rank == 0 and batch_idx == 0 and j == 0:
+            if self.global_rank == 0 and batch_idx == 0 and j == 0 and self.current_epoch % 5 == 0:
                 plot_avg_np = (avg_gen_np - np.min(avg_gen_np)) / (np.max(avg_gen_np) - np.min(avg_gen_np))
                 plot_gt_np = (gt_np - np.min(gt_np)) / (np.max(gt_np) - np.min(gt_np))
 

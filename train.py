@@ -70,7 +70,7 @@ if __name__ == '__main__':
         )
 
         dm = CelebAHQDataModule(cfg, args.mask_type)
-        model = InpaintUNet(cfg, args.num_noise, args.default_model_descriptor, args.exp_name)
+        model = InpaintUNet(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, args.num_gpus)
     elif args.cs:
         with open('configs/cs/config.yml', 'r') as f:
             cfg = yaml.load(f, Loader=yaml.FullLoader)
