@@ -256,6 +256,12 @@ class rcGAN(pl.LightningModule):
             ssims.append(out['ssim'])
             single_psnrs.append(out['single_psnr'])
 
+        psnrs = self.all_gather(psnrs)
+        single_psnrs = self.all_gather(single_psnrs)
+        ssims = self.all_gather(ssims)
+
+        self.trainer.strategy.barrier()
+
         avg_psnr = np.mean(psnrs)
         avg_single_psnr = np.mean(single_psnrs)
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
@@ -272,6 +278,8 @@ class rcGAN(pl.LightningModule):
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE",
                       f"Std. Dev. Weight: {self.std_mult:.4f}\nMetrics:\nPSNR: {avg_psnr:.2f}\nSINGLE PSNR: {avg_single_psnr:.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}",
                       file_name="variation_gif.gif")
+
+        self.trainer.strategy.barrier()
 
     def configure_optimizers(self):
         opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.args.lr * self.num_gpus,
