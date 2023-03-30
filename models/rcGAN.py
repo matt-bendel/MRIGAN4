@@ -257,9 +257,13 @@ class rcGAN(pl.LightningModule):
             ssims.append(out['ssim'])
             single_psnrs.append(out['single_psnr'])
 
+        print(f"{self.global_rank}: {np.mean(psnrs)}")
+
         psnrs = self.all_gather(psnrs)
         single_psnrs = self.all_gather(single_psnrs)
         ssims = self.all_gather(ssims)
+
+        print(f"{self.global_rank}: {np.mean(psnrs)}")
 
         self.trainer.strategy.barrier()
 
