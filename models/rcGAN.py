@@ -257,8 +257,6 @@ class rcGAN(pl.LightningModule):
             ssims.append(out['ssim'])
             single_psnrs.append(out['single_psnr'])
 
-        print(f"{self.global_rank}: {np.mean(psnrs)}")
-
         psnrs = self.all_gather(psnrs)
         single_psnrs = self.all_gather(single_psnrs)
         ssims = self.all_gather(ssims)
@@ -267,10 +265,8 @@ class rcGAN(pl.LightningModule):
         single_psnrs = [single_psnr_val.cpu().numpy() for single_psnr_val in single_psnrs]
         ssims = [ssim_val.cpu().numpy() for ssim_val in ssims]
 
-        print(f"{self.global_rank}: {np.mean(psnrs)}")
-
-        avg_psnr = psnrs
-        avg_single_psnr = single_psnrs
+        avg_psnr = np.mean(psnrs)
+        avg_single_psnr = np.mean(single_psnrs)
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
 
         mu_0 = 2e-2
