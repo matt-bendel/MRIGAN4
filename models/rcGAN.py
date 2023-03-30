@@ -141,7 +141,6 @@ class rcGAN(pl.LightningModule):
         return 0.001 * torch.mean(real_pred ** 2)
 
     def training_step(self, batch, batch_idx, optimizer_idx):
-        exit()
         y, x, mask, max_val, _, _, _ = batch
 
         # train generator
