@@ -32,7 +32,7 @@ class rcGAN(pl.LightningModule):
         self.default_model_descriptor = default_model_descriptor
         self.exp_name = exp_name
         self.noise_type = noise_type
-        self.num_gpus
+        self.num_gpus = num_gpus
 
         self.in_chans = args.in_chans + self.num_realizations * 2
         self.out_chans = args.out_chans
@@ -274,9 +274,9 @@ class rcGAN(pl.LightningModule):
                       file_name="variation_gif.gif")
 
     def configure_optimizers(self):
-        opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.args.lr,
+        opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.args.lr * self.num_gpus,
                                  betas=(self.args.beta_1, self.args.beta_2))
-        opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.args.lr,
+        opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.args.lr * self.num_gpus,
                                  betas=(self.args.beta_1, self.args.beta_2))
         return [opt_g, opt_d], []
 
