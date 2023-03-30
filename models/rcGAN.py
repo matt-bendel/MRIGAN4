@@ -259,9 +259,9 @@ class rcGAN(pl.LightningModule):
 
         print(f"{self.global_rank}: {np.mean(psnrs)}")
 
-        psnrs = self.all_gather(psnrs)
-        single_psnrs = self.all_gather(single_psnrs)
-        ssims = self.all_gather(ssims)
+        psnrs = self.all_gather(psnrs).cpu().numpy()
+        single_psnrs = self.all_gather(single_psnrs).cpu().numpy()
+        ssims = self.all_gather(ssims).cpu().numpy()
 
         print(f"{self.global_rank}: {np.mean(psnrs)}")
 
