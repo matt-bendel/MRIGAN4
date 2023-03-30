@@ -113,13 +113,9 @@ if __name__ == "__main__":
                     np_samp = tensor_to_complex_np((gens[j, z, :, :, :, :] * max_val[j]).cpu())
                     single_samps[z, :, :] = torch.tensor(S.H * np_samp).abs().numpy()
 
-                batch_apsds.append(np.mean(np.std(single_samps, axis=0), axis=(0, 1)))
-                batch_psnrs.append(psnr(gt_np, avg_gen_np))
-                batchs_ssims.append(ssim(gt_np, avg_gen_np))
-
-            psnrs.append(np.mean(batch_psnrs))
-            ssims.append(np.mean(batchs_ssims))
-            apsds.append(np.mean(batch_apsds))
+                apsds.append(np.mean(np.std(single_samps, axis=0), axis=(0, 1)))
+                psnrs.append(psnr(gt_np, avg_gen_np))
+                ssims.append(ssim(gt_np, avg_gen_np))
 
     inception_embedding = VGG16Embedding()
 

@@ -18,7 +18,9 @@ from models.CoModGAN import InpaintUNet
 from pytorch_lightning import seed_everything
 from pytorch_lightning.loggers import WandbLogger
 
-# TODO: REFACTOR UNET INTO BASE PL MODULE
+# TODO: REFACTOR GAN PL MODULES:
+# TODO: SETUP BASE GAN
+# TODO: SUBSEQUENT METHODS SHOULD INHERIT FROM BASEGAN
 def load_object(dct):
     return types.SimpleNamespace(**dct)
 
@@ -53,7 +55,7 @@ if __name__ == '__main__':
 
         if args.rcgan:
             noise_structure = {"AWGN": args.awgn, "structure": args.noise_structure}
-            model = rcGAN(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure)
+            model = rcGAN(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure, args.num_gpus)
         else:
             model = MRIUnet(cfg, args.num_noise, args.default_model_descriptor, args.exp_name)
     elif args.inpaint:
@@ -70,7 +72,7 @@ if __name__ == '__main__':
         )
 
         dm = CelebAHQDataModule(cfg, args.mask_type)
-        model = InpaintUNet(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, args.num_gpus)
+        model = InpaintUNet(cfg, args.num_noise, args.default_model_descriptor, args.exp_name)
     elif args.cs:
         with open('configs/cs/config.yml', 'r') as f:
             cfg = yaml.load(f, Loader=yaml.FullLoader)

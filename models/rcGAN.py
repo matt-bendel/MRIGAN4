@@ -25,13 +25,14 @@ from mail import send_mail
 
 
 class rcGAN(pl.LightningModule):
-    def __init__(self, args, num_realizations, default_model_descriptor, exp_name, noise_type):
+    def __init__(self, args, num_realizations, default_model_descriptor, exp_name, noise_type, num_gpus):
         super().__init__()
         self.args = args
         self.num_realizations = num_realizations
         self.default_model_descriptor = default_model_descriptor
         self.exp_name = exp_name
         self.noise_type = noise_type
+        self.num_gpus
 
         self.in_chans = args.in_chans + self.num_realizations * 2
         self.out_chans = args.out_chans
