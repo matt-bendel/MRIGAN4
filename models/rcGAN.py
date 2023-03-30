@@ -259,16 +259,14 @@ class rcGAN(pl.LightningModule):
 
         print(f"{self.global_rank}: {np.mean(psnrs)}")
 
-        psnrs = self.all_gather(psnrs).cpu().numpy()
-        single_psnrs = self.all_gather(single_psnrs).cpu().numpy()
-        ssims = self.all_gather(ssims).cpu().numpy()
+        psnrs = torch.mean(self.all_gather(psnrs)).cpu().numpy()
+        single_psnrs = torch.mean(self.all_gather(single_psnrs)).cpu().numpy()
+        ssims = torch.mean(self.all_gather(ssims)).cpu().numpy()
 
         print(f"{self.global_rank}: {np.mean(psnrs)}")
 
-        self.trainer.strategy.barrier()
-
-        avg_psnr = np.mean(psnrs)
-        avg_single_psnr = np.mean(single_psnrs)
+        avg_psnr = psnrs
+        avg_single_psnr = single_psnrs
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
 
         mu_0 = 2e-2
