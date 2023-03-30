@@ -274,9 +274,9 @@ class rcGAN(pl.LightningModule):
                       file_name="variation_gif.gif")
 
     def configure_optimizers(self):
-        opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.args.lr,
+        opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.args.lr * self.num_gpus,
                                  betas=(self.args.beta_1, self.args.beta_2))
-        opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.args.lr,
+        opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.args.lr * self.num_gpus,
                                  betas=(self.args.beta_1, self.args.beta_2))
         return [opt_g, opt_d], []
 
