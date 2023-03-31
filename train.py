@@ -97,7 +97,7 @@ if __name__ == '__main__':
         project="neurips",
         name=args.exp_name,
         log_model="all",
-        save_dir=cfg.checkpoint_dir + args.exp_name + '/wandb_logs'
+        save_dir=cfg.checkpoint_dir + 'wandb'
     )
     checkpoint_callback_epoch = ModelCheckpoint(
         monitor='epoch',
@@ -109,7 +109,7 @@ if __name__ == '__main__':
 
     trainer = pl.Trainer(accelerator="gpu", devices=args.num_gpus, strategy='ddp',
                          max_epochs=cfg.num_epochs, callbacks=[checkpoint_callback_epoch],
-                         num_sanity_val_steps=0, profiler="simple", benchmark=False)#logger=wandb_logger, benchmark=False)
+                         num_sanity_val_steps=0, profiler="simple", logger=wandb_logger, benchmark=False)
 
     if args.resume:
         trainer.fit(model, dm,
