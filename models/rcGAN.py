@@ -284,9 +284,9 @@ class rcGAN(pl.LightningModule):
         self.trainer.strategy.barrier()
 
     def configure_optimizers(self):
-        opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.args.lr * self.num_gpus,
+        opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.args.lr,
                                  betas=(self.args.beta_1, self.args.beta_2))
-        opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.args.lr * self.num_gpus,
+        opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.args.lr,
                                  betas=(self.args.beta_1, self.args.beta_2))
         return [opt_g, opt_d], []
 
