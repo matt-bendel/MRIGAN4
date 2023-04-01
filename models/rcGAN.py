@@ -201,7 +201,7 @@ class rcGAN(pl.LightningModule):
         avg = torch.mean(gens, dim=1)
 
         avg_gen = self.reformat(avg)
-        gt = self.reformat(x) * std[:, None, None, None] + mean[:, None, None, None] # EXPERIMENTAL UN
+        gt = self.reformat(x * std[:, None, None, None] + mean[:, None, None, None])
 
         mag_avg_list = []
         mag_single_list = []
