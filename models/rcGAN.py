@@ -238,6 +238,7 @@ class rcGAN(pl.LightningModule):
         return losses
 
     def validation_step_end(self, batch_parts):
+        print(batch_parts)
         losses = {
             'psnr': np.mean(batch_parts['psnr']),
             'single_psnr': np.mean(batch_parts['single_psnr']),
@@ -247,6 +248,7 @@ class rcGAN(pl.LightningModule):
         return losses
 
     def validation_epoch_end(self, validation_step_outputs):
+        exit()
         psnrs = []
         single_psnrs = []
         ssims = []
@@ -257,23 +259,12 @@ class rcGAN(pl.LightningModule):
             single_psnrs.append(out['single_psnr'])
 
         psnrs = self.all_gather(psnrs)
-        psnrs_test = psnrs
-        print(psnrs[0].shape)
-        print(psnrs[0])
         single_psnrs = self.all_gather(single_psnrs)
         ssims = self.all_gather(ssims)
 
         psnrs = [psnr_val.cpu().numpy() for psnr_val in psnrs]
-        psnrs_test = [psnr_val.mean().cpu().numpy() for psnr_val in psnrs_test]
         single_psnrs = [single_psnr_val.cpu().numpy() for single_psnr_val in single_psnrs]
         ssims = [ssim_val.cpu().numpy() for ssim_val in ssims]
-
-        print(psnrs)
-        print(psnrs_test)
-        print(np.mean(psnrs))
-        print(np.mean(psnrs_test))
-        exit()
-
 
         avg_psnr = np.mean(psnrs)
         avg_single_psnr = np.mean(single_psnrs)
