@@ -258,6 +258,7 @@ class rcGAN(pl.LightningModule):
 
         psnrs = self.all_gather(psnrs)
         print(psnrs.shape)
+        exit()
         single_psnrs = self.all_gather(single_psnrs)
         ssims = self.all_gather(ssims)
 
