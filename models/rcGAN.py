@@ -258,9 +258,6 @@ class rcGAN(pl.LightningModule):
         # avg_psnr = torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()
         # avg_single_psnr = torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean()
 
-        self.log('psnr_8_epoch', avg_psnr)
-        self.log('psnr_1_epoch', avg_single_psnr)
-
         avg_psnr = avg_psnr.cpu().numpy()
         avg_single_psnr = avg_single_psnr.cpu().numpy()
 
