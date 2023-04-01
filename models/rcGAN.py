@@ -235,17 +235,13 @@ class rcGAN(pl.LightningModule):
         losses['ssim'] = np.mean(losses['ssim'])
         losses['single_psnr'] = np.mean(losses['single_psnr'])
 
-        print(losses)
-
         return losses
 
     def validation_step_end(self, batch_parts):
-        print(batch_parts)
-
         losses = {
-            'psnr': np.mean(batch_parts['psnr']),
-            'single_psnr': np.mean(batch_parts['single_psnr']),
-            'ssim': np.mean(batch_parts['ssim'])
+            'psnr': batch_parts['psnr'].mean(),
+            'single_psnr': batch_parts['single_psnr'].mean(),
+            'ssim': batch_parts['ssim'].mean()
         }
 
         return losses
