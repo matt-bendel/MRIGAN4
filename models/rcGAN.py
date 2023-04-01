@@ -18,6 +18,7 @@ from models.architectures.patch_disc import PatchDisc
 from evaluation_scripts.metrics import psnr
 from mail import send_mail
 from torchmetrics.functional import peak_signal_noise_ratio
+from fastmri.data.transforms import to_tensor
 
 class rcGAN(pl.LightningModule):
     def __init__(self, args, num_realizations, default_model_descriptor, exp_name, noise_type, num_gpus):
@@ -197,12 +198,12 @@ class rcGAN(pl.LightningModule):
         psnr_1s = []
 
         for j in range(y.size(0)):
-            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), sp.from_pytorch(maps[j], iscomplex=True))
+            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), sp.from_pytorch(maps[j].cpu(), iscomplex=True))
 
             ############# EXPERIMENTAL #################
-            avg_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(avg_gen[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
-            single_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[:, 0])[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
-            gt_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(gt[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
+            avg_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(avg_gen[j].cpu(), iscomplex=True))).unsqueeze(0).unsqueeze(0).to(self.device)
+            single_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[:, 0])[j].cpu(), iscomplex=True))).unsqueeze(0).unsqueeze(0).to(self.device)
+            gt_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(gt[j].cpu(), iscomplex=True))).unsqueeze(0).unsqueeze(0).to(self.device)
 
             psnr_8s.append(peak_signal_noise_ratio(avg_sp_out, gt_sp_out))
             psnr_1s.append(peak_signal_noise_ratio(single_sp_out, gt_sp_out))
@@ -217,8 +218,8 @@ class rcGAN(pl.LightningModule):
         mag_single_gen = torch.cat(mag_single_list, dim=0)
         mag_gt = torch.cat(mag_gt_list, dim=0)
 
-        # self.log('psnr_8_step', psnr_8s.mean(), on_step=True, on_epoch=True, prog_bar=True)
-        # self.log('psnr_1_step', psnr_1s.mean(), on_step=True, on_epoch=True, prog_bar=True)
+        self.log('psnr_8_step', psnr_8s.mean(), on_step=True, on_epoch=False, prog_bar=True)
+        self.log('psnr_1_step', psnr_1s.mean(), on_step=True, on_epoch=False, prog_bar=True)
 
         ############################################
 
