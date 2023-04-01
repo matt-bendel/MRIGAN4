@@ -178,14 +178,14 @@ class FIDMetric:
         self.alpha = calculate_alpha(image_embed, cond_embed, cuda=self.cuda)
         return self.alpha
 
-    def _get_embed_im(self, multi_coil_inp, max, maps, is_ref):
+    def _get_embed_im(self, multi_coil_inp, mean, std, maps, is_ref):
         embed_ims = torch.zeros(size=(multi_coil_inp.size(0), 3, self.args.im_size, self.args.im_size)).cuda()
         for i in range(multi_coil_inp.size(0)):
             reformatted = torch.zeros(size=(8, self.args.im_size, self.args.im_size, 2)).cuda()
             reformatted[:, :, :, 0] = multi_coil_inp[i, 0:8, :, :]
             reformatted[:, :, :, 1] = multi_coil_inp[i, 8:16, :, :]
 
-            unnormal_im = tensor_to_complex_np((reformatted * max[i]).cpu())
+            unnormal_im = tensor_to_complex_np((reformatted * std[i] + mean[i]).cpu())
 
             if is_ref:
                 S = sp.linop.Multiply((self.args.im_size, self.args.im_size), maps[i])
@@ -209,18 +209,19 @@ class FIDMetric:
         for i, data in tqdm(enumerate(self.loader),
                             desc='Computing generated distribution',
                             total=len(self.loader)):
-            condition, gt, mask, max_val, maps, _, _ = data
+            condition, gt, mask, mean, std, maps, _, _ = data
             condition = condition.cuda()
             gt = gt.cuda()
-            max_val = max_val.cuda()
+            mean = mean.cuda()
+            std = std.cuda()
             mask = mask.cuda()
 
             with torch.no_grad():
                 for k in range(self.num_samps):
                     recon = self.gan(condition, mask)
 
-                    image = self._get_embed_im(recon, max_val, maps, False)
-                    condition_im = self._get_embed_im(condition, max_val, maps, False)
+                    image = self._get_embed_im(recon, mean, std, maps, False)
+                    condition_im = self._get_embed_im(condition, mean, std, maps, False)
 
                     img_e = self.image_embedding(self.transforms(image))
                     cond_e = self.condition_embedding(self.transforms(condition_im))
@@ -279,24 +280,25 @@ class FIDMetric:
 
         for data in tqdm(self.ref_loader,
                          desc='Computing reference distribution'):
-            condition, gt, mask, max_val, _, _, _ = data
+            condition, gt, mask, mean, std, _, _, _ = data
             condition = condition.cuda()
             gt = gt.cuda()
-            max_val = max_val.cuda()
+            mean = mean.cuda()
+            std = std.cuda()
             mask = mask.cuda()
             maps = []
 
             with torch.no_grad():
                 for j in range(condition.shape[0]):
-                    new_y_true = fft2c_new(condition * max_val[j])
+                    new_y_true = fft2c_new(condition * std[j] + mean[j])
                     s_maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=16,
                                                  device=sp.Device(0), show_pbar=False, crop=0.70,
                                                  kernel_width=6).run().get()
 
                     maps.append(s_maps)
 
-                image = self._get_embed_im(gt, max_val, maps, True)
-                condition_im = self._get_embed_im(condition, max_val, maps, True)
+                image = self._get_embed_im(gt, mean, std, maps, True)
+                condition_im = self._get_embed_im(condition, mean, std, maps, True)
 
                 img_e = self.image_embedding(self.transforms(image))
                 cond_e = self.condition_embedding(self.transforms(condition_im))

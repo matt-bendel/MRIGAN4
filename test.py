@@ -81,11 +81,12 @@ if __name__ == "__main__":
         apsds = []
 
         for i, data in enumerate(test_loader):
-            y, x, mask, max_val, maps, _, _ = data
+            y, x, mask, mean, std, maps, _, _ = data
             y = y.cuda()
             x = x.cuda()
             mask = mask.cuda()
-            max_val = max_val.cuda()
+            mean = mean.cuda()
+            std = std.cuda()
 
             gens = torch.zeros(size=(y.size(0), cfg.num_z_test, cfg.in_chans / 2, cfg.im_size, cfg.im_size, 2)).cuda()
             for z in range(cfg.num_z_test):
@@ -103,14 +104,14 @@ if __name__ == "__main__":
                 single_samps = np.zeros(cfg.num_z_test, cfg.im_size, cfg.im_size)
 
                 S = sp.linop.Multiply((cfg.im_size, cfg.im_size), maps[j].cpu().numpy())
-                gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * max_val[j]).cpu()), tensor_to_complex_np(
-                    (avg[j] * max_val[j]).cpu())
+                gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
+                    (avg[j] * std[j] + mean[j]).cpu())
 
                 avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
                 gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
 
                 for z in range(cfg.num_z_test):
-                    np_samp = tensor_to_complex_np((gens[j, z, :, :, :, :] * max_val[j]).cpu())
+                    np_samp = tensor_to_complex_np((gens[j, z, :, :, :, :] * std[j] + mean[j]).cpu())
                     single_samps[z, :, :] = torch.tensor(S.H * np_samp).abs().numpy()
 
                 apsds.append(np.mean(np.std(single_samps, axis=0), axis=(0, 1)))
