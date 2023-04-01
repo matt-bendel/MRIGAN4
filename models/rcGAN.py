@@ -49,7 +49,9 @@ class rcGAN(pl.LightningModule):
         self.std_mult = 1
         self.is_good_model = 0
         self.resolution = self.args.im_size
-        self.psnr = PeakSignalNoiseRatio()
+        self.psnr_1 = PeakSignalNoiseRatio()
+        self.psnr_8 = PeakSignalNoiseRatio()
+
         self.save_hyperparameters()  # Save passed values
 
     def get_noise(self, num_vectors, mask):
@@ -201,25 +203,35 @@ class rcGAN(pl.LightningModule):
         avg_gen = self.reformat(avg)
         gt = self.reformat(x) * std[:, None, None, None] + mean[:, None, None, None] # EXPERIMENTAL UN
 
+        mag_avg_list = []
+        mag_single_list = []
+        mag_gt_list = []
+
         for j in range(y.size(0)):
             S = sp.linop.Multiply((self.args.im_size, self.args.im_size), tensor_to_complex_np(maps[j].cpu()))
 
             ############# EXPERIMENTAL #################
             S_pt = sp.to_pytorch_function(S.H, True, True)
-            mag_avg_gen = S_pt(avg_gen[j]).abs()
-            mag_single_gen = S_pt(self.reformat(gens[j, 0])).abs()
-            mag_gt = S_pt(gt[j]).abs()
+            mag_avg_list.append(S_pt(avg_gen[j]).abs().unsqueeze(0).unsqueeze(0))
+            mag_single_list.append(S_pt(self.reformat(gens[j, 0])).abs().unsqueeze(0).unsqueeze(0))
+            mag_gt_list.append(S_pt(gt[j]).abs().unsqueeze(0).unsqueeze(0))
 
-            psnr_8 = self.psnr(mag_avg_gen, mag_gt)
-            psnr_1 = self.psnr(mag_single_gen, mag_gt)
+        mag_avg_gen = torch.cat(mag_avg_list, dim=0)
+        mag_single_gen = torch.cat(mag_single_list, dim=0)
+        mag_gt = torch.cat(mag_gt_list, dim=0)
 
-            self.log('psnr_8_step', psnr_8, prog_bar=True)
-            self.log('psnr_1_step', psnr_1, prog_bar=True)
-            ############################################
+        psnr_8 = self.psnr_8(mag_avg_gen, mag_gt)
+        psnr_1 = self.psnr_1(mag_single_gen, mag_gt)
 
-            if self.global_rank == 0 and batch_idx == 0 and j == 0 and self.current_epoch % 5 == 0:
-                avg_gen_np = mag_avg_gen.cpu().numpy()
-                gt_np = mag_gt.cpu().numpy()
+        self.log('psnr_8_step', self.psnr_8, prog_bar=True)
+        self.log('psnr_1_step', self.psnr_1, prog_bar=True)
+        ############################################
+
+        # TODO: Plot as tensors using torch function
+        if batch_idx == 0:
+            if self.global_rank == 0 and self.current_epoch % 5 == 0:
+                avg_gen_np = mag_avg_gen[0, 0, :, :].cpu().numpy()
+                gt_np = mag_gt[0, 0, :, :].cpu().numpy()
 
                 plot_avg_np = (avg_gen_np - np.min(avg_gen_np)) / (np.max(avg_gen_np) - np.min(avg_gen_np))
                 plot_gt_np = (gt_np - np.min(gt_np)) / (np.max(gt_np) - np.min(gt_np))
@@ -232,24 +244,9 @@ class rcGAN(pl.LightningModule):
 
             self.trainer.strategy.barrier()
 
-            losses['psnr'].append(psnr_8)
-            losses['single_psnr'].append(psnr_1)
-
-        losses['psnr'] = np.mean(losses['psnr'])
-        losses['single_psnr'] = np.mean(losses['single_psnr'])
-
-        return losses
-
     def validation_epoch_end(self, validation_step_outputs):
-        psnrs = []
-        single_psnrs = []
-
-        for out in validation_step_outputs:
-            psnrs.append(out['psnr'])
-            single_psnrs.append(out['single_psnr'])
-
-        avg_psnr = self.all_gather(psnrs).mean()
-        avg_single_psnr = self.all_gather(single_psnrs).mean()
+        avg_psnr = self.all_gather(self.psnr_8.compute()).mean()
+        avg_single_psnr = self.all_gather(self.psnr_1.compute()).mean()
 
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
 
@@ -265,6 +262,9 @@ class rcGAN(pl.LightningModule):
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE - rcGAN",
                       f"Std. Dev. Weight: {self.std_mult:.4f}\nMetrics:\nPSNR: {avg_psnr:.2f}\nSINGLE PSNR: {avg_single_psnr:.2f}\nPSNR Diff: {psnr_diff}",
                       file_name="variation_gif.gif")
+
+        self.psnr_8.reset()
+        self.psnr_1.reset()
 
         self.trainer.strategy.barrier()
 
