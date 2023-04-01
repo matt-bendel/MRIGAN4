@@ -223,8 +223,8 @@ class rcGAN(pl.LightningModule):
         mag_single_gen = torch.cat(mag_single_list, dim=0)
         mag_gt = torch.cat(mag_gt_list, dim=0)
 
-        self.log('psnr_8_step', psnr_8s.mean(), on_step=True, on_epoch=True, prog_bar=True)
-        self.log('psnr_1_step', psnr_1s.mean(), on_step=True, on_epoch=True, prog_bar=True)
+        # self.log('psnr_8_step', psnr_8s.mean(), on_step=True, on_epoch=True, prog_bar=True)
+        # self.log('psnr_1_step', psnr_1s.mean(), on_step=True, on_epoch=True, prog_bar=True)
 
         ############################################
 
