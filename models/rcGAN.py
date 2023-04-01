@@ -199,7 +199,7 @@ class rcGAN(pl.LightningModule):
         avg = torch.mean(gens, dim=1)
 
         avg_gen = self.reformat(avg)
-        gt = self.reformat(x) * std[:] + mean[:] # EXPERIMENTAL UN
+        gt = self.reformat(x) * std[:, None, None, None] + mean[:, None, None, None] # EXPERIMENTAL UN
 
         for j in range(y.size(0)):
             S = sp.linop.Multiply((self.args.im_size, self.args.im_size), tensor_to_complex_np(maps[j].cpu()))
