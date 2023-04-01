@@ -245,8 +245,11 @@ class rcGAN(pl.LightningModule):
             self.trainer.strategy.barrier()
 
     def validation_epoch_end(self, validation_step_outputs):
-        avg_psnr = self.all_gather(self.psnr_8.compute()).mean()
+        avg_psnr = self.psnr_8.compute()
         avg_single_psnr = self.all_gather(self.psnr_1.compute()).mean()
+
+        print(avg_psnr)
+        exit()
 
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
         psnr_diff = psnr_diff.cpu().numpy()
