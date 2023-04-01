@@ -221,8 +221,8 @@ class rcGAN(pl.LightningModule):
         self.psnr_8(mag_avg_gen, mag_gt)
         self.psnr_1(mag_single_gen, mag_gt)
 
-        self.log('psnr_8_step', self.psnr_8, prog_bar=True)
-        self.log('psnr_1_step', self.psnr_1, prog_bar=True)
+        self.log('psnr_8_step', self.psnr_8, on_epoch=True, on_step=True, prog_bar=True)
+        self.log('psnr_1_step', self.psnr_1, on_epoch=True, on_step=True, prog_bar=True)
         ############################################
 
         # TODO: Plot as tensors using torch function
