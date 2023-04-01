@@ -213,7 +213,6 @@ class MulticoilDataset(torch.utils.data.Dataset):
             with open(f'/storage/fastMRI_brain/sense_maps/test_full_res/{fname.name}_{dataslice}.pkl', 'rb') as inp:
                 maps = pickle.load(inp)
             
-        print(maps.shape)
         return (
             zf_img.float(),
             gt_img.float(),
