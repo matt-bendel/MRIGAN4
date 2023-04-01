@@ -44,8 +44,8 @@ class rcGAN(pl.LightningModule):
         self.std_mult = 1
         self.is_good_model = 0
         self.resolution = self.args.im_size
-        self.psnr_1 = PeakSignalNoiseRatio()
-        self.psnr_8 = PeakSignalNoiseRatio()
+        self.psnr_1 = PeakSignalNoiseRatio(dist_sync_on_step=True)
+        self.psnr_8 = PeakSignalNoiseRatio(dist_sync_on_step=True)
 
         self.save_hyperparameters()  # Save passed values
 
