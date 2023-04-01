@@ -212,7 +212,7 @@ class rcGAN(pl.LightningModule):
 
             ############# EXPERIMENTAL #################
             mag_avg_list.append(sp.to_pytorch(S.H * sp.from_pytorch(avg_gen[j], iscomplex=True)).abs().unsqueeze(0).unsqueeze(0))
-            mag_single_list.append(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[j, 0]), iscomplex=True)).abs().unsqueeze(0).unsqueeze(0))
+            mag_single_list.append(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[:, 0])[j], iscomplex=True)).abs().unsqueeze(0).unsqueeze(0))
             mag_gt_list.append(sp.to_pytorch(S.H * sp.from_pytorch(gt[j], iscomplex=True)).abs().unsqueeze(0).unsqueeze(0))
 
         mag_avg_gen = torch.cat(mag_avg_list, dim=0)
