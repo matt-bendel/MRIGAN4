@@ -239,9 +239,6 @@ class rcGAN(pl.LightningModule):
 
                 np_psnr = psnr(gt_np, avg_gen_np)
 
-                print(np_psnr)
-                print(psnr_8s[0])
-
                 self.logger.log_image(
                     key=f"epoch_{self.current_epoch}_img",
                     images=[Image.fromarray(np.uint8(plot_gt_np*255), 'L'), Image.fromarray(np.uint8(plot_avg_np*255), 'L'), Image.fromarray(np.uint8(cm.jet(5*np.abs(plot_gt_np - plot_avg_np))*255))],
@@ -253,8 +250,8 @@ class rcGAN(pl.LightningModule):
         return {'psnr_8': psnr_8s.mean(), 'psnr_1': psnr_1s.mean()}
 
     def validation_epoch_end(self, validation_step_outputs):
-        avg_psnr = self.all_gather(torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean())
-        avg_single_psnr = self.all_gather(torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean())
+        avg_psnr = self.all_gather(torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()).mean()
+        avg_single_psnr = self.all_gather(torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean()).mean()
 
         print(avg_psnr)
         exit()
