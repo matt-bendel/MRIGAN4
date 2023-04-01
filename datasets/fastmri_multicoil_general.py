@@ -219,7 +219,7 @@ class MulticoilDataset(torch.utils.data.Dataset):
             mask,
             mean,
             std,
-            maps,
+            to_tensor(maps),
             fname.name,
             dataslice
         )
