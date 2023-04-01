@@ -203,7 +203,7 @@ class MulticoilDataset(torch.utils.data.Dataset):
             zf_img = zf_img.squeeze(0)
             gt_img = gt_img.squeeze(0)
 
-        maps = 0
+        maps = np.zeros((4,4))
 
         if self.val:
             with open(f'/storage/fastMRI_brain/sense_maps/val_full_res/{fname.name}_{dataslice}.pkl', 'rb') as inp:
