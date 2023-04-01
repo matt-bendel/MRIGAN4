@@ -246,6 +246,7 @@ class rcGAN(pl.LightningModule):
 
     def validation_epoch_end(self, validation_step_outputs):
         avg_psnr = self.all_gather(self.psnr_8.compute()).mean()
+        print(avg_psnr)
         avg_single_psnr = self.all_gather(self.psnr_1.compute()).mean()
 
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
@@ -267,6 +268,8 @@ class rcGAN(pl.LightningModule):
         self.psnr_1.reset()
 
         self.trainer.strategy.barrier()
+        print(self.psnr_8.compute())
+        exit()
 
     def configure_optimizers(self):
         opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.args.lr,
