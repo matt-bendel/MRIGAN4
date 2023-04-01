@@ -249,11 +249,14 @@ class rcGAN(pl.LightningModule):
         self.log('psnr_8_epoch', avg_psnr)
         self.log('psnr_1_epoch', avg_single_psnr)
 
+        avg_psnr = avg_psnr.cpu().numpy()
+        avg_single_psnr = avg_single_psnr.cpu().numpy()
+
         print(avg_psnr)
         exit()
 
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
-        psnr_diff = psnr_diff.cpu().numpy()
+        psnr_diff = psnr_diff
 
         mu_0 = 2e-2
         self.std_mult += mu_0 * psnr_diff
