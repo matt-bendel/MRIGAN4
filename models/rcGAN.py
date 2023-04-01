@@ -259,13 +259,20 @@ class rcGAN(pl.LightningModule):
         psnrs = self.all_gather(psnrs)
         print(psnrs[0].shape)
         print(psnrs[0])
-        exit()
         single_psnrs = self.all_gather(single_psnrs)
         ssims = self.all_gather(ssims)
 
         psnrs = [psnr_val.cpu().numpy() for psnr_val in psnrs]
+        psnrs_test = [psnr_val.mean().cpu().numpy() for psnr_val in psnrs]
         single_psnrs = [single_psnr_val.cpu().numpy() for single_psnr_val in single_psnrs]
         ssims = [ssim_val.cpu().numpy() for ssim_val in ssims]
+
+        print(psnrs)
+        print(psnrs_test)
+        print(np.mean(psnrs))
+        print(np.mean(psnrs_test))
+        exit()
+
 
         avg_psnr = np.mean(psnrs)
         avg_single_psnr = np.mean(single_psnrs)
