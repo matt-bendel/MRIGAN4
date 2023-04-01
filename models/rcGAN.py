@@ -184,6 +184,7 @@ class rcGAN(pl.LightningModule):
         }
 
         y, x, mask, mean, std, maps, _, _ = batch
+        print(maps.shape)
 
         if external_test:
             num_code = self.args.num_z_test
