@@ -208,7 +208,7 @@ class rcGAN(pl.LightningModule):
         mag_gt_list = []
 
         for j in range(y.size(0)):
-            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), tensor_to_complex_np(maps[j].cpu()))
+            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), maps[j].cpu().numpy())
 
             ############# EXPERIMENTAL #################
             S_pt = sp.to_pytorch_function(S, True, True)
