@@ -210,6 +210,9 @@ class rcGAN(pl.LightningModule):
             single_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[:, 0])[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
             gt_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(gt[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
 
+            if j == 0:
+                print(self.psnr_8(avg_sp_out, gt_sp_out))
+
             mag_avg_list.append(avg_sp_out)
             mag_single_list.append(single_sp_out)
             mag_gt_list.append(gt_sp_out)
@@ -218,8 +221,8 @@ class rcGAN(pl.LightningModule):
         mag_single_gen = torch.cat(mag_single_list, dim=0)
         mag_gt = torch.cat(mag_gt_list, dim=0)
 
-        psnr_8 = self.psnr_8(mag_avg_gen, mag_gt)
-        psnr_1 = self.psnr_1(mag_single_gen, mag_gt)
+        self.psnr_8(mag_avg_gen, mag_gt)
+        self.psnr_1(mag_single_gen, mag_gt)
 
         self.log('psnr_8_step', self.psnr_8, prog_bar=True)
         self.log('psnr_1_step', self.psnr_1, prog_bar=True)
@@ -234,17 +237,19 @@ class rcGAN(pl.LightningModule):
                 plot_avg_np = (avg_gen_np - np.min(avg_gen_np)) / (np.max(avg_gen_np) - np.min(avg_gen_np))
                 plot_gt_np = (gt_np - np.min(gt_np)) / (np.max(gt_np) - np.min(gt_np))
 
+                np_psnr = psnr(gt_np, avg_gen_np)
+                print(np_psnr)
+
                 self.logger.log_image(
                     key=f"epoch_{self.current_epoch}_img",
                     images=[Image.fromarray(np.uint8(plot_gt_np*255), 'L'), Image.fromarray(np.uint8(plot_avg_np*255), 'L'), Image.fromarray(np.uint8(cm.jet(5*np.abs(plot_gt_np - plot_avg_np))*255))],
-                    caption=["GT", f"Recon: PSNR (NP): {psnr(gt_np, avg_gen_np):.2f}; PSNR (PT): {psnr_8.cpu().numpy():.2f}; SINGLE PSNR: {psnr_1.cpu().numpy():.2f}", "Error"]
+                    caption=["GT", f"Recon: PSNR (NP): {np_psnr:.2f}", "Error"]
                 )
 
             self.trainer.strategy.barrier()
 
     def validation_epoch_end(self, validation_step_outputs):
         avg_psnr = self.all_gather(self.psnr_8.compute()).mean()
-        print(avg_psnr)
         avg_single_psnr = self.all_gather(self.psnr_1.compute()).mean()
 
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
