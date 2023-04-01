@@ -14,12 +14,12 @@ from torch.nn import functional as F
 from utils.fftc import ifft2c_new, fft2c_new
 from utils.math import complex_abs, tensor_to_complex_np
 from models.architectures.our_gen_unet_only import UNetModel
-from models.architectures.patch_disc import PatchDisc
+from models.architectures.our_disc import DiscriminatorModel
 from evaluation_scripts.metrics import psnr
 from mail import send_mail
 from torchmetrics.functional import peak_signal_noise_ratio
 
-class Ohayon(pl.LightningModule):
+class Adler(pl.LightningModule):
     def __init__(self, args, num_realizations, default_model_descriptor, exp_name, noise_type, num_gpus):
         super().__init__()
         self.args = args
@@ -37,8 +37,9 @@ class Ohayon(pl.LightningModule):
             out_chans=self.out_chans,
         )
 
-        self.discriminator = PatchDisc(
-            input_nc=args.in_chans * 2
+        self.discriminator = DiscriminatorModel(
+            in_chans=args.in_chans * 3,
+            out_chans=args.out_chans
         )
 
         self.std_mult = 1
@@ -105,28 +106,6 @@ class Ohayon(pl.LightningModule):
         samples = self.readd_measures(samples, y, mask)
         return samples
 
-    def adversarial_loss_discriminator(self, fake_pred, real_pred):
-        return fake_pred.mean() - real_pred.mean()
-
-    def adversarial_loss_generator(self, y, gens):
-        patch_out = 94
-        fake_pred = torch.zeros(size=(y.shape[0], self.args.num_z_train, patch_out, patch_out), device=self.device)
-        for k in range(y.shape[0]):
-            cond = torch.zeros(1, gens.shape[2], gens.shape[3], gens.shape[4], device=self.device)
-            cond[0, :, :, :] = y[k, :, :, :]
-            cond = cond.repeat(self.args.num_z_train, 1, 1, 1)
-            temp = self.discriminator(input=gens[k], y=cond)
-            fake_pred[k, :, :, :] = temp[:, 0, :, :]
-
-        gen_pred_loss = torch.mean(fake_pred[0])
-        for k in range(y.shape[0] - 1):
-            gen_pred_loss += torch.mean(fake_pred[k + 1])
-
-        return - 1e-2 * gen_pred_loss.mean()
-
-    def l2(self, avg_recon, x):
-        return F.mse_loss(avg_recon, x)
-
     def gradient_penalty(self, x_hat, x, y):
         gradient_penalty = self.compute_gradient_penalty(x.data, x_hat.data, y.data)
 
@@ -140,17 +119,15 @@ class Ohayon(pl.LightningModule):
 
         # train generator
         if optimizer_idx == 1:
-            gens = torch.zeros(
-                size=(y.size(0), self.args.num_z_valid, self.args.in_chans, self.args.im_size, self.args.im_size),
-                device=self.device)
-            for z in range(self.args.num_z_val):
-                gens[:, z, :, :, :] = self.forward(y, mask)
+            gen1 = self.forward(y, mask)
+            gen2 = self.forward(y, mask)
 
-            avg_recon = torch.mean(gens, dim=1)
+            x_posterior_concat = torch.cat([gen1, gen2], 1)
+
+            fake_pred = self.discriminator(input=x_posterior_concat, y=y)
 
             # adversarial loss is binary cross-entropy
-            g_loss = self.adversarial_loss_generator(y, gens)
-            g_loss += self.l2(avg_recon, x)
+            g_loss = -fake_pred.mean()
 
             self.log('g_loss', g_loss, prog_bar=True)
 
@@ -158,13 +135,22 @@ class Ohayon(pl.LightningModule):
 
         # train discriminator
         if optimizer_idx == 0:
-            x_hat = self.forward(y, mask)
+            gen1 = self.forward(y, mask)
+            gen2 = self.forward(y, mask)
 
-            real_pred = self.discriminator(input=x, y=y)
-            fake_pred = self.discriminator(input=x_hat, y=y)
+            rand_num = np.random.randint(0, 2, 1)
+            if rand_num == 0:
+                x_expect = torch.cat([x, gen1], 1)
+            else:
+                x_expect = torch.cat([gen1, x], 1)
 
-            d_loss = self.adversarial_loss_discriminator(fake_pred, real_pred)
-            d_loss += self.gradient_penalty(x_hat, x, y)
+            # MAKE PREDICTIONS
+            x_posterior_concat = torch.cat([gen1, gen2], 1)
+            real_pred = D(input=x_expect, y=y)
+            fake_pred = D(input=x_posterior_concat, y=y)
+
+            d_loss = fake_pred.mean() - real_pred.mean()
+            d_loss += self.gradient_penalty(x_posterior_concat, x_expect, y)
             d_loss += self.drift_penalty(real_pred)
 
             self.log('d_loss', d_loss, prog_bar=True)
@@ -216,8 +202,8 @@ class Ohayon(pl.LightningModule):
         mag_single_gen = torch.cat(mag_single_list, dim=0)
         mag_gt = torch.cat(mag_gt_list, dim=0)
 
-        self.log('psnr_8_step', psnr_8s.mean(), on_step=True, on_epoch=True, prog_bar=True)
-        self.log('psnr_1_step', psnr_1s.mean(), on_step=True, on_epoch=True, prog_bar=True)
+        self.log('psnr_8_step', psnr_8s.mean(), on_step=True, on_epoch=False, prog_bar=True)
+        self.log('psnr_1_step', psnr_1s.mean(), on_step=True, on_epoch=False, prog_bar=True)
 
         ############################################
 

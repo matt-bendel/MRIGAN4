@@ -173,12 +173,6 @@ class rcGAN(pl.LightningModule):
             return d_loss
 
     def validation_step(self, batch, batch_idx, external_test=False):
-        losses = {
-            'psnr': [],
-            'single_psnr': [],
-            'ssim': []
-        }
-
         y, x, mask, mean, std, maps, _, _ = batch
 
         if external_test:
