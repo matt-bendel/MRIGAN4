@@ -141,7 +141,7 @@ class rcGAN(pl.LightningModule):
         return 0.001 * torch.mean(real_pred ** 2)
 
     def training_step(self, batch, batch_idx, optimizer_idx):
-        y, x, mask, max_val, _, _, _ = batch
+        y, x, mask, mean, std, _, _, _ = batch
 
         # train generator
         if optimizer_idx == 0:
@@ -183,7 +183,7 @@ class rcGAN(pl.LightningModule):
             'ssim': []
         }
 
-        y, x, mask, max_val, maps, _, _ = batch
+        y, x, mask, mean, std, maps, _, _ = batch
 
         if external_test:
             num_code = self.args.num_z_test
@@ -202,8 +202,8 @@ class rcGAN(pl.LightningModule):
 
         for j in range(y.size(0)):
             S = sp.linop.Multiply((self.args.im_size, self.args.im_size), maps[j].cpu().numpy())
-            gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * max_val[j]).cpu()), tensor_to_complex_np(
-                (avg_gen[j] * max_val[j]).cpu())
+            gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
+                (avg_gen[j] * std[j] + mean[j]).cpu())
 
             avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
             gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
@@ -212,7 +212,7 @@ class rcGAN(pl.LightningModule):
             single_gen[:, :, :, 0] = gens[j, 0, 0:8, :, :]
             single_gen[:, :, :, 1] = gens[j, 0, 8:16, :, :]
 
-            single_gen_complex_np = tensor_to_complex_np((single_gen * max_val[j]).cpu())
+            single_gen_complex_np = tensor_to_complex_np((single_gen * std[j] + mean[j]).cpu())
             single_gen_np = torch.tensor(S.H * single_gen_complex_np).abs().numpy()
 
             if self.global_rank == 0 and batch_idx == 0 and j == 0 and self.current_epoch % 5 == 0:

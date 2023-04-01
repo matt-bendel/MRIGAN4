@@ -24,7 +24,7 @@ import sigpy as sp
 import sigpy.mri as mr
 
 import fastmri
-from fastmri.data.transforms import to_tensor, tensor_to_complex_np
+from fastmri.data.transforms import to_tensor, tensor_to_complex_np, normalize, normalize_instance
 from datasets.fastmri_multicoil_preprocess import retrieve_metadata, et_query, fetch_dir, ImageCropandKspaceCompression
 
 
@@ -93,11 +93,11 @@ class MulticoilTransform:
         masked_img = fastmri.ifft2c(masked_kspace).permute(0,3,1,2).reshape(-1,self.img_size,self.img_size).unsqueeze(0)
 
         #Normalized based on the 95th percentile max value of the magnitude
-        zf_img = masked_img/max_val
-        gt_img = gt_img/max_val
+        zf_img, mean, std = normalize_instance(masked_img)
+        gt_img = normalize(gt_img, mean, std)
         
 
-        return zf_img, gt_img, self.mask
+        return zf_img, gt_img, self.mask, mean, std
     
 
 
@@ -198,9 +198,7 @@ class MulticoilDataset(torch.utils.data.Dataset):
             
             acquisition = hf.attrs['acquisition']
             
-            zf_img, gt_img, mask = self.multicoil_transf(kspace=kspace,  
-                                                                 max_val=max_val,
-                                                                 vh=vh)
+            zf_img, gt_img, mask, mean, std = self.multicoil_transf(kspace=kspace, max_val=max_val, vh=vh)
             
             zf_img = zf_img.squeeze(0)
             gt_img = gt_img.squeeze(0)
@@ -220,7 +218,8 @@ class MulticoilDataset(torch.utils.data.Dataset):
             zf_img.float(),
             gt_img.float(),
             mask,
-            np.float32(max_val),
+            mean,
+            std,
             maps,
             fname.name,
             dataslice
