@@ -22,7 +22,7 @@ from evaluation_scripts.plotting_scripts import generate_image, generate_error_m
 from evaluation_scripts.metrics import psnr, ssim
 from evaluation_scripts.plotting_scripts import gif_im, generate_gif
 from mail import send_mail
-
+from torchmetrics import PeakSignalNoiseRatio
 
 class rcGAN(pl.LightningModule):
     def __init__(self, args, num_realizations, default_model_descriptor, exp_name, noise_type, num_gpus):
@@ -49,6 +49,7 @@ class rcGAN(pl.LightningModule):
         self.std_mult = 1
         self.is_good_model = 0
         self.resolution = self.args.im_size
+        self.psnr = PeakSignalNoiseRatio()
         self.save_hyperparameters()  # Save passed values
 
     def get_noise(self, num_vectors, mask):
@@ -144,7 +145,7 @@ class rcGAN(pl.LightningModule):
         y, x, mask, mean, std, _, _, _ = batch
 
         # train generator
-        if optimizer_idx == 0:
+        if optimizer_idx == 1:
             gens = torch.zeros(
                 size=(y.size(0), self.args.num_z_train, self.args.in_chans, self.args.im_size, self.args.im_size),
                 device=self.device)
@@ -162,7 +163,7 @@ class rcGAN(pl.LightningModule):
             return g_loss
 
         # train discriminator
-        if optimizer_idx == 1:
+        if optimizer_idx == 0:
             x_hat = self.forward(y, mask)
 
             real_pred = self.discriminator(input=x, y=y)
@@ -193,83 +194,67 @@ class rcGAN(pl.LightningModule):
         gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size),
                            device=self.device)
         for z in range(num_code):
-            gens[:, z, :, :, :] = self.forward(y, mask)
+            gens[:, z, :, :, :] = self.forward(y, mask) * std[:, None, None, None] + mean[:, None, None, None] # EXPERIMENTAL UN
 
         avg = torch.mean(gens, dim=1)
 
         avg_gen = self.reformat(avg)
-        gt = self.reformat(x)
+        gt = self.reformat(x) * std[:] + mean[:] # EXPERIMENTAL UN
 
         for j in range(y.size(0)):
             S = sp.linop.Multiply((self.args.im_size, self.args.im_size), tensor_to_complex_np(maps[j].cpu()))
-            gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
-                (avg_gen[j] * std[j] + mean[j]).cpu())
 
-            avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
-            gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
+            ############# EXPERIMENTAL #################
+            S_pt = sp.to_pytorch_function(S.H, True, True)
+            mag_avg_gen = S_pt(avg_gen[j]).abs()
+            mag_single_gen = S_pt(self.reformat(gens[j, 0])).abs()
+            mag_gt = S_pt(gt[j]).abs()
 
-            single_gen = torch.zeros(8, self.args.im_size, self.args.im_size, 2, device=self.device)
-            single_gen[:, :, :, 0] = gens[j, 0, 0:8, :, :]
-            single_gen[:, :, :, 1] = gens[j, 0, 8:16, :, :]
+            psnr_8 = self.psnr(mag_avg_gen, mag_gt)
+            psnr_1 = self.psnr(mag_single_gen, mag_gt)
 
-            single_gen_complex_np = tensor_to_complex_np((single_gen * std[j] + mean[j]).cpu())
-            single_gen_np = torch.tensor(S.H * single_gen_complex_np).abs().numpy()
+            self.log('psnr_8_step', psnr_8, prog_bar=True)
+            self.log('psnr_1_step', psnr_1, prog_bar=True)
+            ############################################
 
             if self.global_rank == 0 and batch_idx == 0 and j == 0 and self.current_epoch % 5 == 0:
+                avg_gen_np = mag_avg_gen.cpu().numpy()
+                gt_np = mag_gt.cpu().numpy()
+
                 plot_avg_np = (avg_gen_np - np.min(avg_gen_np)) / (np.max(avg_gen_np) - np.min(avg_gen_np))
                 plot_gt_np = (gt_np - np.min(gt_np)) / (np.max(gt_np) - np.min(gt_np))
 
                 self.logger.log_image(
                     key=f"epoch_{self.current_epoch}_img",
-                    images=[Image.fromarray(np.uint8(plot_gt_np*255), 'L'), Image.fromarray(np.uint8(plot_avg_np*255), 'L'), Image.fromarray(np.uint8(cm.jet(np.abs(plot_gt_np - plot_avg_np))*255))],
-                    caption=["GT", f"Recon: PSNR: {psnr(gt_np, avg_gen_np):.2f}; SINGLE PSNR: {psnr(gt_np, single_gen_np):.2f}", "Error"]
+                    images=[Image.fromarray(np.uint8(plot_gt_np*255), 'L'), Image.fromarray(np.uint8(plot_avg_np*255), 'L'), Image.fromarray(np.uint8(cm.jet(5*np.abs(plot_gt_np - plot_avg_np))*255))],
+                    caption=["GT", f"Recon: PSNR (NP): {psnr(gt_np, avg_gen_np):.2f}; PSNR (PT): {psnr_8.cpu().numpy():.2f}; SINGLE PSNR: {psnr_1.cpu().numpy():.2f}", "Error"]
                 )
 
             self.trainer.strategy.barrier()
 
-            losses['ssim'].append(ssim(gt_np, avg_gen_np))
-            losses['psnr'].append(psnr(gt_np, avg_gen_np))
-            losses['single_psnr'].append(psnr(gt_np, single_gen_np))
+            losses['psnr'].append(psnr_8)
+            losses['single_psnr'].append(psnr_1)
 
         losses['psnr'] = np.mean(losses['psnr'])
-        losses['ssim'] = np.mean(losses['ssim'])
         losses['single_psnr'] = np.mean(losses['single_psnr'])
-
-        return losses
-
-    def validation_step_end(self, batch_parts):
-        losses = {
-            'psnr': batch_parts['psnr'].mean(),
-            'single_psnr': batch_parts['single_psnr'].mean(),
-            'ssim': batch_parts['ssim'].mean()
-        }
 
         return losses
 
     def validation_epoch_end(self, validation_step_outputs):
         psnrs = []
         single_psnrs = []
-        ssims = []
 
         for out in validation_step_outputs:
             psnrs.append(out['psnr'])
-            ssims.append(out['ssim'])
             single_psnrs.append(out['single_psnr'])
 
-        psnrs = self.all_gather(psnrs)
-        single_psnrs = self.all_gather(single_psnrs)
-        ssims = self.all_gather(ssims)
+        avg_psnr = self.all_gather(psnrs).mean()
+        avg_single_psnr = self.all_gather(single_psnrs).mean()
 
-        psnrs = [psnr_val.cpu().numpy() for psnr_val in psnrs]
-        single_psnrs = [single_psnr_val.cpu().numpy() for single_psnr_val in single_psnrs]
-        ssims = [ssim_val.cpu().numpy() for ssim_val in ssims]
-
-        avg_psnr = np.mean(psnrs)
-        avg_single_psnr = np.mean(single_psnrs)
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
 
         mu_0 = 2e-2
-        self.std_mult += mu_0 * psnr_diff
+        self.std_mult += mu_0 * psnr_diff.cpu().numpy()
 
         if np.abs(psnr_diff) <= 0.25:
             self.is_good_model = 1
@@ -278,7 +263,7 @@ class rcGAN(pl.LightningModule):
 
         if self.global_rank == 0 and self.current_epoch % 1 == 0:
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE - rcGAN",
-                      f"Std. Dev. Weight: {self.std_mult:.4f}\nMetrics:\nPSNR: {avg_psnr:.2f}\nSINGLE PSNR: {avg_single_psnr:.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}",
+                      f"Std. Dev. Weight: {self.std_mult:.4f}\nMetrics:\nPSNR: {avg_psnr:.2f}\nSINGLE PSNR: {avg_single_psnr:.2f}\nPSNR Diff: {psnr_diff}",
                       file_name="variation_gif.gif")
 
         self.trainer.strategy.barrier()
@@ -288,7 +273,7 @@ class rcGAN(pl.LightningModule):
                                  betas=(self.args.beta_1, self.args.beta_2))
         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.args.lr,
                                  betas=(self.args.beta_1, self.args.beta_2))
-        return [opt_g, opt_d], []
+        return [opt_d, opt_g], []
 
     def on_save_checkpoint(self, checkpoint):
         checkpoint["beta_std"] = self.std_mult

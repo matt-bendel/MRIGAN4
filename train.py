@@ -107,9 +107,9 @@ if __name__ == '__main__':
         save_top_k=50
     )
 
-    trainer = pl.Trainer(accelerator="gpu", devices=args.num_gpus, strategy='dp',
+    trainer = pl.Trainer(accelerator="gpu", devices=args.num_gpus, strategy='ddp',
                          max_epochs=cfg.num_epochs, callbacks=[checkpoint_callback_epoch],
-                         num_sanity_val_steps=0, profiler="simple", logger=wandb_logger, benchmark=False)
+                         num_sanity_val_steps=2, profiler="simple", logger=wandb_logger, benchmark=False)
 
     if args.resume:
         trainer.fit(model, dm,
