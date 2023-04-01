@@ -218,13 +218,9 @@ class rcGAN(pl.LightningModule):
         mag_single_gen = torch.cat(mag_single_list, dim=0)
         mag_gt = torch.cat(mag_gt_list, dim=0)
 
-        test = self.psnr_8(mag_avg_gen, mag_gt)
-        self.psnr_1(mag_single_gen, mag_gt)
+        self.psnr_8.update(mag_avg_gen, mag_gt)
+        self.psnr_1.update(mag_single_gen, mag_gt)
 
-        print(test.mean())
-
-        self.log('psnr_8_step', self.psnr_8, on_epoch=True, on_step=True, prog_bar=True)
-        self.log('psnr_1_step', self.psnr_1, on_epoch=True, on_step=True, prog_bar=True)
         ############################################
 
         # TODO: Plot as tensors using torch function
@@ -247,8 +243,11 @@ class rcGAN(pl.LightningModule):
             self.trainer.strategy.barrier()
 
     def validation_epoch_end(self, validation_step_outputs):
-        avg_psnr = self.all_gather(self.psnr_8.compute())
-        avg_single_psnr = self.all_gather(self.psnr_1.compute()).mean()
+        avg_psnr = self.psnr_8.compute()
+        avg_single_psnr = self.psnr_1.compute()
+
+        self.log('psnr_8_epoch', avg_psnr)
+        self.log('psnr_1_epoch', avg_single_psnr)
 
         print(avg_psnr)
         exit()
