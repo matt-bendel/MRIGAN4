@@ -199,6 +199,8 @@ class rcGAN(pl.LightningModule):
         mag_avg_list = []
         mag_single_list = []
         mag_gt_list = []
+        psnr_8s = []
+        psnr_1s = []
 
         for j in range(y.size(0)):
             S = sp.linop.Multiply((self.args.im_size, self.args.im_size), sp.from_pytorch(maps[j], iscomplex=True))
@@ -208,19 +210,21 @@ class rcGAN(pl.LightningModule):
             single_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[:, 0])[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
             gt_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(gt[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
 
+            psnr_8s.append(peak_signal_noise_ratio(avg_sp_out, gt_sp_out))
+            psnr_1s.append(peak_signal_noise_ratio(single_sp_out, gt_sp_out))
+
             mag_avg_list.append(avg_sp_out)
             mag_single_list.append(single_sp_out)
             mag_gt_list.append(gt_sp_out)
 
+        psnr_8s = torch.stack(psnr_8s)
+        psnr_1s = torch.stack(psnr_1s)
         mag_avg_gen = torch.cat(mag_avg_list, dim=0)
         mag_single_gen = torch.cat(mag_single_list, dim=0)
         mag_gt = torch.cat(mag_gt_list, dim=0)
 
-        batch_psnr_8 = peak_signal_noise_ratio(mag_avg_gen, mag_gt)
-        batch_psnr_1 = peak_signal_noise_ratio(mag_single_gen, mag_gt)
-
-        self.log('psnr_8_step', batch_psnr_8, on_step=True, on_epoch=True, prog_bar=True)
-        self.log('psnr_1_step', batch_psnr_1, on_step=True, on_epoch=True, prog_bar=True)
+        self.log('psnr_8_step', psnr_8s.mean(), on_step=True, on_epoch=True, prog_bar=True)
+        self.log('psnr_1_step', psnr_1s.mean(), on_step=True, on_epoch=True, prog_bar=True)
 
         ############################################
 
@@ -235,6 +239,9 @@ class rcGAN(pl.LightningModule):
 
                 np_psnr = psnr(gt_np, avg_gen_np)
 
+                print(np_psnr)
+                print(psnr_8s[0])
+
                 self.logger.log_image(
                     key=f"epoch_{self.current_epoch}_img",
                     images=[Image.fromarray(np.uint8(plot_gt_np*255), 'L'), Image.fromarray(np.uint8(plot_avg_np*255), 'L'), Image.fromarray(np.uint8(cm.jet(5*np.abs(plot_gt_np - plot_avg_np))*255))],
@@ -243,7 +250,7 @@ class rcGAN(pl.LightningModule):
 
             self.trainer.strategy.barrier()
 
-        return {'psnr_8': batch_psnr_8, 'psnr_1': batch_psnr_1}
+        return {'psnr_8': psnr_8s.mean(), 'psnr_1': psnr_1s.mean()}
 
     def validation_epoch_end(self, validation_step_outputs):
         avg_psnr = self.all_gather(torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean())
