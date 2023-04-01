@@ -208,13 +208,12 @@ class rcGAN(pl.LightningModule):
         mag_gt_list = []
 
         for j in range(y.size(0)):
-            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), sp.from_pytorch(maps))
+            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), sp.from_pytorch(maps[j], iscomplex=True))
 
             ############# EXPERIMENTAL #################
-            S_pt = sp.to_pytorch_function(S.H, True, True)
-            mag_avg_list.append(S_pt.forward(avg_gen[j]).abs().unsqueeze(0).unsqueeze(0))
-            mag_single_list.append(S_pt.forward(self.reformat(gens[j, 0])).abs().unsqueeze(0).unsqueeze(0))
-            mag_gt_list.append(S_pt.forward(gt[j]).abs().unsqueeze(0).unsqueeze(0))
+            mag_avg_list.append(sp.to_pytorch(S.H * sp.from_pytorch(avg_gen[j], iscomplex=True)).abs().unsqueeze(0).unsqueeze(0))
+            mag_single_list.append(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[j, 0], iscomplex=True))).abs().unsqueeze(0).unsqueeze(0))
+            mag_gt_list.append(sp.to_pytorch(S.H * sp.from_pytorch(gt[j], iscomplex=True)).abs().unsqueeze(0).unsqueeze(0))
 
         mag_avg_gen = torch.cat(mag_avg_list, dim=0)
         mag_single_gen = torch.cat(mag_single_list, dim=0)
