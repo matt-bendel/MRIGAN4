@@ -215,15 +215,15 @@ class rcGAN(pl.LightningModule):
             single_gen_complex_np = tensor_to_complex_np((single_gen * max_val[j]).cpu())
             single_gen_np = torch.tensor(S.H * single_gen_complex_np).abs().numpy()
 
-            # if self.global_rank == 0 and batch_idx == 0 and j == 0 and self.current_epoch % 5 == 0:
-            #     plot_avg_np = (avg_gen_np - np.min(avg_gen_np)) / (np.max(avg_gen_np) - np.min(avg_gen_np))
-            #     plot_gt_np = (gt_np - np.min(gt_np)) / (np.max(gt_np) - np.min(gt_np))
-            #
-            #     self.logger.log_image(
-            #         key=f"epoch_{self.current_epoch}_img",
-            #         images=[Image.fromarray(np.uint8(plot_gt_np*255), 'L'), Image.fromarray(np.uint8(plot_avg_np*255), 'L'), Image.fromarray(np.uint8(cm.jet(np.abs(plot_gt_np - plot_avg_np))*255))],
-            #         caption=["GT", f"Recon: PSNR: {psnr(gt_np, avg_gen_np):.2f}; SINGLE PSNR: {psnr(gt_np, single_gen_np):.2f}", "Error"]
-            #     )
+            if self.global_rank == 0 and batch_idx == 0 and j == 0 and self.current_epoch % 5 == 0:
+                plot_avg_np = (avg_gen_np - np.min(avg_gen_np)) / (np.max(avg_gen_np) - np.min(avg_gen_np))
+                plot_gt_np = (gt_np - np.min(gt_np)) / (np.max(gt_np) - np.min(gt_np))
+
+                self.logger.log_image(
+                    key=f"epoch_{self.current_epoch}_img",
+                    images=[Image.fromarray(np.uint8(plot_gt_np*255), 'L'), Image.fromarray(np.uint8(plot_avg_np*255), 'L'), Image.fromarray(np.uint8(cm.jet(np.abs(plot_gt_np - plot_avg_np))*255))],
+                    caption=["GT", f"Recon: PSNR: {psnr(gt_np, avg_gen_np):.2f}; SINGLE PSNR: {psnr(gt_np, single_gen_np):.2f}", "Error"]
+                )
 
             self.trainer.strategy.barrier()
 
@@ -238,7 +238,6 @@ class rcGAN(pl.LightningModule):
         return losses
 
     def validation_step_end(self, batch_parts):
-        print(batch_parts)
         losses = {
             'psnr': np.mean(batch_parts['psnr']),
             'single_psnr': np.mean(batch_parts['single_psnr']),
@@ -277,7 +276,7 @@ class rcGAN(pl.LightningModule):
         else:
             self.is_good_model = 0
 
-        if self.global_rank == 0 and self.current_epoch % 2 == 0:
+        if self.global_rank == 0 and self.current_epoch % 1 == 0:
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE - rcGAN",
                       f"Std. Dev. Weight: {self.std_mult:.4f}\nMetrics:\nPSNR: {avg_psnr:.2f}\nSINGLE PSNR: {avg_single_psnr:.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}",
                       file_name="variation_gif.gif")
