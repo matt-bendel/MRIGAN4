@@ -210,9 +210,6 @@ class rcGAN(pl.LightningModule):
             single_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[:, 0])[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
             gt_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(gt[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
 
-            if j == 0:
-                print(self.psnr_8(avg_sp_out, gt_sp_out))
-
             mag_avg_list.append(avg_sp_out)
             mag_single_list.append(single_sp_out)
             mag_gt_list.append(gt_sp_out)
@@ -238,7 +235,6 @@ class rcGAN(pl.LightningModule):
                 plot_gt_np = (gt_np - np.min(gt_np)) / (np.max(gt_np) - np.min(gt_np))
 
                 np_psnr = psnr(gt_np, avg_gen_np)
-                print(np_psnr)
 
                 self.logger.log_image(
                     key=f"epoch_{self.current_epoch}_img",
@@ -254,7 +250,6 @@ class rcGAN(pl.LightningModule):
 
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
         psnr_diff = psnr_diff.cpu().numpy()
-        print(psnr_diff)
 
         mu_0 = 2e-2
         self.std_mult += mu_0 * psnr_diff
