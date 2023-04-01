@@ -27,7 +27,7 @@ def load_object(dct):
 if __name__ == '__main__':
     torch.set_float32_matmul_precision('medium')
     args = create_arg_parser().parse_args()
-    seed_everything(1, workers=True)
+    seed_everything(0, workers=True)
 
     print(f"Experiment Name: {args.exp_name}")
     print(f"Number of Noise Realizations: {args.num_noise}")
