@@ -243,6 +243,12 @@ class Ohayon(pl.LightningModule):
         return losses
 
     def training_epoch_end(self, training_step_outputs):
+        if self.global_rank == 0 and self.current_epoch % 2 == 0:
+            send_mail(f"EPOCH {self.current_epoch + 1} UPDATE - Ohayon",
+                      "",
+                      file_name="variation_gif.gif")
+
+        self.trainer.strategy.barrier()
 
     def validation_epoch_end(self, validation_step_outputs):
         psnrs = []
