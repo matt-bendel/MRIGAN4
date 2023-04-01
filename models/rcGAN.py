@@ -219,6 +219,8 @@ class rcGAN(pl.LightningModule):
         mag_single_gen = torch.cat(mag_single_list, dim=0)
         mag_gt = torch.cat(mag_gt_list, dim=0)
 
+        print(mag_avg_gen.shape)
+
         psnr_8 = self.psnr_8(mag_avg_gen, mag_gt)
         psnr_1 = self.psnr_1(mag_single_gen, mag_gt)
 
