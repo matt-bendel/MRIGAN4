@@ -210,6 +210,9 @@ class rcGAN(pl.LightningModule):
             single_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[:, 0])[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
             gt_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(gt[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
 
+            self.psnr_8.update(avg_sp_out, gt_sp_out)
+            self.psnr_1.update(single_sp_out, gt_sp_out)
+
             mag_avg_list.append(avg_sp_out)
             mag_single_list.append(single_sp_out)
             mag_gt_list.append(gt_sp_out)
@@ -217,9 +220,6 @@ class rcGAN(pl.LightningModule):
         mag_avg_gen = torch.cat(mag_avg_list, dim=0)
         mag_single_gen = torch.cat(mag_single_list, dim=0)
         mag_gt = torch.cat(mag_gt_list, dim=0)
-
-        self.psnr_8.update(mag_avg_gen, mag_gt)
-        self.psnr_1.update(mag_single_gen, mag_gt)
 
         ############################################
 
