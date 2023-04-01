@@ -17,7 +17,7 @@ from models.architectures.our_gen_unet_only import UNetModel
 from models.architectures.patch_disc import PatchDisc
 from evaluation_scripts.metrics import psnr
 from mail import send_mail
-from torchmetrics import PeakSignalNoiseRatio
+from torchmetrics.functional import peak_signal_noise_ratio
 
 class rcGAN(pl.LightningModule):
     def __init__(self, args, num_realizations, default_model_descriptor, exp_name, noise_type, num_gpus):
@@ -44,8 +44,6 @@ class rcGAN(pl.LightningModule):
         self.std_mult = 1
         self.is_good_model = 0
         self.resolution = self.args.im_size
-        self.psnr_1 = PeakSignalNoiseRatio(dist_sync_on_step=True)
-        self.psnr_8 = PeakSignalNoiseRatio(dist_sync_on_step=True)
 
         self.save_hyperparameters()  # Save passed values
 
@@ -210,9 +208,6 @@ class rcGAN(pl.LightningModule):
             single_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[:, 0])[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
             gt_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(gt[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
 
-            self.psnr_8.update(avg_sp_out, gt_sp_out)
-            self.psnr_1.update(single_sp_out, gt_sp_out)
-
             mag_avg_list.append(avg_sp_out)
             mag_single_list.append(single_sp_out)
             mag_gt_list.append(gt_sp_out)
@@ -220,6 +215,12 @@ class rcGAN(pl.LightningModule):
         mag_avg_gen = torch.cat(mag_avg_list, dim=0)
         mag_single_gen = torch.cat(mag_single_list, dim=0)
         mag_gt = torch.cat(mag_gt_list, dim=0)
+
+        batch_psnr_8 = peak_signal_noise_ratio(mag_avg_gen, mag_gt)
+        batch_psnr_1 = peak_signal_noise_ratio(mag_single_gen, mag_gt)
+
+        self.log('psnr_8_step', batch_psnr_8, on_step=True, on_epoch=True, prog_bar=True)
+        self.log('psnr_1_step', batch_psnr_1, on_step=True, on_epoch=True, prog_bar=True)
 
         ############################################
 
@@ -242,9 +243,11 @@ class rcGAN(pl.LightningModule):
 
             self.trainer.strategy.barrier()
 
+        return batch_psnr_8, batch_psnr_1
+
     def validation_epoch_end(self, validation_step_outputs):
-        avg_psnr = self.psnr_8.compute()
-        avg_single_psnr = self.psnr_1.compute()
+        avg_psnr = self.all_gather(validation_step_outputs[0].mean())
+        avg_single_psnr = self.all_gather(validation_step_outputs[1].mean())
 
         self.log('psnr_8_epoch', avg_psnr)
         self.log('psnr_1_epoch', avg_single_psnr)
@@ -270,9 +273,6 @@ class rcGAN(pl.LightningModule):
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE - rcGAN",
                       f"Std. Dev. Weight: {self.std_mult:.4f}\nMetrics:\nPSNR: {avg_psnr:.2f}\nSINGLE PSNR: {avg_single_psnr:.2f}\nPSNR Diff: {psnr_diff}",
                       file_name="variation_gif.gif")
-
-        self.psnr_8.reset()
-        self.psnr_1.reset()
 
         self.trainer.strategy.barrier()
 
