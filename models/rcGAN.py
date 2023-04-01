@@ -6,21 +6,16 @@ import torchvision
 import pytorch_lightning as pl
 import numpy as np
 import torch.autograd as autograd
-import matplotlib.pyplot as plt
 import sigpy as sp
-import sigpy.mri as mr
 from matplotlib import cm
 
 from PIL import Image
 from torch.nn import functional as F
-from data import transforms
 from utils.fftc import ifft2c_new, fft2c_new
 from utils.math import complex_abs, tensor_to_complex_np
 from models.architectures.our_gen_unet_only import UNetModel
 from models.architectures.patch_disc import PatchDisc
-from evaluation_scripts.plotting_scripts import generate_image, generate_error_map
-from evaluation_scripts.metrics import psnr, ssim
-from evaluation_scripts.plotting_scripts import gif_im, generate_gif
+from evaluation_scripts.metrics import psnr
 from mail import send_mail
 from torchmetrics import PeakSignalNoiseRatio
 
@@ -211,15 +206,17 @@ class rcGAN(pl.LightningModule):
             S = sp.linop.Multiply((self.args.im_size, self.args.im_size), sp.from_pytorch(maps[j], iscomplex=True))
 
             ############# EXPERIMENTAL #################
-            mag_avg_list.append(sp.to_pytorch(S.H * sp.from_pytorch(avg_gen[j], iscomplex=True)).abs().unsqueeze(0).unsqueeze(0))
-            mag_single_list.append(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[:, 0])[j], iscomplex=True)).abs().unsqueeze(0).unsqueeze(0))
-            mag_gt_list.append(sp.to_pytorch(S.H * sp.from_pytorch(gt[j], iscomplex=True)).abs().unsqueeze(0).unsqueeze(0))
+            avg_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(avg_gen[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
+            single_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[:, 0])[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
+            gt_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(gt[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
+
+            mag_avg_list.append(avg_sp_out)
+            mag_single_list.append(single_sp_out)
+            mag_gt_list.append(gt_sp_out)
 
         mag_avg_gen = torch.cat(mag_avg_list, dim=0)
         mag_single_gen = torch.cat(mag_single_list, dim=0)
         mag_gt = torch.cat(mag_gt_list, dim=0)
-
-        print(mag_avg_gen.shape)
 
         psnr_8 = self.psnr_8(mag_avg_gen, mag_gt)
         psnr_1 = self.psnr_1(mag_single_gen, mag_gt)
