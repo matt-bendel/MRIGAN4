@@ -268,8 +268,6 @@ class rcGAN(pl.LightningModule):
         self.psnr_1.reset()
 
         self.trainer.strategy.barrier()
-        print(self.psnr_8.compute())
-        exit()
 
     def configure_optimizers(self):
         opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.args.lr,
