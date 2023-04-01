@@ -248,9 +248,10 @@ class rcGAN(pl.LightningModule):
         avg_single_psnr = self.all_gather(self.psnr_1.compute()).mean()
 
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
+        psnr_diff = psnr_diff.cpu().numpy()
 
         mu_0 = 2e-2
-        self.std_mult += mu_0 * psnr_diff.cpu().numpy()
+        self.std_mult += mu_0 * psnr_diff
 
         if np.abs(psnr_diff) <= 0.25:
             self.is_good_model = 1
