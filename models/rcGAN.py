@@ -254,6 +254,7 @@ class rcGAN(pl.LightningModule):
 
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
         psnr_diff = psnr_diff.cpu().numpy()
+        print(psnr_diff)
 
         mu_0 = 2e-2
         self.std_mult += mu_0 * psnr_diff
