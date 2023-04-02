@@ -50,8 +50,8 @@ if __name__ == '__main__':
             save_top_k=1
         )
 
-        dm = MRIDataModule(cfg, args.mask_type)
-        # dm = FastMRIDataModule(base_path=cfg.data_path, batch_size=cfg.batch_size)
+        # dm = MRIDataModule(cfg, args.mask_type)
+        dm = FastMRIDataModule(base_path=cfg.data_path, batch_size=cfg.batch_size)
 
         if args.rcgan:
             noise_structure = {"AWGN": args.awgn, "structure": args.noise_structure}
@@ -109,7 +109,7 @@ if __name__ == '__main__':
 
     trainer = pl.Trainer(accelerator="gpu", devices=args.num_gpus, strategy='ddp',
                          max_epochs=cfg.num_epochs, callbacks=[checkpoint_callback_epoch],
-                         num_sanity_val_steps=2, profiler="simple", logger=wandb_logger, benchmark=False)
+                         num_sanity_val_steps=0, profiler="simple", logger=wandb_logger, benchmark=False)
 
     if args.resume:
         trainer.fit(model, dm,

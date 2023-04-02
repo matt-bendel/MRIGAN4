@@ -67,16 +67,12 @@ class DataTransform:
         #     TODO: Save resized image offline
             # im_tensor = reduce_resolution(im_tensor)
 
-        true_image = torch.clone(im_tensor)
-        true_measures = fft2c_new(im_tensor) * mask
-        image = im_tensor
-
-        kspace = fft2c_new(image)
+        kspace = fft2c_new(im_tensor)
         masked_kspace = kspace * mask
         input_tensor = ifft2c_new(masked_kspace)
 
         normalized_input, mean, std = transforms.normalize_instance(input_tensor)
-        normalized_gt = transforms.normalize(true_image, mean, std)
+        normalized_gt = transforms.normalize(im_tensor, mean, std)
 
         final_input = torch.zeros(16, self.args.im_size, self.args.im_size)
         final_input[0:8, :, :] = normalized_input[:, :, :, 0]
@@ -86,7 +82,7 @@ class DataTransform:
         final_gt[0:8, :, :] = normalized_gt[:, :, :, 0]
         final_gt[8:16, :, :] = normalized_gt[:, :, :, 1]
 
-        return final_input.float(), final_gt.float(), mask, mean.float(), std.float(), transforms.to_tensor(sense_maps), fname, slice
+        return final_input.float(), final_gt.float(), mask, mean, std, transforms.to_tensor(sense_maps), fname, slice
 
 
 
