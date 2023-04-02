@@ -86,7 +86,7 @@ class DataTransform:
         final_gt[0:8, :, :] = normalized_gt[:, :, :, 0]
         final_gt[8:16, :, :] = normalized_gt[:, :, :, 1]
 
-        return final_input.float(), final_gt.float(), mask, mean.float(), std.float(), fname, slice
+        return final_input.float(), final_gt.float(), mask, mean.float(), std.float(), transforms.to_tensor(sense_maps), fname, slice
 
 
 

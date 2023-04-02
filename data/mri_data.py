@@ -279,7 +279,7 @@ class SelectiveSliceData(torch.utils.data.Dataset):
         with h5py.File(fname, 'r') as data:
             kspace = data['kspace'][slice]
             target = data[self.recons_key][slice] if self.recons_key in data else None
-            return self.transform(kspace, target, data.attrs, fname.name, slice, 0, vh)
+            return self.transform(kspace, target, data.attrs, fname.name, slice, np.zeros((4,4)), vh)
 
 
 class SelectiveSliceData_Val(torch.utils.data.Dataset):
