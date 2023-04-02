@@ -178,7 +178,7 @@ class SelectiveSliceData_Test(torch.utils.data.Dataset):
     def __getitem__(self, i):
         fname, slice = self.examples[i]
 
-        with h5py.File(os.path.join('multicoil_small_T2_test_8coils', fname.name), 'r') as hf:
+        with h5py.File(os.path.join('/storage/fastMRI_brain/data/multicoil_small_T2_test_8coils', fname.name), 'r') as hf:
             vh = hf['vh'][slice]
 
         with h5py.File(fname, 'r') as data:
@@ -273,7 +273,7 @@ class SelectiveSliceData(torch.utils.data.Dataset):
     def __getitem__(self, i):
         fname, slice = self.examples[i]
 
-        with h5py.File(os.path.join('multicoil_train_8coils_general', fname.name), 'r') as hf:
+        with h5py.File(os.path.join('/storage/fastMRI_brain/data/multicoil_train_8coils_general', fname.name), 'r') as hf:
             vh = hf['vh'][slice]
 
         with h5py.File(fname, 'r') as data:
@@ -367,7 +367,7 @@ class SelectiveSliceData_Val(torch.utils.data.Dataset):
     def __getitem__(self, i):
         fname, slice = self.examples[i]
 
-        with h5py.File(os.path.join('multicoil_val_8coils_general', fname.name), 'r') as hf:
+        with h5py.File(os.path.join('/storage/fastMRI_brain/data/multicoil_val_8coils_general', fname.name), 'r') as hf:
             vh = hf['vh'][slice]
 
         with h5py.File(fname, 'r') as data:
