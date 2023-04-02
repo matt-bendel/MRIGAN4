@@ -36,7 +36,7 @@ class DataTransform:
         self.test = test
         self.mask_type = mask_type
 
-    def __call__(self, kspace, target, attrs, fname, slice, sense_maps=None, vh):
+    def __call__(self, kspace, target, attrs, fname, slice, sense_maps=None, vh=None):
         """
         Args:
             kspace (numpy.array): Input k-space of shape (num_coils, rows, cols, 2) for multi-coil
