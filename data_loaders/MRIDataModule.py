@@ -36,7 +36,7 @@ class DataTransform:
         self.test = test
         self.mask_type = mask_type
 
-    def __call__(self, kspace, target, attrs, fname, slice, sense_maps=None):
+    def __call__(self, kspace, target, attrs, fname, slice, sense_maps=None, vh):
         """
         Args:
             kspace (numpy.array): Input k-space of shape (num_coils, rows, cols, 2) for multi-coil
@@ -59,7 +59,7 @@ class DataTransform:
         x = ifft(kspace, (0, 1))  # (768, 396, 16)
 
         # TODO: Save SVD matrix offline
-        coil_compressed_x = ImageCropandKspaceCompression(x)  # (384, 384, 8)
+        coil_compressed_x = ImageCropandKspaceCompression(x, vh)  # (384, 384, 8)
 
         im_tensor = transforms.to_tensor(coil_compressed_x).permute(2, 0, 1, 3)
 
@@ -78,10 +78,6 @@ class DataTransform:
         normalized_input, mean, std = transforms.normalize_instance(input_tensor)
         normalized_gt = transforms.normalize(true_image, mean, std)
 
-        # For Dynamic Inpainting
-        normalized_true_measures = transforms.normalize(ifft2c_new(true_measures), mean, std)
-        normalized_true_measures = fft2c_new(normalized_true_measures)
-
         final_input = torch.zeros(16, self.args.im_size, self.args.im_size)
         final_input[0:8, :, :] = normalized_input[:, :, :, 0]
         final_input[8:16, :, :] = normalized_input[:, :, :, 1]
@@ -90,7 +86,7 @@ class DataTransform:
         final_gt[0:8, :, :] = normalized_gt[:, :, :, 0]
         final_gt[8:16, :, :] = normalized_gt[:, :, :, 1]
 
-        return final_input.float(), final_gt.float(), normalized_true_measures.float(), mean.float(), std.float(), mask, fname, slice
+        return final_input.float(), final_gt.float(), mask, mean.float(), std.float(), fname, slice
 
 
 
@@ -117,7 +113,7 @@ def unflatten(t, shape_t):
     return t
 
 
-def ImageCropandKspaceCompression(x):
+def ImageCropandKspaceCompression(x, vh):
     w_from = (x.shape[0] - 384) // 2  # crop images into 384x384
     h_from = (x.shape[1] - 384) // 2
     w_to = w_from + 384
@@ -125,9 +121,14 @@ def ImageCropandKspaceCompression(x):
     cropped_x = x[w_from:w_to, h_from:h_to, :]
     if cropped_x.shape[-1] > 8:
         x_tocompression = cropped_x.reshape(384 ** 2, cropped_x.shape[-1])
-        U, S, Vh = np.linalg.svd(x_tocompression, full_matrices=False)
-        coil_compressed_x = np.matmul(x_tocompression, Vh.conj().T)
-        coil_compressed_x = coil_compressed_x[:, 0:8].reshape(384, 384, 8)
+
+        if vh is None:
+            U, S, Vh = np.linalg.svd(x_tocompression, full_matrices=False)
+            coil_compressed_x = np.matmul(x_tocompression, Vh.conj().T)
+            coil_compressed_x = coil_compressed_x[:, 0:8].reshape(384, 384, 8)
+        else:
+            coil_compressed_x = np.matmul(x_tocompression, vh.conj().T)
+            coil_compressed_x = coil_compressed_x[:, 0:8].reshape(384, 384, 8)
     else:
         coil_compressed_x = cropped_x
 

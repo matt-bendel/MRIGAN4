@@ -177,15 +177,19 @@ class SelectiveSliceData_Test(torch.utils.data.Dataset):
 
     def __getitem__(self, i):
         fname, slice = self.examples[i]
+
+        with h5py.File(os.path.join('multicoil_small_T2_test_8coils', fname.name), 'r') as hf:
+            vh = hf['vh'][slice]
+
         with h5py.File(fname, 'r') as data:
             kspace = data['kspace'][slice]
             target = data[self.recons_key][slice] if self.recons_key in data else None
 
             maps = None
-            with open(f'/storage/fastMRI_brain/sense_maps/test/{fname.name}_{slice}.pkl', 'rb') as inp:
+            with open(f'/storage/fastMRI_brain/sense_maps/test_full_res/{fname.name}_{slice}.pkl', 'rb') as inp:
                 maps = pickle.load(inp)
 
-            return self.transform(kspace, target, data.attrs, fname.name, slice, maps)
+            return self.transform(kspace, target, data.attrs, fname.name, slice, maps, vh)
 
 
 class SelectiveSliceData(torch.utils.data.Dataset):
@@ -268,10 +272,14 @@ class SelectiveSliceData(torch.utils.data.Dataset):
 
     def __getitem__(self, i):
         fname, slice = self.examples[i]
+
+        with h5py.File(os.path.join('multicoil_train_8coils_general', fname.name), 'r') as hf:
+            vh = hf['vh'][slice]
+
         with h5py.File(fname, 'r') as data:
             kspace = data['kspace'][slice]
             target = data[self.recons_key][slice] if self.recons_key in data else None
-            return self.transform(kspace, target, data.attrs, fname.name, slice, 0)
+            return self.transform(kspace, target, data.attrs, fname.name, slice, 0, vh)
 
 
 class SelectiveSliceData_Val(torch.utils.data.Dataset):
@@ -358,6 +366,10 @@ class SelectiveSliceData_Val(torch.utils.data.Dataset):
 
     def __getitem__(self, i):
         fname, slice = self.examples[i]
+
+        with h5py.File(os.path.join('multicoil_val_8coils_general', fname.name), 'r') as hf:
+            vh = hf['vh'][slice]
+
         with h5py.File(fname, 'r') as data:
             kspace = data['kspace'][slice]
             target = data[self.recons_key][slice] if self.recons_key in data else None
@@ -366,7 +378,7 @@ class SelectiveSliceData_Val(torch.utils.data.Dataset):
             with open(f'/storage/fastMRI_brain/sense_maps/val_full_res/{fname.name}_{slice}.pkl', 'rb') as inp:
                 maps = pickle.load(inp)
 
-            return self.transform(kspace, target, data.attrs, fname.name, slice, maps)
+            return self.transform(kspace, target, data.attrs, fname.name, slice, maps, vh)
 
 
 class CombinedSliceDataset(torch.utils.data.Dataset):

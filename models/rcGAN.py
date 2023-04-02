@@ -246,12 +246,12 @@ class rcGAN(pl.LightningModule):
 
     def validation_epoch_end(self, validation_step_outputs):
         # GATHER
-        # avg_psnr = self.all_gather(torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()).mean()
-        # avg_single_psnr = self.all_gather(torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean()).mean()
+        avg_psnr = self.all_gather(torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()).mean()
+        avg_single_psnr = self.all_gather(torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean()).mean()
 
         # NO GATHER
-        avg_psnr = torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()
-        avg_single_psnr = torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean()
+        # avg_psnr = torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()
+        # avg_single_psnr = torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean()
 
         avg_psnr = avg_psnr.cpu().numpy()
         avg_single_psnr = avg_single_psnr.cpu().numpy()

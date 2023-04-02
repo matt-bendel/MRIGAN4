@@ -302,7 +302,6 @@ class FastMRIDataModule(pl.LightningDataModule):
         max_val_dir_train = os.path.join(self.base_path, '{0}_{1}_{2}coils_general'.format(self.challenge, 'train', self.num_vcoils))
         max_val_dir_val = os.path.join(self.base_path, '{0}_{1}_{2}coils_general'.format(self.challenge, 'val', self.num_vcoils))
 
-
         # Assign train/val datasets for use in dataloaders
         self.train = MulticoilDataset(train_dir,
                                       max_val_dir_train,
