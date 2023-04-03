@@ -123,7 +123,7 @@ class rcGAN(pl.LightningModule):
         for k in range(y.shape[0] - 1):
             gen_pred_loss += torch.mean(fake_pred[k + 1])
 
-        return - 1e-2 * gen_pred_loss.mean()
+        return - 1e-5 * gen_pred_loss.mean()
 
     def l1_std_p(self, avg_recon, gens, x):
         return F.l1_loss(avg_recon, x) - self.std_mult * np.sqrt(
