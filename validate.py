@@ -9,7 +9,7 @@ import pytorch_lightning as pl
 from data_loaders.MRIDataModule import MRIDataModule
 from datasets.fastmri_multicoil_general import FastMRIDataModule
 from utils.parse_args import create_arg_parser
-from models.rcGAN_no_d import rcGAN
+from models.rcGAN import rcGAN
 from pytorch_lightning import seed_everything
 from evaluation_scripts.fid.embeddings import VGG16Embedding
 from evaluation_scripts.cfid.cfid_metric import CFIDMetric
@@ -43,7 +43,8 @@ if __name__ == "__main__":
             print(f"VALIDATING EPOCH: {epoch + 1}")
             try:
                 model = rcGAN.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + args.exp_name + f'/checkpoint-epoch={epoch}.ckpt')
-            except:
+            except Exception as e:
+                print(e)
                 continue
 
             if model.is_good_model == 0:
