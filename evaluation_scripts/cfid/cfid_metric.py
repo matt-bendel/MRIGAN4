@@ -155,12 +155,11 @@ class CFIDMetric:
             reformatted[:, :, :, 0] = multi_coil_inp[i, 0:8, :, :]
             reformatted[:, :, :, 1] = multi_coil_inp[i, 8:16, :, :]
 
-            unnormal_im = tensor_to_complex_np((reformatted * std[i] + mean[i]).cpu())
+            unnormal_im = reformatted * std[i] + mean[i]
 
-            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), maps[i].cpu().numpy())
+            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), sp.from_pytorch(maps[i], iscomplex=True))
 
-            im = torch.tensor(S.H * unnormal_im).abs()
-
+            im = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(unnormal_im[i].cpu(), iscomplex=True)))
             im = (im - torch.min(im)) / (torch.max(im) - torch.min(im))
 
             embed_ims[i, 0, :, :] = im
