@@ -37,9 +37,6 @@ if __name__ == '__main__':
         print("USING DEFAULT MODEL DESCRIPTOR...")
         args.num_noise = 1
 
-    if args.dp:
-        cfg.batch_size = cfg.batch_size * args.num_gpus
-
     if args.mri:
         with open('configs/mri/config.yml', 'r') as f:
             cfg = yaml.load(f, Loader=yaml.FullLoader)
@@ -52,6 +49,9 @@ if __name__ == '__main__':
             filename='best_model',
             save_top_k=1
         )
+
+        if args.dp:
+            cfg.batch_size = cfg.batch_size * args.num_gpus
 
         # dm = MRIDataModule(cfg, args.mask_type)
         dm = FastMRIDataModule(base_path=cfg.data_path, batch_size=cfg.batch_size)
@@ -74,6 +74,9 @@ if __name__ == '__main__':
             save_top_k=1
         )
 
+        if args.dp:
+            cfg.batch_size = cfg.batch_size * args.num_gpus
+
         dm = CelebAHQDataModule(cfg, args.mask_type)
         model = InpaintUNet(cfg, args.num_noise, args.default_model_descriptor, args.exp_name)
     elif args.cs:
@@ -88,6 +91,9 @@ if __name__ == '__main__':
             filename='best_model',
             save_top_k=1
         )
+
+        if args.dp:
+            cfg.batch_size = cfg.batch_size * args.num_gpus
 
         dm = BSD400DataModule(cfg, args.mask_type)
         # TODO: CS Lighnting Module
