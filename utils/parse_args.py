@@ -39,7 +39,8 @@ def create_arg_parser():
                         help='Whether or not to dynamically remove chunk of image')
     parser.add_argument('--awgn', action='store_true',
                         help='Whether or not to dynamically remove chunk of image')
-
+    parser.add_argument('--dp', action='store_true',
+                        help='Whether or not to dynamically remove chunk of image')
     parser.add_argument('--default-model-descriptor', action='store_true',
                         help='Whether or not to dynamically remove chunk of image')
     parser.add_argument('--exp-name', type=str, default="", help='Weight for Gradient Penalty', required=True)

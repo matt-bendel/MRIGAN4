@@ -201,9 +201,15 @@ class rcGAN(pl.LightningModule):
             S = sp.linop.Multiply((self.args.im_size, self.args.im_size), sp.from_pytorch(maps[j].cpu(), iscomplex=True))
 
             ############# EXPERIMENTAL #################
-            avg_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(avg_gen[j].cpu(), iscomplex=True))).unsqueeze(0).unsqueeze(0).to(self.device)
-            single_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[:, 0])[j].cpu(), iscomplex=True))).unsqueeze(0).unsqueeze(0).to(self.device)
-            gt_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(gt[j].cpu(), iscomplex=True))).unsqueeze(0).unsqueeze(0).to(self.device)
+            # ON CPU
+            # avg_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(avg_gen[j].cpu(), iscomplex=True))).unsqueeze(0).unsqueeze(0).to(self.device)
+            # single_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[:, 0])[j].cpu(), iscomplex=True))).unsqueeze(0).unsqueeze(0).to(self.device)
+            # gt_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(gt[j].cpu(), iscomplex=True))).unsqueeze(0).unsqueeze(0).to(self.device)
+
+            # ON GPU
+            avg_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(avg_gen[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
+            single_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[:, 0])[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
+            gt_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(gt[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
 
             psnr_8s.append(peak_signal_noise_ratio(avg_sp_out, gt_sp_out))
             psnr_1s.append(peak_signal_noise_ratio(single_sp_out, gt_sp_out))
@@ -246,12 +252,12 @@ class rcGAN(pl.LightningModule):
 
     def validation_epoch_end(self, validation_step_outputs):
         # GATHER
-        avg_psnr = self.all_gather(torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()).mean()
-        avg_single_psnr = self.all_gather(torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean()).mean()
+        # avg_psnr = self.all_gather(torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()).mean()
+        # avg_single_psnr = self.all_gather(torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean()).mean()
 
         # NO GATHER
-        # avg_psnr = torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()
-        # avg_single_psnr = torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean()
+        avg_psnr = torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()
+        avg_single_psnr = torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean()
 
         avg_psnr = avg_psnr.cpu().numpy()
         avg_single_psnr = avg_single_psnr.cpu().numpy()

@@ -37,6 +37,9 @@ if __name__ == '__main__':
         print("USING DEFAULT MODEL DESCRIPTOR...")
         args.num_noise = 1
 
+    if args.dp:
+        cfg.batch_size = cfg.batch_size * args.num_gpus
+
     if args.mri:
         with open('configs/mri/config.yml', 'r') as f:
             cfg = yaml.load(f, Loader=yaml.FullLoader)
@@ -107,7 +110,7 @@ if __name__ == '__main__':
         save_top_k=50
     )
 
-    trainer = pl.Trainer(accelerator="gpu", devices=args.num_gpus, strategy='ddp',
+    trainer = pl.Trainer(accelerator="gpu", devices=args.num_gpus, strategy='ddp' if not args.dp else 'dp',
                          max_epochs=cfg.num_epochs, callbacks=[checkpoint_callback_epoch],
                          num_sanity_val_steps=0, profiler="simple", logger=wandb_logger, benchmark=False)
 
