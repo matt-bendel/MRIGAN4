@@ -159,7 +159,7 @@ class CFIDMetric:
 
             S = sp.linop.Multiply((self.args.im_size, self.args.im_size), sp.from_pytorch(maps[i], iscomplex=True))
 
-            im = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(unnormal_im[i].cpu(), iscomplex=True)))
+            im = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(unnormal_im.cpu(), iscomplex=True)))
             im = (im - torch.min(im)) / (torch.max(im) - torch.min(im))
 
             embed_ims[i, 0, :, :] = im
