@@ -90,7 +90,7 @@ if __name__ == "__main__":
             mean = mean.cuda()
             std = std.cuda()
 
-            gens = torch.zeros(size=(y.size(0), cfg.num_z_test, cfg.in_chans / 2, cfg.im_size, cfg.im_size, 2)).cuda()
+            gens = torch.zeros(size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
             for z in range(cfg.num_z_test):
                 gens[:, z, :, :, :, :] = model.reformat(model.forward(y, mask))
 
