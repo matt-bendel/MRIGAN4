@@ -7,6 +7,7 @@ import numpy as np
 import pytorch_lightning as pl
 
 from data_loaders.MRIDataModule import MRIDataModule
+from datasets.fastmri_multicoil_general import FastMRIDataModule
 from utils.parse_args import create_arg_parser
 from models.rcGAN_no_d import rcGAN
 from pytorch_lightning import seed_everything
@@ -28,14 +29,14 @@ if __name__ == "__main__":
         cfg = yaml.load(f, Loader=yaml.FullLoader)
         cfg = json.loads(json.dumps(cfg), object_hook=load_object)
 
-    dm = MRIDataModule(cfg, args.mask_type)
+    dm = FastMRIDataModule(base_path=cfg.data_path, batch_size=cfg.batch_size)
     dm.setup()
     val_loader = dm.val_dataloader()
     best_epoch = -1
     inception_embedding = VGG16Embedding()
     best_cfid = 10000000
-    start_epoch = 50
-    end_epoch = 100
+    start_epoch = 42
+    end_epoch = 92
 
     with torch.no_grad():
         for epoch in range(start_epoch, end_epoch):
