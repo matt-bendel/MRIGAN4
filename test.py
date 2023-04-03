@@ -103,7 +103,7 @@ if __name__ == "__main__":
             batch_apsds = []
 
             for j in range(y.size(0)):
-                single_samps = np.zeros(cfg.num_z_test, cfg.im_size, cfg.im_size)
+                single_samps = np.zeros((cfg.num_z_test, cfg.im_size, cfg.im_size))
 
                 S = sp.linop.Multiply((cfg.im_size, cfg.im_size), maps[j].cpu().numpy())
                 gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
