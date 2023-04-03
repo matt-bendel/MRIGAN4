@@ -80,6 +80,8 @@ if __name__ == "__main__":
         ssims = []
         apsds = []
 
+        print(len(test_loader))
+
         for i, data in enumerate(test_loader):
             y, x, mask, mean, std, maps, _, _ = data
             y = y.cuda()
