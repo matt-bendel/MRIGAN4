@@ -42,15 +42,9 @@ def ImageCropandKspaceCompression(x, size, num_vcoils = 8, vh = None):
         if vh is None:
             #Convert to a cupy tensor
             with cp.cuda.Device(0):
-                x_tocompression = cp.asarray(x_tocompression)
-                U, S, Vh = cp.linalg.svd(x_tocompression, full_matrices=False)
-                coil_compressed_x = cp.matmul(x_tocompression, Vh.conj().T)
-                coil_compressed_x = coil_compressed_x[:, 0:num_vcoils].reshape(size, size, num_vcoils)
-            # x_tocompression = np.asarray(x_tocompression)
-            # U, S, Vh = np.linalg.svd(x_tocompression, full_matrices=False)
-            # coil_compressed_x = np.matmul(x_tocompression, Vh.conj().T)
-            # coil_compressed_x = coil_compressed_x[:, 0:num_vcoils].reshape(size, size, num_vcoils)
-                
+                U, S, Vh = np.linalg.svd(x_tocompression, full_matrices=False)
+                coil_compressed_x = np.matmul(x_tocompression, Vh.conj().T)
+                coil_compressed_x = coil_compressed_x[:, 0:8].reshape(384, 384, 8)
         else:
             coil_compressed_x = np.matmul(x_tocompression, vh.conj().T)
             coil_compressed_x = coil_compressed_x[:, 0:num_vcoils].reshape(size, size, num_vcoils)
@@ -59,9 +53,7 @@ def ImageCropandKspaceCompression(x, size, num_vcoils = 8, vh = None):
     else:
         coil_compressed_x = cropped_x
 
-    if vh is not None:
-        return coil_compressed_x
-    return cp.asnumpy(coil_compressed_x), cp.asnumpy(Vh)
+    return coil_compressed_x
 
 
 def get_compressed(kspace: np.ndarray, img_size, mask_type, accel_rate, attrs: Dict, fname:str, num_vcoils = 8, vh=None):
