@@ -129,7 +129,7 @@ class rcGAN(pl.LightningModule):
         elif self.current_epoch <= 22:
             adv_weight = 1e-4
 
-        return - 1e-5 * gen_pred_loss.mean()
+        return adv_weight * gen_pred_loss.mean()
 
     def l1_std_p(self, avg_recon, gens, x):
         return F.l1_loss(avg_recon, x) - self.std_mult * np.sqrt(
