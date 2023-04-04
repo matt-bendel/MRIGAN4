@@ -164,14 +164,14 @@ class MulticoilDataset(torch.utils.data.Dataset):
     def __getitem__(self, i: int):
         fname, dataslice = self.examples[i]
         # print(i, fname, dataslice)
+        try:
+            with h5py.File(os.path.join(self.max_val_dir, fname.name), 'r') as hf:
+                    max_val = hf.attrs['max_val']
 
-        with h5py.File(os.path.join(self.max_val_dir, fname.name), 'r') as hf:
-            try:
-                max_val = hf.attrs['max_val']
-
-                vh = hf['vh'][dataslice]
-            except:
-                vh = None
+                    vh = hf['vh'][dataslice]
+        except:
+            max_val = None
+            vh = None
 
         with h5py.File(fname, "r") as hf:
 
