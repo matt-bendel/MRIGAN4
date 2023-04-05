@@ -16,7 +16,7 @@ im_size: 384
 R: 8
 
 #optimizer:
-lr: 0.001
+lr: 0.002
 beta_1: 0
 beta_2: 0.99
 gp_weight: 10
