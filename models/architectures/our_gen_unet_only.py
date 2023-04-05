@@ -40,10 +40,10 @@ class UNET(nn.Module):
     def contract_block(self, in_channels, out_channels, kernel_size, padding):
         contract = nn.Sequential(
             torch.nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, stride=1, padding=padding),
-            torch.nn.InstanceNorm2d(out_channels),
+            torch.nn.BatchNorm2d(out_channels),
             torch.nn.ReLU(),
             torch.nn.Conv2d(out_channels, out_channels, kernel_size=kernel_size, stride=1, padding=padding),
-            torch.nn.InstanceNorm2d(out_channels),
+            torch.nn.BatchNorm2d(out_channels),
             torch.nn.ReLU(),
             torch.nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         )
@@ -52,10 +52,10 @@ class UNET(nn.Module):
 
     def expand_block(self, in_channels, out_channels, kernel_size, padding):
         expand = nn.Sequential(torch.nn.Conv2d(in_channels, out_channels, kernel_size, stride=1, padding=padding),
-                               torch.nn.InstanceNorm2d(out_channels),
+                               torch.nn.BatchNorm2d(out_channels),
                                torch.nn.ReLU(),
                                torch.nn.Conv2d(out_channels, out_channels, kernel_size, stride=1, padding=padding),
-                               torch.nn.InstanceNorm2d(out_channels),
+                               torch.nn.BatchNorm2d(out_channels),
                                torch.nn.ReLU(),
                                torch.nn.ConvTranspose2d(out_channels, out_channels, kernel_size=3, stride=2, padding=1,
                                                         output_padding=1)
