@@ -324,7 +324,7 @@ class FastMRIDataModule(pl.LightningDataModule):
         """
         return DataLoader(self.train, batch_size=self.batch_size,
                           num_workers=self.num_data_loader_workers,
-                          shuffle=True, pin_memory=False, drop_last=True)
+                          shuffle=False, pin_memory=False, drop_last=True)
 
     def val_dataloader(self):
         """
