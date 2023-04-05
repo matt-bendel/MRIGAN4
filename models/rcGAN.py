@@ -235,7 +235,7 @@ class rcGAN(pl.LightningModule):
 
         # TODO: Plot as tensors using torch function
         if batch_idx == 0:
-            if self.global_rank == 0 and self.current_epoch % 5 == 0: and fig_count == 0:
+            if self.global_rank == 0 and self.current_epoch % 5 == 0 and fig_count == 0:
                 fig_count += 1
                 avg_gen_np = mag_avg_gen[0, 0, :, :].cpu().numpy()
                 gt_np = mag_gt[0, 0, :, :].cpu().numpy()
