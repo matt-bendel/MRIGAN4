@@ -123,7 +123,7 @@ class rcGAN(pl.LightningModule):
         for k in range(y.shape[0] - 1):
             gen_pred_loss += torch.mean(fake_pred[k + 1])
 
-        adv_weight = 1e-4
+        adv_weight = 1e-3
 
         return adv_weight * gen_pred_loss.mean()
 
@@ -286,9 +286,9 @@ class rcGAN(pl.LightningModule):
         self.trainer.strategy.barrier()
 
     def configure_optimizers(self):
-        opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.args.lr,
+        opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.args.lr / self.num_gpus,
                                  betas=(self.args.beta_1, self.args.beta_2))
-        opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.args.lr,
+        opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.args.lr / self.num_gpus,
                                  betas=(self.args.beta_1, self.args.beta_2))
         return [opt_d, opt_g], []
 
