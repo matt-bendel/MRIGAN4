@@ -123,7 +123,7 @@ class rcGAN(pl.LightningModule):
         for k in range(y.shape[0] - 1):
             gen_pred_loss += torch.mean(fake_pred[k + 1])
 
-        adv_weight = 1e-3
+        adv_weight = 1e-4
 
         return adv_weight * gen_pred_loss.mean()
 
