@@ -14,7 +14,7 @@ from torch.nn import functional as F
 from utils.fftc import ifft2c_new, fft2c_new
 from utils.math import complex_abs, tensor_to_complex_np
 from models.architectures.our_gen_unet_only import UNetModel
-from models.architectures.patch_disc import PatchDisc
+from models.architectures.our_disc import DiscriminatorModel
 from evaluation_scripts.metrics import psnr
 from mail import send_mail
 from torchmetrics.functional import peak_signal_noise_ratio
@@ -123,9 +123,13 @@ class rcGAN(pl.LightningModule):
         for k in range(y.shape[0] - 1):
             gen_pred_loss += torch.mean(fake_pred[k + 1])
 
-        adv_weight = 1e-4
+        adv_weight = 1e-5
+        if self.current_epoch <= 4:
+            adv_weight = 1e-2
+        elif self.current_epoch <= 22:
+            adv_weight = 1e-4
 
-        return adv_weight * gen_pred_loss.mean()
+        return - adv_weight * gen_pred_loss.mean()
 
     def l1_std_p(self, avg_recon, gens, x):
         return F.l1_loss(avg_recon, x) - self.std_mult * np.sqrt(
