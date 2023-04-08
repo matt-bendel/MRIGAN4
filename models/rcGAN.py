@@ -14,7 +14,7 @@ from torch.nn import functional as F
 from utils.fftc import ifft2c_new, fft2c_new
 from utils.math import complex_abs, tensor_to_complex_np
 from models.architectures.our_gen_unet_only import UNetModel
-from models.architectures.our_disc import DiscriminatorModel
+from models.architectures.patch_disc import PatchDisc
 from evaluation_scripts.metrics import psnr
 from mail import send_mail
 from torchmetrics.functional import peak_signal_noise_ratio
