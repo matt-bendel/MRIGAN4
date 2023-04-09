@@ -15,6 +15,7 @@ from utils.fftc import ifft2c_new, fft2c_new
 from utils.math import complex_abs, tensor_to_complex_np
 from models.architectures.our_gen_unet_only import UNetModel
 from models.architectures.our_disc import DiscriminatorModel
+from models.architectures.patch_disc import PatchDisc
 from evaluation_scripts.metrics import psnr
 from mail import send_mail
 from torchmetrics.functional import peak_signal_noise_ratio
@@ -38,13 +39,13 @@ class rcGAN(pl.LightningModule):
             out_chans=self.out_chans,
         )
 
-        self.discriminator = DiscriminatorModel(
-            in_chans=self.args.in_chans * 2,
-            out_chans=self.out_chans
-        )
-        # PatchDisc(
-        #     input_nc=args.in_chans * 2
+        # self.discriminator = DiscriminatorModel(
+        #     in_chans=self.args.in_chans * 2,
+        #     out_chans=self.out_chans
         # )
+        self.discriminator = PatchDisc(
+            input_nc=args.in_chans * 2
+        )
 
         self.std_mult = 1
         self.is_good_model = 0
