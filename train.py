@@ -54,7 +54,7 @@ if __name__ == '__main__':
             cfg.batch_size = cfg.batch_size * args.num_gpus
 
         # dm = MRIDataModule(cfg, args.mask_type)
-        dm = FastMRIDataModule(base_path=cfg.data_path, batch_size=cfg.batch_size, num_data_loader_workers=2 if not args.dp else 20)
+        dm = FastMRIDataModule(base_path=cfg.data_path, batch_size=cfg.batch_size, num_data_loader_workers=10 if not args.dp else 20)
 
         if args.rcgan:
             noise_structure = {"AWGN": args.awgn, "structure": args.noise_structure}
