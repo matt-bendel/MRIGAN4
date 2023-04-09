@@ -14,7 +14,7 @@ from torch.nn import functional as F
 from utils.fftc import ifft2c_new, fft2c_new
 from utils.math import complex_abs, tensor_to_complex_np
 from models.architectures.our_gen_unet_only import UNetModel
-from models.architectures.patch_disc import PatchDisc
+from models.architectures.our_disc import DiscriminatorModel
 from evaluation_scripts.metrics import psnr
 from mail import send_mail
 from torchmetrics.functional import peak_signal_noise_ratio
@@ -38,9 +38,13 @@ class rcGAN(pl.LightningModule):
             out_chans=self.out_chans,
         )
 
-        self.discriminator = PatchDisc(
-            input_nc=args.in_chans * 2
+        self.discriminator = DiscriminatorModel(
+            in_chans=self.args.in_chans * 2,
+            out_chans=self.out_chans
         )
+        # PatchDisc(
+        #     input_nc=args.in_chans * 2
+        # )
 
         self.std_mult = 1
         self.is_good_model = 0
@@ -83,7 +87,9 @@ class rcGAN(pl.LightningModule):
         # Get random interpolation between real and fake samples
         interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
         d_interpolates = self.discriminator(input=interpolates, y=y)
-        fake = Tensor(real_samples.shape[0], 1, d_interpolates.shape[-1], d_interpolates.shape[-1]).fill_(1.0).to(
+        # fake = Tensor(real_samples.shape[0], 1, d_interpolates.shape[-1], d_interpolates.shape[-1]).fill_(1.0).to(
+        #     self.device)
+        fake = Tensor(real_samples.shape[0], 1).fill_(1.0).to(
             self.device)
 
         # Get gradient w.r.t. interpolates
@@ -111,13 +117,21 @@ class rcGAN(pl.LightningModule):
 
     def adversarial_loss_generator(self, y, gens):
         patch_out = 94
-        fake_pred = torch.zeros(size=(y.shape[0], self.args.num_z_train, patch_out, patch_out), device=self.device)
+        # fake_pred = torch.zeros(size=(y.shape[0], self.args.num_z_train, patch_out, patch_out), device=self.device)
+        # for k in range(y.shape[0]):
+        #     cond = torch.zeros(1, gens.shape[2], gens.shape[3], gens.shape[4], device=self.device)
+        #     cond[0, :, :, :] = y[k, :, :, :]
+        #     cond = cond.repeat(self.args.num_z_train, 1, 1, 1)
+        #     temp = self.discriminator(input=gens[k], y=cond)
+        #     fake_pred[k, :, :, :] = temp[:, 0, :, :]
+
+        fake_pred = torch.zeros(size=(y.shape[0], self.args.num_z_train), device=self.device)
         for k in range(y.shape[0]):
             cond = torch.zeros(1, gens.shape[2], gens.shape[3], gens.shape[4], device=self.device)
             cond[0, :, :, :] = y[k, :, :, :]
             cond = cond.repeat(self.args.num_z_train, 1, 1, 1)
             temp = self.discriminator(input=gens[k], y=cond)
-            fake_pred[k, :, :, :] = temp[:, 0, :, :]
+            fake_pred[k] = temp[:, 0]
 
         gen_pred_loss = torch.mean(fake_pred[0])
         for k in range(y.shape[0] - 1):
