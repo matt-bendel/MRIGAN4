@@ -53,8 +53,8 @@ if __name__ == '__main__':
         if args.dp:
             cfg.batch_size = cfg.batch_size * args.num_gpus
 
-        # dm = MRIDataModule(cfg, args.mask_type)
-        dm = FastMRIDataModule(base_path=cfg.data_path, batch_size=cfg.batch_size, num_data_loader_workers=2 if not args.dp else 20)
+        dm = MRIDataModule(cfg, args.mask_type)
+        # dm = FastMRIDataModule(base_path=cfg.data_path, batch_size=cfg.batch_size, num_data_loader_workers=2 if not args.dp else 20)
 
         if args.rcgan:
             noise_structure = {"AWGN": args.awgn, "structure": args.noise_structure}
@@ -79,6 +79,16 @@ if __name__ == '__main__':
 
         dm = CelebAHQDataModule(cfg, args.mask_type)
         model = InpaintUNet(cfg, args.num_noise, args.default_model_descriptor, args.exp_name)
+    elif args.sr:
+        with open('configs/super_resolution/config.yml', 'r') as f:
+            cfg = yaml.load(f, Loader=yaml.FullLoader)
+            cfg = json.loads(json.dumps(cfg), object_hook=load_object)
+
+        if args.dp:
+            cfg.batch_size = cfg.batch_size * args.num_gpus
+
+        dm = CelebAHQDataModule(cfg, args.mask_type) # TODO: SR DataModule
+        model = InpaintUNet(cfg, args.num_noise, args.default_model_descriptor, args.exp_name) # TODO: SR rcGAN
     elif args.cs:
         with open('configs/cs/config.yml', 'r') as f:
             cfg = yaml.load(f, Loader=yaml.FullLoader)

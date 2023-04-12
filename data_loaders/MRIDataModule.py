@@ -59,7 +59,7 @@ class DataTransform:
         x = ifft(kspace, (0, 1))  # (768, 396, 16)
 
         # TODO: Save SVD matrix offline
-        coil_compressed_x = ImageCropandKspaceCompression(x, vh)  # (384, 384, 8)
+        coil_compressed_x = ImageCropandKspaceCompression(x, None)  # (384, 384, 8)
 
         im_tensor = transforms.to_tensor(coil_compressed_x).permute(2, 0, 1, 3)
 

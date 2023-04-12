@@ -35,6 +35,8 @@ def create_arg_parser():
                         help='Whether or not to dynamically remove chunk of image')
     parser.add_argument('--cs', action='store_true',
                         help='Whether or not to dynamically remove chunk of image')
+    parser.add_argument('--sr', action='store_true',
+                        help='Whether or not to dynamically remove chunk of image')
     parser.add_argument('--rcgan', action='store_true',
                         help='Whether or not to dynamically remove chunk of image')
     parser.add_argument('--awgn', action='store_true',
