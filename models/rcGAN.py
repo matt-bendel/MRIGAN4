@@ -221,13 +221,13 @@ class rcGAN(pl.LightningModule):
         psnr_1s = []
 
         for j in range(y.size(0)):
-            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), sp.from_pytorch(maps[j].cpu(), iscomplex=True))
+            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), tensor_to_complex_np(maps[j].cpu()))
 
             ############# EXPERIMENTAL #################
             # ON CPU
-            avg_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(avg_gen[j].cpu(), iscomplex=True))).unsqueeze(0).unsqueeze(0).to(self.device)
-            single_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[:, 0])[j].cpu(), iscomplex=True))).unsqueeze(0).unsqueeze(0).to(self.device)
-            gt_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(gt[j].cpu(), iscomplex=True))).unsqueeze(0).unsqueeze(0).to(self.device)
+            avg_sp_out = torch.tensor(S.H * tensor_to_complex_np(avg_gen[j].cpu())).abs().unsqueeze(0).unsqueeze(0).to(self.device)
+            single_sp_out = torch.tensor(S.H * tensor_to_complex_np(self.reformat(gens[:, 0])[j].cpu())).abs().unsqueeze(0).unsqueeze(0).to(self.device)
+            gt_sp_out = torch.tensor(S.H * tensor_to_complex_np(gt[j].cpu())).abs().unsqueeze(0).unsqueeze(0).to(self.device)
 
             # ON GPU
             # avg_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(avg_gen[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
@@ -259,8 +259,8 @@ class rcGAN(pl.LightningModule):
                 avg_gen_np = mag_avg_gen[0, 0, :, :].cpu().numpy()
                 gt_np = mag_gt[0, 0, :, :].cpu().numpy()
 
-                plot_avg_np = avg_gen_np / np.max(gt_np)
-                plot_gt_np = gt_np / np.max(gt_np)
+                plot_avg_np = (avg_gen_np - np.min(avg_gen_np)) / (np.max(avg_gen_np) - np.min(avg_gen_np))
+                plot_gt_np = (gt_np - np.min(gt_np)) / (np.max(gt_np) - np.min(avg_gen_np))
 
                 np_psnr = psnr(gt_np, avg_gen_np)
 
