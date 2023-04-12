@@ -259,8 +259,8 @@ class rcGAN(pl.LightningModule):
                 avg_gen_np = mag_avg_gen[0, 0, :, :].cpu().numpy()
                 gt_np = mag_gt[0, 0, :, :].cpu().numpy()
 
-                plot_avg_np = (avg_gen_np - np.min(avg_gen_np)) / (np.max(avg_gen_np) - np.min(avg_gen_np))
-                plot_gt_np = (gt_np - np.min(gt_np)) / (np.max(gt_np) - np.min(gt_np))
+                plot_avg_np = avg_gen_np / np.max(gt_np)
+                plot_gt_np = gt_np / np.max(gt_np)
 
                 np_psnr = psnr(gt_np, avg_gen_np)
 
