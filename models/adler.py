@@ -6,32 +6,28 @@ import torchvision
 import pytorch_lightning as pl
 import numpy as np
 import torch.autograd as autograd
-import matplotlib.pyplot as plt
 import sigpy as sp
-import sigpy.mri as mr
 from matplotlib import cm
 
 from PIL import Image
 from torch.nn import functional as F
-from data import transforms
 from utils.fftc import ifft2c_new, fft2c_new
 from utils.math import complex_abs, tensor_to_complex_np
 from models.architectures.our_gen_unet_only import UNetModel
 from models.architectures.our_disc import DiscriminatorModel
-from evaluation_scripts.plotting_scripts import generate_image, generate_error_map
-from evaluation_scripts.metrics import psnr, ssim
-from evaluation_scripts.plotting_scripts import gif_im, generate_gif
+from evaluation_scripts.metrics import psnr
 from mail import send_mail
-
+from torchmetrics.functional import peak_signal_noise_ratio
 
 class Adler(pl.LightningModule):
-    def __init__(self, args, num_realizations, default_model_descriptor, exp_name, noise_type):
+    def __init__(self, args, num_realizations, default_model_descriptor, exp_name, noise_type, num_gpus):
         super().__init__()
         self.args = args
         self.num_realizations = num_realizations
         self.default_model_descriptor = default_model_descriptor
         self.exp_name = exp_name
         self.noise_type = noise_type
+        self.num_gpus = num_gpus
 
         self.in_chans = args.in_chans + self.num_realizations * 2
         self.out_chans = args.out_chans
@@ -46,7 +42,10 @@ class Adler(pl.LightningModule):
             out_chans=args.out_chans
         )
 
+        self.std_mult = 1
+        self.is_good_model = 0
         self.resolution = self.args.im_size
+
         self.save_hyperparameters()  # Save passed values
 
     def get_noise(self, num_vectors, mask):
@@ -116,10 +115,10 @@ class Adler(pl.LightningModule):
         return 0.001 * torch.mean(real_pred ** 2)
 
     def training_step(self, batch, batch_idx, optimizer_idx):
-        y, x, mask, max_val, _, _, _ = batch
+        y, x, mask, mean, std, _, _, _ = batch
 
         # train generator
-        if optimizer_idx == 0:
+        if optimizer_idx == 1:
             gen1 = self.forward(y, mask)
             gen2 = self.forward(y, mask)
 
@@ -135,7 +134,7 @@ class Adler(pl.LightningModule):
             return g_loss
 
         # train discriminator
-        if optimizer_idx == 1:
+        if optimizer_idx == 0:
             gen1 = self.forward(y, mask)
             gen2 = self.forward(y, mask)
 
@@ -147,8 +146,8 @@ class Adler(pl.LightningModule):
 
             # MAKE PREDICTIONS
             x_posterior_concat = torch.cat([gen1, gen2], 1)
-            real_pred = D(input=x_expect, y=y)
-            fake_pred = D(input=x_posterior_concat, y=y)
+            real_pred = self.discriminator(input=x_expect, y=y)
+            fake_pred = self.discriminator(input=x_posterior_concat, y=y)
 
             d_loss = fake_pred.mean() - real_pred.mean()
             d_loss += self.gradient_penalty(x_posterior_concat, x_expect, y)
@@ -159,13 +158,7 @@ class Adler(pl.LightningModule):
             return d_loss
 
     def validation_step(self, batch, batch_idx, external_test=False):
-        losses = {
-            'psnr': [],
-            'single_psnr': [],
-            'ssim': []
-        }
-
-        y, x, mask, max_val, maps, _, _ = batch
+        y, x, mask, mean, std, maps, _, _ = batch
 
         if external_test:
             num_code = self.args.num_z_test
@@ -175,81 +168,88 @@ class Adler(pl.LightningModule):
         gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size),
                            device=self.device)
         for z in range(num_code):
-            gens[:, z, :, :, :] = self.forward(y, mask)
+            gens[:, z, :, :, :] = self.forward(y, mask) * std[:, None, None, None] + mean[:, None, None, None] # EXPERIMENTAL UN
 
         avg = torch.mean(gens, dim=1)
 
         avg_gen = self.reformat(avg)
-        gt = self.reformat(x)
+        gt = self.reformat(x * std[:, None, None, None] + mean[:, None, None, None])
+
+        mag_avg_list = []
+        mag_single_list = []
+        mag_gt_list = []
+        psnr_8s = []
+        psnr_1s = []
 
         for j in range(y.size(0)):
-            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), maps[j].cpu().numpy())
-            gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * max_val[j]).cpu()), tensor_to_complex_np(
-                (avg_gen[j] * max_val[j]).cpu())
+            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), sp.from_pytorch(maps[j], iscomplex=True))
 
-            avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
-            gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
+            ############# EXPERIMENTAL #################
+            avg_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(avg_gen[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
+            single_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[:, 0])[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
+            gt_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(gt[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
 
-            single_gen = torch.zeros(8, self.args.im_size, self.args.im_size, 2, device=self.device)
-            single_gen[:, :, :, 0] = gens[j, 0, 0:8, :, :]
-            single_gen[:, :, :, 1] = gens[j, 0, 8:16, :, :]
+            psnr_8s.append(peak_signal_noise_ratio(avg_sp_out, gt_sp_out))
+            psnr_1s.append(peak_signal_noise_ratio(single_sp_out, gt_sp_out))
 
-            single_gen_complex_np = tensor_to_complex_np((single_gen * max_val[j]).cpu())
-            single_gen_np = torch.tensor(S.H * single_gen_complex_np).abs().numpy()
+            mag_avg_list.append(avg_sp_out)
+            mag_single_list.append(single_sp_out)
+            mag_gt_list.append(gt_sp_out)
 
-            if self.global_rank == 0 and batch_idx == 0 and j == 0 and self.current_epoch % 5 == 0:
+        psnr_8s = torch.stack(psnr_8s)
+        psnr_1s = torch.stack(psnr_1s)
+        mag_avg_gen = torch.cat(mag_avg_list, dim=0)
+        mag_single_gen = torch.cat(mag_single_list, dim=0)
+        mag_gt = torch.cat(mag_gt_list, dim=0)
+
+        self.log('psnr_8_step', psnr_8s.mean(), on_step=True, on_epoch=False, prog_bar=True)
+        self.log('psnr_1_step', psnr_1s.mean(), on_step=True, on_epoch=False, prog_bar=True)
+
+        ############################################
+
+        # TODO: Plot as tensors using torch function
+        if batch_idx == 0:
+            if self.global_rank == 0 and self.current_epoch % 5 == 0:
+                avg_gen_np = mag_avg_gen[0, 0, :, :].cpu().numpy()
+                gt_np = mag_gt[0, 0, :, :].cpu().numpy()
+
                 plot_avg_np = (avg_gen_np - np.min(avg_gen_np)) / (np.max(avg_gen_np) - np.min(avg_gen_np))
                 plot_gt_np = (gt_np - np.min(gt_np)) / (np.max(gt_np) - np.min(gt_np))
 
+                np_psnr = psnr(gt_np, avg_gen_np)
+
                 self.logger.log_image(
                     key=f"epoch_{self.current_epoch}_img",
-                    images=[Image.fromarray(np.uint8(plot_gt_np*255), 'L'), Image.fromarray(np.uint8(plot_avg_np*255), 'L'), Image.fromarray(np.uint8(cm.jet(np.abs(plot_gt_np - plot_avg_np))*255))],
-                    caption=["GT", f"Recon: PSNR: {psnr(gt_np, avg_gen_np):.2f}; SINGLE PSNR: {psnr(gt_np, single_gen_np):.2f}", "Error"]
+                    images=[Image.fromarray(np.uint8(plot_gt_np*255), 'L'), Image.fromarray(np.uint8(plot_avg_np*255), 'L'), Image.fromarray(np.uint8(cm.jet(5*np.abs(plot_gt_np - plot_avg_np))*255))],
+                    caption=["GT", f"Recon: PSNR (NP): {np_psnr:.2f}", "Error"]
                 )
 
             self.trainer.strategy.barrier()
 
-            losses['ssim'].append(ssim(gt_np, avg_gen_np))
-            losses['psnr'].append(psnr(gt_np, avg_gen_np))
-            losses['single_psnr'].append(psnr(gt_np, single_gen_np))
-
-        losses['psnr'] = np.mean(losses['psnr'])
-        losses['ssim'] = np.mean(losses['ssim'])
-        losses['single_psnr'] = np.mean(losses['single_psnr'])
-
-        return losses
-
-    def validation_step_end(self, batch_parts):
-        losses = {
-            'psnr': np.mean(batch_parts['psnr']),
-            'single_psnr': np.mean(batch_parts['single_psnr']),
-            'ssim': np.mean(batch_parts['ssim'])
-        }
-
-        return losses
+        return {'psnr_8': psnr_8s.mean(), 'psnr_1': psnr_1s.mean()}
 
     def validation_epoch_end(self, validation_step_outputs):
-        psnrs = []
-        single_psnrs = []
-        ssims = []
+        # GATHER
+        avg_psnr = self.all_gather(torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()).mean()
+        avg_single_psnr = self.all_gather(torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean()).mean()
 
-        for out in validation_step_outputs:
-            psnrs.append(out['psnr'])
-            ssims.append(out['ssim'])
-            single_psnrs.append(out['single_psnr'])
+        # NO GATHER
+        # avg_psnr = torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()
+        # avg_single_psnr = torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean()
 
-        avg_psnr = np.mean(psnrs)
-        avg_single_psnr = np.mean(single_psnrs)
-        psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
+        avg_psnr = avg_psnr.cpu().numpy()
+        avg_single_psnr = avg_single_psnr.cpu().numpy()
 
-        if self.global_rank == 0 and self.current_epoch % 2 == 0:
+        if self.global_rank == 0 and self.current_epoch % 1 == 0:
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE - Ohayon",
-                      f"Metrics:\nPSNR: {avg_psnr:.2f}\nSINGLE PSNR: {avg_single_psnr:.2f}\nSSIM: {np.mean(ssims):.4f}\nPSNR Diff: {psnr_diff}",
+                      f"Std. Dev. Weight: {self.std_mult:.4f}\nMetrics:\nPSNR: {avg_psnr:.2f}\nSINGLE PSNR: {avg_single_psnr:.2f}",
                       file_name="variation_gif.gif")
+
+        self.trainer.strategy.barrier()
 
     def configure_optimizers(self):
         opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.args.lr,
                                  betas=(self.args.beta_1, self.args.beta_2))
         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.args.lr,
                                  betas=(self.args.beta_1, self.args.beta_2))
-        return [opt_g, opt_d], []
+        return [opt_d, opt_g], []
