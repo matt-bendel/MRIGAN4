@@ -136,11 +136,12 @@ class MRIDataModule(pl.LightningDataModule):
     DataModule used for semantic segmentation in geometric generalization project
     """
 
-    def __init__(self, args, mask_type):
+    def __init__(self, args, mask_type, big_test=False):
         super().__init__()
         self.prepare_data_per_node = True
         self.args = args
         self.mask_type = mask_type
+        self.big_test = big_test
 
     def prepare_data(self):
         pass
@@ -170,7 +171,7 @@ class MRIDataModule(pl.LightningDataModule):
             use_top_slices=True,
             number_of_top_slices=self.args.num_of_top_slices,
             restrict_size=False,
-            big_test=False
+            big_test=self.big_test
         )
 
         test_data = SelectiveSliceData_Test(

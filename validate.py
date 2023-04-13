@@ -29,7 +29,7 @@ if __name__ == "__main__":
         cfg = yaml.load(f, Loader=yaml.FullLoader)
         cfg = json.loads(json.dumps(cfg), object_hook=load_object)
 
-    dm = FastMRIDataModule(base_path=cfg.data_path, batch_size=cfg.batch_size)
+    dm = MRIDataModule(cfg, args.mask_type)
     dm.setup()
     val_loader = dm.val_dataloader()
     best_epoch = -1
