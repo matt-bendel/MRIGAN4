@@ -163,14 +163,14 @@ if __name__ == "__main__":
                 avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
                 gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
 
-                # fig = plt.figure()
-                #
-                # generate_image(fig, gt_np, avg_gen_np, f'Recon', 1, 2, 1, disc_num=False)
-                # im, ax = generate_error_map(fig, gt_np, avg_gen_np, f'Recon', 2, 2, 1)
-                #
-                # plt.savefig(f'test.png')
-                # plt.close()
-                # exit()
+                fig = plt.figure()
+
+                generate_image(fig, gt_np, avg_gen_np, f'Recon', 1, 2, 1, disc_num=False)
+                im, ax = generate_error_map(fig, gt_np, avg_gen_np, f'Recon', 2, 2, 1)
+
+                plt.savefig(f'test.png')
+                plt.close()
+                exit()
 
                 for z in range(cfg.num_z_test):
                     np_samp = tensor_to_complex_np((gens[j, z, :, :, :, :] * std[j] + mean[j]).cpu())
