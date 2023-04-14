@@ -10,6 +10,7 @@ import torchvision.transforms as transforms
 from utils.fftc import fft2c_new, ifft2c_new
 from utils.math import complex_abs, tensor_to_complex_np
 from tqdm import tqdm
+from data.transforms import to_tensor
 
 def symmetric_matrix_square_root_torch(mat, eps=1e-10):
     """Compute square root of a symmetric matrix.
@@ -227,7 +228,7 @@ class CFIDMetric:
                                 s_maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=16,
                                                              device=sp.Device(0), show_pbar=False, crop=0.70,
                                                              kernel_width=6).run().get()
-                                S = sp.linop.Multiply((self.args.im_size, self.args.im_size), s_maps)
+                                S = to_tensor(s_maps).cuda()
 
                                 maps.append(S)
 
