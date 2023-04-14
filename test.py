@@ -159,11 +159,10 @@ if __name__ == "__main__":
             name = k[7:]  # remove `module.`
             new_state_dict[name] = v
 
-        model.generator = torch.nn.DataParallel(model.generator).cuda()
-        model.generator.load_state_dict(checkpoint_gen['model'])
-        model.generator.eval()
+        print(new_state_dict)
+        model.generator.load_state_dict(new_state_dict)
 
-        # model = model.cuda()
+        model = model.cuda()
         model.eval()
 
 
