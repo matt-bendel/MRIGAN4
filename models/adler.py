@@ -185,9 +185,13 @@ class Adler(pl.LightningModule):
             S = sp.linop.Multiply((self.args.im_size, self.args.im_size), sp.from_pytorch(maps[j], iscomplex=True))
 
             ############# EXPERIMENTAL #################
-            avg_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(avg_gen[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
-            single_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[:, 0])[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
-            gt_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(gt[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
+            avg_sp_out = torch.tensor(S.H * tensor_to_complex_np(avg_gen[j].cpu())).abs().unsqueeze(0).unsqueeze(0).to(
+                self.device)
+            single_sp_out = torch.tensor(
+                S.H * tensor_to_complex_np(self.reformat(gens[:, 0])[j].cpu())).abs().unsqueeze(0).unsqueeze(0).to(
+                self.device)
+            gt_sp_out = torch.tensor(S.H * tensor_to_complex_np(gt[j].cpu())).abs().unsqueeze(0).unsqueeze(0).to(
+                self.device)
 
             psnr_8s.append(peak_signal_noise_ratio(avg_sp_out, gt_sp_out))
             psnr_1s.append(peak_signal_noise_ratio(single_sp_out, gt_sp_out))
