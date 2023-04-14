@@ -181,7 +181,7 @@ if __name__ == "__main__":
                 plt.savefig(f'test_gt.png')
                 plt.close()
 
-                new_y_true = fft2c_new(model.reformat(y)[j] * std[j] + mask[j])
+                new_y_true = fft2c_new(model.reformat(x)[j] * std[j] + mask[j])
                 maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=32,
                                            device=sp.Device(0), crop=0.70,
                                            kernel_width=6).run().get()
