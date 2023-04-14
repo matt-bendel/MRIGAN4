@@ -174,12 +174,12 @@ if __name__ == "__main__":
                 # plt.savefig(f'test.png')
                 # plt.close()
 
-                fig = plt.figure()
-
-                generate_image(fig, gt_np, gt_np, f'GT', 1, 1, 1, disc_num=False)
-
-                plt.savefig(f'test_gt.png')
-                plt.close()
+                # fig = plt.figure()
+                #
+                # generate_image(fig, gt_np, gt_np, f'GT', 1, 1, 1, disc_num=False)
+                #
+                # plt.savefig(f'test_gt.png')
+                # plt.close()
 
                 new_y_true = fft2c_new(model.reformat(y)[j] * std[j] + mean[j])
                 mps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=16,
