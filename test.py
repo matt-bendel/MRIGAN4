@@ -3,6 +3,7 @@ import yaml
 import os
 import types
 import json
+import pathlib
 
 import numpy as np
 
@@ -112,6 +113,7 @@ if __name__ == "__main__":
             cfg = yaml.load(f, Loader=yaml.FullLoader)
             cfg = json.loads(json.dumps(cfg), object_hook=load_object)
 
+        cfg.batch_size = cfg.batch_size * 4
         dm = MRIDataModule(cfg, args.mask_type, big_test=True)
 
         dm.setup()
@@ -144,8 +146,18 @@ if __name__ == "__main__":
     with torch.no_grad():
         model = model_alias.load_from_checkpoint(
             checkpoint_path=cfg.checkpoint_dir + args.exp_name + '/checkpoint-epoch=92.ckpt')
+        checkpoint_file_gen = pathlib.Path(
+            f'/home/bendel.8/Git_Repos/full_scale_mrigan/MRIGAN3/trained_models/generator_best_model.pt')
+        # checkpoint_file_gen = pathlib.Path(
+        #     f'{args.checkpoint_dir}/generator_model.pt')
+        checkpoint_gen = torch.load(checkpoint_file_gen, map_location=torch.device('cuda'))
+
+        model.generator.load_state_dict(checkpoint_gen['model'])
+
         model = model.cuda()
         model.eval()
+
+
 
         psnrs = []
         ssims = []
