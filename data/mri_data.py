@@ -277,9 +277,13 @@ class SelectiveSliceData(torch.utils.data.Dataset):
             vh = hf['vh'][slice]
 
         with h5py.File(fname, 'r') as data:
+            maps = None
+            with open(f'/storage/fastMRI_brain/sense_maps/train_full_res/{fname.name}_{slice}.pkl', 'rb') as inp:
+                maps = pickle.load(inp)
+
             kspace = data['kspace'][slice]
             target = data[self.recons_key][slice] if self.recons_key in data else None
-            return self.transform(kspace, target, data.attrs, fname.name, slice, np.zeros((4,4)), vh)
+            return self.transform(kspace, target, data.attrs, fname.name, slice, maps, vh)
 
 
 class SelectiveSliceData_Val(torch.utils.data.Dataset):

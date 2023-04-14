@@ -211,26 +211,16 @@ class CFIDMetric:
                 for i, data in tqdm(enumerate(self.ref_loader),
                                     desc='Computing generated distribution',
                                     total=len(self.ref_loader)):
-                    condition, gt, mask, mean, std, _, _, _ = data
+                    condition, gt, mask, mean, std, maps, _, _ = data
                     condition = condition.cuda()
                     gt = gt.cuda()
                     mean = mean.cuda()
                     std = std.cuda()
                     mask = mask.cuda()
-                    maps = []
 
                     with torch.no_grad():
                         for l in range(self.num_samps):
                             recon = self.gan(condition, mask)
-
-                            for j in range(condition.shape[0]):
-                                new_y_true = fft2c_new(self.gan.reformat(condition)[j] * std[j] + mean[j])
-                                s_maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=16,
-                                                             device=sp.Device(0), show_pbar=False, crop=0.70,
-                                                             kernel_width=6).run().get()
-                                S = to_tensor(s_maps).cuda()
-
-                                maps.append(S)
 
                             image = self._get_embed_im(recon, mean, std, maps)
                             condition_im = self._get_embed_im(condition, mean, std, maps)
