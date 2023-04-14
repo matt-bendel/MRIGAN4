@@ -32,19 +32,19 @@ if __name__ == '__main__':
         cfg = yaml.load(f, Loader=yaml.FullLoader)
         cfg = json.loads(json.dumps(cfg), object_hook=load_object)
 
-    dm = FastMRIDataModule(base_path=cfg.data_path, batch_size=cfg.batch_size)
+    dm = MRIDataModule(cfg, args.mask_type)
     dm.setup()
     val_loader = dm.test_dataloader()
 
     for i, data in enumerate(val_loader):
-        y, x, mask, max_val, maps, fname, slice = data
+        y, x, mask, mean, std, maps, fname, slice = data
         new_y = torch.zeros(y.size(0), 8, 384, 384, 2)
         new_y[:, :, :, :, 0] = y[:, 0:8, :, :]
         new_y[:, :, :, :, 1] = y[:, 8:16, :, :]
 
         for j in range(y.size(0)):
-            new_y_true = fft2c_new(new_y[j] * max_val[j])
-            maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=32,
+            new_y_true = fft2c_new(new_y[j] * std[j] + mask[j])
+            maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=16,
                                        device=sp.Device(0), crop=0.70,
                                        kernel_width=6).run().get()
 
