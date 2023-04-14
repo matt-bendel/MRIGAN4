@@ -158,22 +158,21 @@ if __name__ == "__main__":
 
             for j in range(y.size(0)):
                 single_samps = np.zeros((cfg.num_z_test, cfg.im_size, cfg.im_size))
-                print(maps[j].shape)
 
-                S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
-                gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
-                    (avg[j] * std[j] + mean[j]).cpu())
-
-                avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
-                gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
-
-                fig = plt.figure()
-
-                generate_image(fig, gt_np, avg_gen_np, f'Recon', 1, 2, 1, disc_num=False)
-                im, ax = generate_error_map(fig, gt_np, avg_gen_np, f'Recon', 2, 2, 1)
-
-                plt.savefig(f'test.png')
-                plt.close()
+                # S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
+                # gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
+                #     (avg[j] * std[j] + mean[j]).cpu())
+                #
+                # avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
+                # gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
+                #
+                # fig = plt.figure()
+                #
+                # generate_image(fig, gt_np, avg_gen_np, f'Recon', 1, 2, 1, disc_num=False)
+                # im, ax = generate_error_map(fig, gt_np, avg_gen_np, f'Recon', 2, 2, 1)
+                #
+                # plt.savefig(f'test.png')
+                # plt.close()
 
                 fig = plt.figure()
 
@@ -182,11 +181,11 @@ if __name__ == "__main__":
                 plt.savefig(f'test_gt.png')
                 plt.close()
 
-                new_y_true = fft2c_new(model.reformat(y)[j] * std[j] + mask[j])
-                maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=16,
+                new_y_true = fft2c_new(model.reformat(y)[j] * std[j] + mean[j])
+                mps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=16,
                                            device=sp.Device(0), crop=0.70,
                                            kernel_width=6).run().get()
-                S = sp.linop.Multiply((cfg.im_size, cfg.im_size), maps)
+                S = sp.linop.Multiply((cfg.im_size, cfg.im_size), mps)
                 avg_gen_np = complex_abs(to_tensor(S.H * avg_ksp)).numpy()
                 gt_np = complex_abs(to_tensor(S.H * gt_ksp)).numpy()
 
