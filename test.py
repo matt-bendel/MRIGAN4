@@ -155,6 +155,7 @@ if __name__ == "__main__":
 
             for j in range(y.size(0)):
                 single_samps = np.zeros((cfg.num_z_test, cfg.im_size, cfg.im_size))
+                print(maps[j].shape)
 
                 S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
                 gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
