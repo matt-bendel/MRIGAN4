@@ -185,7 +185,7 @@ if __name__ == "__main__":
                 maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=16,
                                            device=sp.Device(0), crop=0.70,
                                            kernel_width=6).run().get()
-                S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
+                S = sp.linop.Multiply((cfg.im_size, cfg.im_size), maps)
                 avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
                 gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
 
