@@ -163,7 +163,7 @@ if __name__ == "__main__":
         # g = torch.nn.DataParallel(GeneratorModel(18, 16).cuda())
         # g.load_state_dict(checkpoint_gen['model'])
 
-        model.generator = g
+        # model.generator = g
         model.cuda()
         model.eval()
 
