@@ -5,7 +5,6 @@ import types
 import json
 
 import numpy as np
-import sigpy as sp
 
 from data_loaders.MRIDataModule import MRIDataModule
 from datasets.fastmri_multicoil_general import FastMRIDataModule
@@ -22,6 +21,8 @@ from evaluation_scripts.cfid.cfid_metric import CFIDMetric
 from evaluation_scripts.fid.fid_metric import FIDMetric
 import matplotlib.pyplot as plt
 from utils.fftc import ifft2c_new, fft2c_new
+import sigpy as sp
+import sigpy.mri as mr
 
 def generate_image(fig, target, image, method, image_ind, rows, cols, kspace=False, disc_num=False):
     # rows and cols are both previously defined ints
