@@ -152,7 +152,14 @@ if __name__ == "__main__":
         #     f'{args.checkpoint_dir}/generator_model.pt')
         checkpoint_gen = torch.load(checkpoint_file_gen, map_location=torch.device('cuda'))
 
-        model.generator.load_state_dict(checkpoint_gen['model'])
+        from collections import OrderedDict
+
+        new_state_dict = OrderedDict()
+        for k, v in checkpoint_gen['model'].items():
+            name = k[7:]  # remove `module.`
+            new_state_dict[name] = v
+
+        model.generator.load_state_dict(new_state_dict)
 
         model = model.cuda()
         model.eval()
