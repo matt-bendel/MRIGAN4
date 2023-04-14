@@ -160,8 +160,8 @@ if __name__ == "__main__":
                 single_samps = np.zeros((cfg.num_z_test, cfg.im_size, cfg.im_size))
 
                 # S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
-                # gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
-                #     (avg[j] * std[j] + mean[j]).cpu())
+                gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
+                    (avg[j] * std[j] + mean[j]).cpu())
                 #
                 # avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
                 # gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
