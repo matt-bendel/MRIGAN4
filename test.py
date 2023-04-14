@@ -206,12 +206,11 @@ if __name__ == "__main__":
     print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
     print(f'APSD: {np.mean(apsds)}')
 
-    inception_embedding = VGG16Embedding()
-
     cfids = []
     m_comps = []
     c_comps = []
 
+    inception_embedding = VGG16Embedding(parallel=True)
     # CFID_1
     cfid_metric = CFIDMetric(gan=model,
                              loader=test_loader,
@@ -227,6 +226,7 @@ if __name__ == "__main__":
     m_comps.append(m_comp)
     c_comps.append(c_comp)
 
+    inception_embedding = VGG16Embedding(parallel=True)
     # CFID_2
     cfid_metric = CFIDMetric(gan=model,
                              loader=val_dataloader,
@@ -242,6 +242,7 @@ if __name__ == "__main__":
     m_comps.append(m_comp)
     c_comps.append(c_comp)
 
+    inception_embedding = VGG16Embedding(parallel=True)
     # CFID_3
     cfid_metric = CFIDMetric(gan=model,
                              loader=val_dataloader,
@@ -257,6 +258,7 @@ if __name__ == "__main__":
     m_comps.append(m_comp)
     c_comps.append(c_comp)
 
+    inception_embedding = VGG16Embedding(parallel=True)
     fid_metric = FIDMetric(gan=model,
                            ref_loader=train_dataloader,
                            loader=test_loader,

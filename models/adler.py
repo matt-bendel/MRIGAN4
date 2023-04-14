@@ -245,7 +245,7 @@ class Adler(pl.LightningModule):
         avg_single_psnr = avg_single_psnr.cpu().numpy()
 
         if self.global_rank == 0 and self.current_epoch % 1 == 0:
-            send_mail(f"EPOCH {self.current_epoch + 1} UPDATE - Ohayon",
+            send_mail(f"EPOCH {self.current_epoch + 1} UPDATE - Adler",
                       f"Std. Dev. Weight: {self.std_mult:.4f}\nMetrics:\nPSNR: {avg_psnr:.2f}\nSINGLE PSNR: {avg_single_psnr:.2f}",
                       file_name="variation_gif.gif")
 
