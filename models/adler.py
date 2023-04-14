@@ -83,7 +83,7 @@ class Adler(pl.LightningModule):
         # Get random interpolation between real and fake samples
         interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
         d_interpolates = self.discriminator(input=interpolates, y=y)
-        fake = Tensor(real_samples.shape[0], 1, d_interpolates.shape[-1], d_interpolates.shape[-1]).fill_(1.0).to(
+        fake = Tensor(real_samples.shape[0], 1).fill_(1.0).to(
             self.device)
 
         # Get gradient w.r.t. interpolates

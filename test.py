@@ -25,6 +25,20 @@ import sigpy as sp
 import sigpy.mri as mr
 from data.transforms import to_tensor
 
+# M_1: 2.15
+# C_1: 3.50
+# CFID_1: 5.65
+
+# M_2: 1.76
+# C_2: 1.18
+# CFID_2: 2.94
+
+# M_3: 1.69
+# C_3: 0.77
+# CFID_3: 2.46
+
+# FID: 7.51
+
 def generate_image(fig, target, image, method, image_ind, rows, cols, kspace=False, disc_num=False):
     # rows and cols are both previously defined ints
     ax = fig.add_subplot(rows, cols, image_ind)
@@ -77,6 +91,7 @@ def generate_error_map(fig, target, recon, method, image_ind, rows, cols, relati
 
     # Return plotted image and its axis in the subplot
     return im, ax
+
 
 def load_object(dct):
     return types.SimpleNamespace(**dct)
@@ -218,7 +233,7 @@ if __name__ == "__main__":
                              cuda=True,
                              args=cfg,
                              ref_loader=train_dataloader,
-                             num_samps=32)
+                             num_samps=1)
 
     cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
     cfids.append(cfid)
@@ -226,12 +241,12 @@ if __name__ == "__main__":
     c_comps.append(c_comp)
 
     fid_metric = FIDMetric(gan=model,
-                            ref_loader=train_dataloader,
-                            loader=test_loader,
-                            image_embedding=inception_embedding,
-                            condition_embedding=inception_embedding,
-                            cuda=True,
-                            args=cfg)
+                           ref_loader=train_dataloader,
+                           loader=test_loader,
+                           image_embedding=inception_embedding,
+                           condition_embedding=inception_embedding,
+                           cuda=True,
+                           args=cfg)
     #
     fid, _ = fid_metric.get_fid()
 
@@ -242,4 +257,3 @@ if __name__ == "__main__":
         print(f'CFID_{l}: {cfids[l]:.2f}; M_COMP: {m_comps[l]:.4f}; C_COMP: {c_comps[l]:.4f}')
 
     print(f'FID: {fid}')
-
