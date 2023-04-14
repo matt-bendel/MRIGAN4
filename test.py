@@ -210,21 +210,21 @@ if __name__ == "__main__":
     m_comps = []
     c_comps = []
 
-    inception_embedding = VGG16Embedding(parallel=True)
-    # CFID_1
-    cfid_metric = CFIDMetric(gan=model,
-                             loader=test_loader,
-                             image_embedding=inception_embedding,
-                             condition_embedding=inception_embedding,
-                             cuda=True,
-                             args=cfg,
-                             ref_loader=False,
-                             num_samps=32)
-
-    cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
-    cfids.append(cfid)
-    m_comps.append(m_comp)
-    c_comps.append(c_comp)
+    # inception_embedding = VGG16Embedding(parallel=True)
+    # # CFID_1
+    # cfid_metric = CFIDMetric(gan=model,
+    #                          loader=test_loader,
+    #                          image_embedding=inception_embedding,
+    #                          condition_embedding=inception_embedding,
+    #                          cuda=True,
+    #                          args=cfg,
+    #                          ref_loader=False,
+    #                          num_samps=32)
+    #
+    # cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
+    # cfids.append(cfid)
+    # m_comps.append(m_comp)
+    # c_comps.append(c_comp)
 
     inception_embedding = VGG16Embedding(parallel=True)
     # CFID_2
