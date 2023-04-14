@@ -147,18 +147,16 @@ if __name__ == "__main__":
     with torch.no_grad():
         model = model_alias.load_from_checkpoint(
             checkpoint_path=cfg.checkpoint_dir + args.exp_name + '/checkpoint-epoch=92.ckpt')
-        checkpoint_file_gen = pathlib.Path(
-            f'/home/bendel.8/Git_Repos/full_scale_mrigan/MRIGAN3/trained_models/generator_best_model.pt')
-        checkpoint_gen = torch.load(checkpoint_file_gen, map_location=torch.device('cuda'))
+        # checkpoint_file_gen = pathlib.Path(
+        #     f'/home/bendel.8/Git_Repos/full_scale_mrigan/MRIGAN3/trained_models/generator_best_model.pt')
+        # checkpoint_gen = torch.load(checkpoint_file_gen, map_location=torch.device('cuda'))
+        #
+        # g = torch.nn.DataParallel(GeneratorModel(18, 16).cuda())
+        # g.load_state_dict(checkpoint_gen['model'])
 
-        g = torch.nn.DataParallel(GeneratorModel(18, 16).cuda())
-        g.load_state_dict(checkpoint_gen['model'])
-
-        model.generator = g#torch.nn.DataParallel(model.generator)
+        model.generator = torch.nn.DataParallel(model.generator)
         model.cuda()
         model.eval()
-
-
 
         psnrs = []
         ssims = []
@@ -195,6 +193,16 @@ if __name__ == "__main__":
                 avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
                 gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
 
+                if i == 0 and j == 0:
+                    fig = plt.figure()
+
+                    generate_image(fig, gt_np, avg_gen_np, f'Test Im', 1, 2, 1, disc_num=False)
+                    im, ax = generate_error_map(fig, gt_np, avg_gen_np, f'Test Im', 2, 2, 1)
+
+                    plt.savefig(f'test_im.png')
+                    plt.close()
+
+
                 for z in range(cfg.num_z_test):
                     np_samp = tensor_to_complex_np((gens[j, z, :, :, :, :] * std[j] + mean[j]).cpu())
                     single_samps[z, :, :] = torch.tensor(S.H * np_samp).abs().numpy()
@@ -211,21 +219,21 @@ if __name__ == "__main__":
     m_comps = []
     c_comps = []
 
-    # inception_embedding = VGG16Embedding(parallel=True)
-    # # CFID_1
-    # cfid_metric = CFIDMetric(gan=model,
-    #                          loader=test_loader,
-    #                          image_embedding=inception_embedding,
-    #                          condition_embedding=inception_embedding,
-    #                          cuda=True,
-    #                          args=cfg,
-    #                          ref_loader=False,
-    #                          num_samps=32)
-    #
-    # cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
-    # cfids.append(cfid)
-    # m_comps.append(m_comp)
-    # c_comps.append(c_comp)
+    inception_embedding = VGG16Embedding(parallel=True)
+    # CFID_1
+    cfid_metric = CFIDMetric(gan=model,
+                             loader=test_loader,
+                             image_embedding=inception_embedding,
+                             condition_embedding=inception_embedding,
+                             cuda=True,
+                             args=cfg,
+                             ref_loader=False,
+                             num_samps=32)
+
+    cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
+    cfids.append(cfid)
+    m_comps.append(m_comp)
+    c_comps.append(c_comp)
 
     inception_embedding = VGG16Embedding(parallel=True)
     # CFID_2
@@ -267,13 +275,12 @@ if __name__ == "__main__":
                            condition_embedding=inception_embedding,
                            cuda=True,
                            args=cfg)
-    #
     fid, _ = fid_metric.get_fid()
 
     print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
     print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
     print(f'APSD: {np.mean(apsds)}')
     for l in range(3):
-        print(f'CFID_{l}: {cfids[l]:.2f}; M_COMP: {m_comps[l]:.4f}; C_COMP: {c_comps[l]:.4f}')
+        print(f'CFID_{l+1}: {cfids[l]:.2f}; M_COMP: {m_comps[l]:.4f}; C_COMP: {c_comps[l]:.4f}')
 
     print(f'FID: {fid}')
