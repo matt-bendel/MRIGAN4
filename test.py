@@ -147,21 +147,21 @@ if __name__ == "__main__":
     with torch.no_grad():
         model = model_alias.load_from_checkpoint(
             checkpoint_path=cfg.checkpoint_dir + args.exp_name + '/checkpoint-epoch=92.ckpt')
-        checkpoint_file_gen = pathlib.Path(
-            f'/home/bendel.8/Git_Repos/full_scale_mrigan/MRIGAN3/trained_models/generator_best_model.pt')
         # checkpoint_file_gen = pathlib.Path(
-        #     f'{args.checkpoint_dir}/generator_model.pt')
-        checkpoint_gen = torch.load(checkpoint_file_gen, map_location=torch.device('cuda'))
-
-        from collections import OrderedDict
-
-        new_state_dict = OrderedDict()
-        for k, v in checkpoint_gen['model'].items():
-            name = k[7:]  # remove `module.`
-            new_state_dict[name] = v
-
-        g = torch.nn.DataParallel(GeneratorModel(18, 16).cuda())
-        g.load_state_dict(checkpoint_gen['model'])
+        #     f'/home/bendel.8/Git_Repos/full_scale_mrigan/MRIGAN3/trained_models/generator_best_model.pt')
+        # # checkpoint_file_gen = pathlib.Path(
+        # #     f'{args.checkpoint_dir}/generator_model.pt')
+        # checkpoint_gen = torch.load(checkpoint_file_gen, map_location=torch.device('cuda'))
+        #
+        # from collections import OrderedDict
+        #
+        # new_state_dict = OrderedDict()
+        # for k, v in checkpoint_gen['model'].items():
+        #     name = k[7:]  # remove `module.`
+        #     new_state_dict[name] = v
+        #
+        # g = torch.nn.DataParallel(GeneratorModel(18, 16).cuda())
+        # g.load_state_dict(checkpoint_gen['model'])
 
         model.generator = g
         model.cuda()
@@ -210,6 +210,10 @@ if __name__ == "__main__":
                 apsds.append(np.mean(np.std(single_samps, axis=0), axis=(0, 1)))
                 psnrs.append(psnr(gt_np, avg_gen_np))
                 ssims.append(ssim(gt_np, avg_gen_np))
+
+    print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
+    print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
+    print(f'APSD: {np.mean(apsds)}')
 
     inception_embedding = VGG16Embedding()
 
