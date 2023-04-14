@@ -244,7 +244,7 @@ if __name__ == "__main__":
                              cuda=True,
                              args=cfg,
                              ref_loader=False,
-                             num_samps=1)
+                             num_samps=8)
 
     cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
     cfids.append(cfid)
