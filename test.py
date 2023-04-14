@@ -21,6 +21,7 @@ from evaluation_scripts.fid.embeddings import VGG16Embedding
 from evaluation_scripts.cfid.cfid_metric import CFIDMetric
 from evaluation_scripts.fid.fid_metric import FIDMetric
 import matplotlib.pyplot as plt
+from utils.fftc import ifft2c_new, fft2c_new
 
 def generate_image(fig, target, image, method, image_ind, rows, cols, kspace=False, disc_num=False):
     # rows and cols are both previously defined ints
