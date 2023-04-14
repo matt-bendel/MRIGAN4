@@ -147,14 +147,14 @@ if __name__ == "__main__":
     with torch.no_grad():
         model = model_alias.load_from_checkpoint(
             checkpoint_path=cfg.checkpoint_dir + args.exp_name + '/checkpoint-epoch=92.ckpt')
-        # checkpoint_file_gen = pathlib.Path(
-        #     f'/home/bendel.8/Git_Repos/full_scale_mrigan/MRIGAN3/trained_models/generator_best_model.pt')
-        # checkpoint_gen = torch.load(checkpoint_file_gen, map_location=torch.device('cuda'))
-        #
-        # g = torch.nn.DataParallel(GeneratorModel(18, 16).cuda())
-        # g.load_state_dict(checkpoint_gen['model'])
+        checkpoint_file_gen = pathlib.Path(
+            f'/home/bendel.8/Git_Repos/full_scale_mrigan/MRIGAN3/trained_models/generator_best_model.pt')
+        checkpoint_gen = torch.load(checkpoint_file_gen, map_location=torch.device('cuda'))
 
-        model.generator = torch.nn.DataParallel(model.generator)
+        g = torch.nn.DataParallel(GeneratorModel(18, 16).cuda())
+        g.load_state_dict(checkpoint_gen['model'])
+
+        model.generator = g#torch.nn.DataParallel(model.generator)
         model.cuda()
         model.eval()
 
