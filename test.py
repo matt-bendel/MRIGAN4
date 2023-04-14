@@ -159,7 +159,7 @@ if __name__ == "__main__":
             name = k[7:]  # remove `module.`
             new_state_dict[name] = v
 
-        print(new_state_dict)
+        print(new_state_dict.keys())
         model.generator.load_state_dict(new_state_dict)
 
         model = model.cuda()
