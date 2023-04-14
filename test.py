@@ -25,6 +25,7 @@ from utils.fftc import ifft2c_new, fft2c_new
 import sigpy as sp
 import sigpy.mri as mr
 from data.transforms import to_tensor
+from models.architectures.old_gen import GeneratorModel
 
 # M_1: 2.15
 # C_1: 3.50
@@ -159,10 +160,11 @@ if __name__ == "__main__":
             name = k[7:]  # remove `module.`
             new_state_dict[name] = v
 
-        print(new_state_dict.keys())
-        model.generator.load_state_dict(new_state_dict)
+        g = torch.nn.DataParallel(GeneratorModel(18, 16).cuda())
+        g.load_state_dict(checkpoint_gen['model'])
 
-        model = model.cuda()
+        model.generator = g
+        model.cuda()
         model.eval()
 
 
