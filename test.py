@@ -178,6 +178,22 @@ if __name__ == "__main__":
 
                 plt.savefig(f'test_gt.png')
                 plt.close()
+
+                new_y_true = fft2c_new(model.reformat(y)[j] * std[j] + mask[j])
+                maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=16,
+                                           device=sp.Device(0), crop=0.70,
+                                           kernel_width=6).run().get()
+                S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
+                avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
+                gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
+
+                fig = plt.figure()
+
+                generate_image(fig, gt_np, avg_gen_np, f'Recon', 1, 2, 1, disc_num=False)
+                im, ax = generate_error_map(fig, gt_np, avg_gen_np, f'Recon', 2, 2, 1)
+
+                plt.savefig(f'test_2.png')
+                plt.close()
                 exit()
 
                 for z in range(cfg.num_z_test):
