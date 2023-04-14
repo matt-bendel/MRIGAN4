@@ -94,7 +94,7 @@ if __name__ == "__main__":
             cfg = yaml.load(f, Loader=yaml.FullLoader)
             cfg = json.loads(json.dumps(cfg), object_hook=load_object)
 
-        dm = MRIDataModule(cfg, args.mask_type)
+        dm = MRIDataModule(cfg, args.mask_type, big_test=True)
 
         dm.setup()
         test_loader = dm.test_dataloader()
@@ -125,7 +125,7 @@ if __name__ == "__main__":
 
     with torch.no_grad():
         model = model_alias.load_from_checkpoint(
-            checkpoint_path=cfg.checkpoint_dir + args.exp_name + '/checkpoint-epoch=99.ckpt')
+            checkpoint_path=cfg.checkpoint_dir + args.exp_name + '/checkpoint-epoch=92.ckpt')
         model = model.cuda()
         model.eval()
 
@@ -163,14 +163,14 @@ if __name__ == "__main__":
                 avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
                 gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
 
-                fig = plt.figure()
-
-                generate_image(fig, gt_np, avg_gen_np, f'Recon', 1, 2, 1, disc_num=False)
-                im, ax = generate_error_map(fig, gt_np, avg_gen_np, f'Recon', 2, 2, 1)
-
-                plt.savefig(f'test.png')
-                plt.close()
-                exit()
+                # fig = plt.figure()
+                #
+                # generate_image(fig, gt_np, avg_gen_np, f'Recon', 1, 2, 1, disc_num=False)
+                # im, ax = generate_error_map(fig, gt_np, avg_gen_np, f'Recon', 2, 2, 1)
+                #
+                # plt.savefig(f'test.png')
+                # plt.close()
+                # exit()
 
                 for z in range(cfg.num_z_test):
                     np_samp = tensor_to_complex_np((gens[j, z, :, :, :, :] * std[j] + mean[j]).cpu())
@@ -202,50 +202,50 @@ if __name__ == "__main__":
     c_comps.append(c_comp)
 
     # CFID_2
-    # cfid_metric = CFIDMetric(gan=model,
-    #                          loader=val_dataloader,
-    #                          image_embedding=inception_embedding,
-    #                          condition_embedding=inception_embedding,
-    #                          cuda=True,
-    #                          args=cfg,
-    #                          ref_loader=False,
-    #                          num_samps=1)
-    #
-    # cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
-    # cfids.append(cfid)
-    # m_comps.append(m_comp)
-    # c_comps.append(c_comp)
+    cfid_metric = CFIDMetric(gan=model,
+                             loader=val_dataloader,
+                             image_embedding=inception_embedding,
+                             condition_embedding=inception_embedding,
+                             cuda=True,
+                             args=cfg,
+                             ref_loader=False,
+                             num_samps=1)
+
+    cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
+    cfids.append(cfid)
+    m_comps.append(m_comp)
+    c_comps.append(c_comp)
 
     # CFID_3
-    # cfid_metric = CFIDMetric(gan=model,
-    #                          loader=val_dataloader,
-    #                          image_embedding=inception_embedding,
-    #                          condition_embedding=inception_embedding,
-    #                          cuda=True,
-    #                          args=cfg,
-    #                          ref_loader=train_dataloader,
-    #                          num_samps=1)
-    #
-    # cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
-    # cfids.append(cfid)
-    # m_comps.append(m_comp)
-    # c_comps.append(c_comp)
+    cfid_metric = CFIDMetric(gan=model,
+                             loader=val_dataloader,
+                             image_embedding=inception_embedding,
+                             condition_embedding=inception_embedding,
+                             cuda=True,
+                             args=cfg,
+                             ref_loader=train_dataloader,
+                             num_samps=1)
 
-    # cfid_metric = FIDMetric(gan=model,
-    #                         ref_loader=train_dataloader,
-    #                         loader=test_loader,
-    #                         image_embedding=inception_embedding,
-    #                         condition_embedding=inception_embedding,
-    #                         cuda=True,
-    #                         args=cfg)
+    cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
+    cfids.append(cfid)
+    m_comps.append(m_comp)
+    c_comps.append(c_comp)
+
+    fid_metric = FIDMetric(gan=model,
+                            ref_loader=train_dataloader,
+                            loader=test_loader,
+                            image_embedding=inception_embedding,
+                            condition_embedding=inception_embedding,
+                            cuda=True,
+                            args=cfg)
     #
-    # cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
-    # cfids.append(cfid)
-    # m_comps.append(m_comp)
-    # c_comps.append(c_comp)
+    fid, _ = fid_metric.get_fid()
 
     print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
     print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
     print(f'APSD: {np.mean(apsds)}')
-    for l in range(1):
-        print(f'CFID_1: {cfids[l]:.2f}; M_COMP: {m_comps[l]:.4f}; C_COMP: {c_comps[l]:.4f}')
+    for l in range(3):
+        print(f'CFID_{l}: {cfids[l]:.2f}; M_COMP: {m_comps[l]:.4f}; C_COMP: {c_comps[l]:.4f}')
+
+    print(f'FID: {fid}')
+

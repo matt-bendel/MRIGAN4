@@ -185,15 +185,11 @@ class FIDMetric:
             reformatted[:, :, :, 0] = multi_coil_inp[i, 0:8, :, :]
             reformatted[:, :, :, 1] = multi_coil_inp[i, 8:16, :, :]
 
-            unnormal_im = tensor_to_complex_np((reformatted * std[i] + mean[i]).cpu())
+            unnormal_im = reformatted * std[i] + mean[i]
 
-            if is_ref:
-                S = sp.linop.Multiply((self.args.im_size, self.args.im_size), maps[i])
-            else:
-                S = sp.linop.Multiply((self.args.im_size, self.args.im_size), maps[i].cpu().numpy())
+            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), tensor_to_complex_np(maps[i].cpu()))
 
-            im = torch.tensor(S.H * unnormal_im).abs()
-
+            im = torch.tensor(S.H * tensor_to_complex_np(unnormal_im.cpu())).abs().cuda()
             im = (im - torch.min(im)) / (torch.max(im) - torch.min(im))
 
             embed_ims[i, 0, :, :] = im
