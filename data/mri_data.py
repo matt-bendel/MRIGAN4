@@ -278,8 +278,11 @@ class SelectiveSliceData(torch.utils.data.Dataset):
 
         with h5py.File(fname, 'r') as data:
             maps = None
-            with open(f'/storage/fastMRI_brain/sense_maps/train_full_res/{fname.name}_{slice}.pkl', 'rb') as inp:
-                maps = pickle.load(inp)
+            try:
+                with open(f'/storage/fastMRI_brain/sense_maps/train_full_res/{fname.name}_{slice}.pkl', 'rb') as inp:
+                    maps = pickle.load(inp)
+            except:
+                maps = 1j*np.ones((8, 384, 384))
 
             kspace = data['kspace'][slice]
             target = data[self.recons_key][slice] if self.recons_key in data else None
