@@ -23,6 +23,7 @@ import matplotlib.pyplot as plt
 from utils.fftc import ifft2c_new, fft2c_new
 import sigpy as sp
 import sigpy.mri as mr
+from data.transforms import to_tensor
 
 def generate_image(fig, target, image, method, image_ind, rows, cols, kspace=False, disc_num=False):
     # rows and cols are both previously defined ints
@@ -186,8 +187,8 @@ if __name__ == "__main__":
                                            device=sp.Device(0), crop=0.70,
                                            kernel_width=6).run().get()
                 S = sp.linop.Multiply((cfg.im_size, cfg.im_size), maps)
-                avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
-                gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
+                avg_gen_np = complex_abs(to_tensor(S.H * avg_ksp)).numpy()
+                gt_np = complex_abs(to_tensor(S.H * gt_ksp)).numpy()
 
                 fig = plt.figure()
 
