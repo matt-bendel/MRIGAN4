@@ -170,6 +170,13 @@ if __name__ == "__main__":
 
                 plt.savefig(f'test.png')
                 plt.close()
+
+                fig = plt.figure()
+
+                generate_image(fig, gt_np, gt_np, f'GT', 1, 1, 1, disc_num=False)
+
+                plt.savefig(f'test_gt.png')
+                plt.close()
                 exit()
 
                 for z in range(cfg.num_z_test):
