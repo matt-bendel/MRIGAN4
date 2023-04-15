@@ -47,9 +47,9 @@ if __name__ == "__main__":
                 print(e)
                 continue
 
-            if model.is_good_model == 0:
-                print("NO GOOD: SKIPPING...")
-                continue
+            # if model.is_good_model == 0:
+            #     print("NO GOOD: SKIPPING...")
+            #     continue
 
             model = model.cuda()
             model.eval()

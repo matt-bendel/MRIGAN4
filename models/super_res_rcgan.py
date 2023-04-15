@@ -11,15 +11,11 @@ from matplotlib import cm
 
 from PIL import Image
 from torch.nn import functional as F
-from utils.fftc import ifft2c_new, fft2c_new
-from utils.math import complex_abs, tensor_to_complex_np
-from models.architectures.our_gen_unet_only import UNetModel
-from models.architectures.our_disc import DiscriminatorModel
-from models.architectures.patch_disc import PatchDisc
+from models.architectures.super_res_disc import UNetDiscriminatorSN
+from models.architectures.super_res_gen import SRVGGNetCompact
 from evaluation_scripts.metrics import psnr
 from mail import send_mail
 from torchmetrics.functional import peak_signal_noise_ratio
-from fastmri.data.transforms import to_tensor
 
 class rcGAN(pl.LightningModule):
     def __init__(self, args, num_realizations, default_model_descriptor, exp_name, noise_type, num_gpus):
@@ -34,18 +30,9 @@ class rcGAN(pl.LightningModule):
         self.in_chans = args.in_chans + self.num_realizations * 2
         self.out_chans = args.out_chans
 
-        self.generator = UNetModel(
-            in_chans=self.in_chans,
-            out_chans=self.out_chans,
-        )
+        self.generator = None# TODO
 
-        self.discriminator = DiscriminatorModel(
-            in_chans=self.args.in_chans * 2,
-            out_chans=self.out_chans
-        )
-        # self.discriminator = PatchDisc(
-        #     input_nc=args.in_chans * 2
-        # )
+        self.discriminator = None# TODO
 
         self.std_mult = 1
         self.is_good_model = 0
@@ -57,26 +44,8 @@ class rcGAN(pl.LightningModule):
         z = torch.randn(num_vectors, 2, self.resolution, self.resolution, device=self.device)
         return z
 
-    def reformat(self, samples):
-        reformatted_tensor = torch.zeros(size=(samples.size(0), 8, self.resolution, self.resolution, 2),
-                                         device=self.device)
-        reformatted_tensor[:, :, :, :, 0] = samples[:, 0:8, :, :]
-        reformatted_tensor[:, :, :, :, 1] = samples[:, 8:16, :, :]
-
-        return reformatted_tensor
-
     def readd_measures(self, samples, measures, mask):
-        reformatted_tensor = self.reformat(samples)
-        measures = fft2c_new(self.reformat(measures))
-        reconstructed_kspace = fft2c_new(reformatted_tensor)
-
-        reconstructed_kspace = mask * measures + (1 - mask) * reconstructed_kspace
-
-        image = ifft2c_new(reconstructed_kspace)
-
-        output_im = torch.zeros(size=samples.shape, device=self.device)
-        output_im[:, 0:8, :, :] = image[:, :, :, :, 0]
-        output_im[:, 8:16, :, :] = image[:, :, :, :, 1]
+        #TODO
 
         return output_im
 
@@ -88,8 +57,6 @@ class rcGAN(pl.LightningModule):
         # Get random interpolation between real and fake samples
         interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
         d_interpolates = self.discriminator(input=interpolates, y=y)
-        # fake = Tensor(real_samples.shape[0], 1, d_interpolates.shape[-1], d_interpolates.shape[-1]).fill_(1.0).to(
-        #     self.device)
         fake = Tensor(real_samples.shape[0], 1).fill_(1.0).to(
             self.device)
 
@@ -109,7 +76,7 @@ class rcGAN(pl.LightningModule):
     def forward(self, y, mask):
         num_vectors = y.size(0)
         noise = self.get_noise(num_vectors, mask)
-        samples = self.generator(torch.cat([y, noise], dim=1))
+        samples = self.generator(torch.cat([y, noise], dim=1)) # TODO
         samples = self.readd_measures(samples, y, mask)
         return samples
 
@@ -117,15 +84,6 @@ class rcGAN(pl.LightningModule):
         return fake_pred.mean() - real_pred.mean()
 
     def adversarial_loss_generator(self, y, gens):
-        patch_out = 94
-        # fake_pred = torch.zeros(size=(y.shape[0], self.args.num_z_train, patch_out, patch_out), device=self.device)
-        # for k in range(y.shape[0]):
-        #     cond = torch.zeros(1, gens.shape[2], gens.shape[3], gens.shape[4], device=self.device)
-        #     cond[0, :, :, :] = y[k, :, :, :]
-        #     cond = cond.repeat(self.args.num_z_train, 1, 1, 1)
-        #     temp = self.discriminator(input=gens[k], y=cond)
-        #     fake_pred[k, :, :, :] = temp[:, 0, :, :]
-
         fake_pred = torch.zeros(size=(y.shape[0], self.args.num_z_train), device=self.device)
         for k in range(y.shape[0]):
             cond = torch.zeros(1, gens.shape[2], gens.shape[3], gens.shape[4], device=self.device)
@@ -138,11 +96,7 @@ class rcGAN(pl.LightningModule):
         for k in range(y.shape[0] - 1):
             gen_pred_loss += torch.mean(fake_pred[k + 1])
 
-        adv_weight = 1e-5
-        if self.current_epoch <= 4:
-            adv_weight = 1e-2
-        elif self.current_epoch <= 22:
-            adv_weight = 1e-4
+        adv_weight = 1e-5 # TODO
 
         return - adv_weight * gen_pred_loss.mean()
 
@@ -159,7 +113,8 @@ class rcGAN(pl.LightningModule):
         return 0.001 * torch.mean(real_pred ** 2)
 
     def training_step(self, batch, batch_idx, optimizer_idx):
-        y, x, mask, mean, std, _, _, _ = batch
+        # TODO: BIG UPDATE
+        y, x, mean, std = batch
 
         # train generator
         if optimizer_idx == 1:
@@ -195,6 +150,7 @@ class rcGAN(pl.LightningModule):
             return d_loss
 
     def validation_step(self, batch, batch_idx, external_test=False):
+        # TODO: BIG UPDATE
         y, x, mask, mean, std, maps, _, _ = batch
 
         fig_count = 0
@@ -275,13 +231,8 @@ class rcGAN(pl.LightningModule):
         return {'psnr_8': psnr_8s.mean(), 'psnr_1': psnr_1s.mean()}
 
     def validation_epoch_end(self, validation_step_outputs):
-        # GATHER
         avg_psnr = self.all_gather(torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()).mean()
         avg_single_psnr = self.all_gather(torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean()).mean()
-
-        # NO GATHER
-        # avg_psnr = torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()
-        # avg_single_psnr = torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean()
 
         avg_psnr = avg_psnr.cpu().numpy()
         avg_single_psnr = avg_single_psnr.cpu().numpy()
