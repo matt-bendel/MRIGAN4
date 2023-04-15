@@ -10,6 +10,7 @@ from data_loaders.MRIDataModule import MRIDataModule
 from datasets.fastmri_multicoil_general import FastMRIDataModule
 from utils.parse_args import create_arg_parser
 from models.rcGAN import rcGAN
+from models.adler import Adler
 from pytorch_lightning import seed_everything
 from evaluation_scripts.fid.embeddings import VGG16Embedding
 from evaluation_scripts.cfid.cfid_metric import CFIDMetric
@@ -35,14 +36,14 @@ if __name__ == "__main__":
     best_epoch = -1
     inception_embedding = VGG16Embedding()
     best_cfid = 10000000
-    start_epoch = 50
+    start_epoch = 80
     end_epoch = 100
 
     with torch.no_grad():
         for epoch in range(start_epoch, end_epoch):
             print(f"VALIDATING EPOCH: {epoch + 1}")
             try:
-                model = rcGAN.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + args.exp_name + f'/checkpoint-epoch={epoch}.ckpt')
+                model = Adler.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + args.exp_name + f'/checkpoint-epoch={epoch}.ckpt')
             except Exception as e:
                 print(e)
                 continue
@@ -73,6 +74,6 @@ if __name__ == "__main__":
 
     print(f"BEST EPOCH: {best_epoch}")
 
-    for epoch in range(start_epoch, end_epoch):
+    for epoch in range(50, end_epoch):
         if epoch != best_epoch:
             os.remove(cfg.checkpoint_dir + args.exp_name + f'/checkpoint-epoch={epoch}.ckpt')
