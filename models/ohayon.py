@@ -14,12 +14,14 @@ from torch.nn import functional as F
 from utils.fftc import ifft2c_new, fft2c_new
 from utils.math import complex_abs, tensor_to_complex_np
 from models.architectures.our_gen_unet_only import UNetModel
+from models.architectures.our_disc import DiscriminatorModel
 from models.architectures.patch_disc import PatchDisc
 from evaluation_scripts.metrics import psnr
 from mail import send_mail
 from torchmetrics.functional import peak_signal_noise_ratio
+from fastmri.data.transforms import to_tensor
 
-class Ohayon(pl.LightningModule):
+class rcGAN(pl.LightningModule):
     def __init__(self, args, num_realizations, default_model_descriptor, exp_name, noise_type, num_gpus):
         super().__init__()
         self.args = args
@@ -37,9 +39,13 @@ class Ohayon(pl.LightningModule):
             out_chans=self.out_chans,
         )
 
-        self.discriminator = PatchDisc(
-            input_nc=args.in_chans * 2
+        self.discriminator = DiscriminatorModel(
+            in_chans=self.args.in_chans * 2,
+            out_chans=self.out_chans
         )
+        # self.discriminator = PatchDisc(
+        #     input_nc=args.in_chans * 2
+        # )
 
         self.std_mult = 1
         self.is_good_model = 0
@@ -82,7 +88,9 @@ class Ohayon(pl.LightningModule):
         # Get random interpolation between real and fake samples
         interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
         d_interpolates = self.discriminator(input=interpolates, y=y)
-        fake = Tensor(real_samples.shape[0], 1, d_interpolates.shape[-1], d_interpolates.shape[-1]).fill_(1.0).to(
+        # fake = Tensor(real_samples.shape[0], 1, d_interpolates.shape[-1], d_interpolates.shape[-1]).fill_(1.0).to(
+        #     self.device)
+        fake = Tensor(real_samples.shape[0], 1).fill_(1.0).to(
             self.device)
 
         # Get gradient w.r.t. interpolates
@@ -109,20 +117,21 @@ class Ohayon(pl.LightningModule):
         return fake_pred.mean() - real_pred.mean()
 
     def adversarial_loss_generator(self, y, gens):
-        patch_out = 94
-        fake_pred = torch.zeros(size=(y.shape[0], self.args.num_z_train, patch_out, patch_out), device=self.device)
+        fake_pred = torch.zeros(size=(y.shape[0], self.args.num_z_train), device=self.device)
         for k in range(y.shape[0]):
             cond = torch.zeros(1, gens.shape[2], gens.shape[3], gens.shape[4], device=self.device)
             cond[0, :, :, :] = y[k, :, :, :]
             cond = cond.repeat(self.args.num_z_train, 1, 1, 1)
             temp = self.discriminator(input=gens[k], y=cond)
-            fake_pred[k, :, :, :] = temp[:, 0, :, :]
+            fake_pred[k] = temp[:, 0]
 
         gen_pred_loss = torch.mean(fake_pred[0])
         for k in range(y.shape[0] - 1):
             gen_pred_loss += torch.mean(fake_pred[k + 1])
 
-        return - 1e-2 * gen_pred_loss.mean()
+        adv_weight = 1e-3
+
+        return - adv_weight * gen_pred_loss.mean()
 
     def l2(self, avg_recon, x):
         return F.mse_loss(avg_recon, x)
@@ -136,14 +145,14 @@ class Ohayon(pl.LightningModule):
         return 0.001 * torch.mean(real_pred ** 2)
 
     def training_step(self, batch, batch_idx, optimizer_idx):
-        y, x, mask, max_val, _, _, _ = batch
+        y, x, mask, mean, std, _, _, _ = batch
 
         # train generator
         if optimizer_idx == 1:
             gens = torch.zeros(
                 size=(y.size(0), self.args.num_z_valid, self.args.in_chans, self.args.im_size, self.args.im_size),
                 device=self.device)
-            for z in range(self.args.num_z_val):
+            for z in range(self.args.num_z_valid):
                 gens[:, z, :, :, :] = self.forward(y, mask)
 
             avg_recon = torch.mean(gens, dim=1)
@@ -174,6 +183,8 @@ class Ohayon(pl.LightningModule):
     def validation_step(self, batch, batch_idx, external_test=False):
         y, x, mask, mean, std, maps, _, _ = batch
 
+        fig_count = 0
+
         if external_test:
             num_code = self.args.num_z_test
         else:
@@ -196,12 +207,18 @@ class Ohayon(pl.LightningModule):
         psnr_1s = []
 
         for j in range(y.size(0)):
-            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), sp.from_pytorch(maps[j], iscomplex=True))
+            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), tensor_to_complex_np(maps[j].cpu()))
 
             ############# EXPERIMENTAL #################
-            avg_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(avg_gen[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
-            single_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[:, 0])[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
-            gt_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(gt[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
+            # ON CPU
+            avg_sp_out = torch.tensor(S.H * tensor_to_complex_np(avg_gen[j].cpu())).abs().unsqueeze(0).unsqueeze(0).to(self.device)
+            single_sp_out = torch.tensor(S.H * tensor_to_complex_np(self.reformat(gens[:, 0])[j].cpu())).abs().unsqueeze(0).unsqueeze(0).to(self.device)
+            gt_sp_out = torch.tensor(S.H * tensor_to_complex_np(gt[j].cpu())).abs().unsqueeze(0).unsqueeze(0).to(self.device)
+
+            # ON GPU
+            # avg_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(avg_gen[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
+            # single_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[:, 0])[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
+            # gt_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(gt[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
 
             psnr_8s.append(peak_signal_noise_ratio(avg_sp_out, gt_sp_out))
             psnr_1s.append(peak_signal_noise_ratio(single_sp_out, gt_sp_out))
@@ -216,14 +233,15 @@ class Ohayon(pl.LightningModule):
         mag_single_gen = torch.cat(mag_single_list, dim=0)
         mag_gt = torch.cat(mag_gt_list, dim=0)
 
-        self.log('psnr_8_step', psnr_8s.mean(), on_step=True, on_epoch=True, prog_bar=True)
-        self.log('psnr_1_step', psnr_1s.mean(), on_step=True, on_epoch=True, prog_bar=True)
+        self.log('psnr_8_step', psnr_8s.mean(), on_step=True, on_epoch=False, prog_bar=True)
+        self.log('psnr_1_step', psnr_1s.mean(), on_step=True, on_epoch=False, prog_bar=True)
 
         ############################################
 
         # TODO: Plot as tensors using torch function
         if batch_idx == 0:
-            if self.global_rank == 0 and self.current_epoch % 5 == 0:
+            if self.global_rank == 0 and self.current_epoch % 5 == 0 and fig_count == 0:
+                fig_count += 1
                 avg_gen_np = mag_avg_gen[0, 0, :, :].cpu().numpy()
                 gt_np = mag_gt[0, 0, :, :].cpu().numpy()
 
@@ -243,20 +261,15 @@ class Ohayon(pl.LightningModule):
         return {'psnr_8': psnr_8s.mean(), 'psnr_1': psnr_1s.mean()}
 
     def validation_epoch_end(self, validation_step_outputs):
-        # GATHER
         avg_psnr = self.all_gather(torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()).mean()
         avg_single_psnr = self.all_gather(torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean()).mean()
-
-        # NO GATHER
-        # avg_psnr = torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()
-        # avg_single_psnr = torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean()
 
         avg_psnr = avg_psnr.cpu().numpy()
         avg_single_psnr = avg_single_psnr.cpu().numpy()
 
         if self.global_rank == 0 and self.current_epoch % 1 == 0:
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE - Ohayon",
-                      f"Std. Dev. Weight: {self.std_mult:.4f}\nMetrics:\nPSNR: {avg_psnr:.2f}\nSINGLE PSNR: {avg_single_psnr:.2f}",
+                      f"Metrics:\nPSNR: {avg_psnr:.2f}\nSINGLE PSNR: {avg_single_psnr:.2f}",
                       file_name="variation_gif.gif")
 
         self.trainer.strategy.barrier()
