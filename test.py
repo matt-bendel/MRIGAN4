@@ -14,6 +14,7 @@ from utils.parse_args import create_arg_parser
 from pytorch_lightning import seed_everything
 from models.mri_unet import MRIUnet
 from models.rcGAN import rcGAN
+from models.adler import Adler
 from models.CoModGAN import InpaintUNet
 from utils.math import complex_abs, tensor_to_complex_np
 from evaluation_scripts.metrics import psnr, ssim
@@ -120,7 +121,7 @@ if __name__ == "__main__":
         dm.setup()
         test_loader = dm.test_dataloader()
         if args.rcgan:
-            model_alias = rcGAN
+            model_alias = Adler
         else:
             model_alias = MRIUnet
     elif args.inpaint:
@@ -146,7 +147,7 @@ if __name__ == "__main__":
 
     with torch.no_grad():
         model = model_alias.load_from_checkpoint(
-            checkpoint_path=cfg.checkpoint_dir + args.exp_name + '/checkpoint-epoch=92.ckpt')
+            checkpoint_path=cfg.checkpoint_dir + args.exp_name + '/checkpoint_best.ckpt')
         # checkpoint_file_gen = pathlib.Path(
         #     f'/home/bendel.8/Git_Repos/full_scale_mrigan/MRIGAN3/trained_models/generator_best_model.pt')
         # checkpoint_gen = torch.load(checkpoint_file_gen, map_location=torch.device('cuda'))
