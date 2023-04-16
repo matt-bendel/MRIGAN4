@@ -21,7 +21,7 @@ from mail import send_mail
 from torchmetrics.functional import peak_signal_noise_ratio
 from fastmri.data.transforms import to_tensor
 
-class rcGAN(pl.LightningModule):
+class Ohayon(pl.LightningModule):
     def __init__(self, args, num_realizations, default_model_descriptor, exp_name, noise_type, num_gpus):
         super().__init__()
         self.args = args

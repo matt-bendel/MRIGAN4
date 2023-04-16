@@ -14,6 +14,7 @@ from data_loaders.BSD400DataModule import BSD400DataModule
 from utils.parse_args import create_arg_parser
 from models.rcGAN import rcGAN
 from models.adler import Adler
+from models.ohayon import Ohayon
 from models.mri_unet import MRIUnet
 from models.CoModGAN import InpaintUNet
 from pytorch_lightning import seed_everything
@@ -59,7 +60,7 @@ if __name__ == '__main__':
 
         if args.rcgan:
             noise_structure = {"AWGN": args.awgn, "structure": args.noise_structure}
-            model = Adler(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure, args.num_gpus)
+            model = Ohayon(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure, args.num_gpus)
         else:
             model = MRIUnet(cfg, args.num_noise, args.default_model_descriptor, args.exp_name)
     elif args.inpaint:
