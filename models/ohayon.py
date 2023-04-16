@@ -150,9 +150,9 @@ class Ohayon(pl.LightningModule):
         # train generator
         if optimizer_idx == 1:
             gens = torch.zeros(
-                size=(y.size(0), self.args.num_z_valid, self.args.in_chans, self.args.im_size, self.args.im_size),
+                size=(y.size(0), self.args.num_z_train, self.args.in_chans, self.args.im_size, self.args.im_size),
                 device=self.device)
-            for z in range(self.args.num_z_valid):
+            for z in range(self.args.num_z_train):
                 gens[:, z, :, :, :] = self.forward(y, mask)
 
             avg_recon = torch.mean(gens, dim=1)
