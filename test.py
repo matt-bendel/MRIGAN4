@@ -15,6 +15,7 @@ from pytorch_lightning import seed_everything
 from models.mri_unet import MRIUnet
 from models.rcGAN import rcGAN
 from models.adler import Adler
+from models.ohayon import Ohayon
 from models.CoModGAN import InpaintUNet
 from utils.math import complex_abs, tensor_to_complex_np
 from evaluation_scripts.metrics import psnr, ssim
@@ -121,7 +122,7 @@ if __name__ == "__main__":
         dm.setup()
         test_loader = dm.test_dataloader()
         if args.rcgan:
-            model_alias = Adler
+            model_alias = Ohayon
         else:
             model_alias = MRIUnet
     elif args.inpaint:
