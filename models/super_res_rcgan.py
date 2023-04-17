@@ -190,6 +190,9 @@ class SRrcGAN(pl.LightningModule):
         avg_psnr = self.all_gather(torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()).mean()
         avg_single_psnr = self.all_gather(torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean()).mean()
 
+        print(avg_psnr)
+        print(avg_single_psnr)
+
         avg_psnr = avg_psnr.cpu().numpy()
         avg_single_psnr = avg_single_psnr.cpu().numpy()
 
