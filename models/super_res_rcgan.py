@@ -165,7 +165,8 @@ class SRrcGAN(pl.LightningModule):
 
         psnr_8s = torch.stack(psnr_8s)
         psnr_1s = torch.stack(psnr_1s)
-        print(psnr_8s)
+        psnr_1s[psnr_1s < 0] = 0
+        psnr_8s[psnr_8s < 0] = 0
 
         self.log('psnr_8_step', psnr_8s.mean(), on_step=True, on_epoch=False, prog_bar=True)
         self.log('psnr_1_step', psnr_1s.mean(), on_step=True, on_epoch=False, prog_bar=True)
@@ -195,7 +196,7 @@ class SRrcGAN(pl.LightningModule):
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
         psnr_diff = psnr_diff
 
-        mu_0 = 1e-2
+        mu_0 = 1e-3
         self.std_mult += mu_0 * psnr_diff
 
         if np.abs(psnr_diff) <= 0.25:
