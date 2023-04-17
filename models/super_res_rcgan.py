@@ -117,6 +117,9 @@ class SRrcGAN(pl.LightningModule):
             # g_loss += 1e-2 * self.perceptual_loss(avg_recon, x)
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
+            if torch.isnan(g_loss):
+                exit()
+
             self.log('g_loss', g_loss, prog_bar=True)
 
             return g_loss
@@ -131,6 +134,9 @@ class SRrcGAN(pl.LightningModule):
             d_loss = self.adversarial_loss_discriminator(fake_pred, real_pred)
             d_loss += self.gradient_penalty(x_hat, x)
             d_loss += self.drift_penalty(real_pred)
+
+            if torch.isnan(d_loss):
+                exit()
 
             self.log('d_loss', d_loss, prog_bar=True)
 
