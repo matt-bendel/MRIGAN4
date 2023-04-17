@@ -80,37 +80,45 @@ class LRHR_IMGDataset(data.Dataset):
         hr = self.imread(self.hr_paths[item])
         hr = random_crop(hr, self.crop_size)
         lr = imresize(hr, scalar_scale=1 / self.scale)
+        lf = imresize(lr, scalar_scale=self.scale)
 
         hr = np.transpose(hr, [2, 0, 1])
         lr = np.transpose(lr, [2, 0, 1])
+        lf = np.transpose(lf, [2, 0, 1])
 
         if self.use_flip:
-            hr, lr = random_flip(hr, lr)
+            hr, lr, lf = random_flip(hr, lr, lf)
 
         if self.use_rot:
-            hr, lr = random_rotation(hr, lr)
+            hr, lr, lf = random_rotation(hr, lr, lf)
 
         hr = hr / 255.0
         lr = lr / 255.0
+        lf = lf / 255.0
 
         hr = torch.Tensor(hr)
         lr = torch.Tensor(lr)
+        lf = torch.Tensor(lf)
 
-        return lr, hr, self.hr_paths[item], self.hr_paths[item]
+        return lr, hr, lf, self.hr_paths[item], self.hr_paths[item]
 
 
-def random_flip(img, seg):
+def random_flip(img, seg, hf):
     random_choice = np.random.choice([True, False])
     img = img if random_choice else np.flip(img, 2).copy()
     seg = seg if random_choice else np.flip(seg, 2).copy()
-    return img, seg
+    hf = hf if random_choice else np.flip(hf, 2).copy()
+
+    return img, seg, hf
 
 
-def random_rotation(img, seg):
+def random_rotation(img, seg, hf):
     random_choice = np.random.choice([0, 1, 3])
     img = np.rot90(img, random_choice, axes=(1, 2)).copy()
     seg = np.rot90(seg, random_choice, axes=(1, 2)).copy()
-    return img, seg
+    hf = np.rot90(hf, random_choice, axes=(1, 2)).copy()
+
+    return img, seg, hf
 
 
 def random_crop(img, size):

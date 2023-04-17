@@ -71,10 +71,10 @@ class SRrcGAN(pl.LightningModule):
         gradient_penalty = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
         return gradient_penalty
 
-    def forward(self, y):
+    def forward(self, y, x_lf):
         num_vectors = y.size(0)
         noise = self.get_noise(num_vectors, y.shape[-1])
-        samples = self.generator(y, noise)
+        samples = self.generator(y, noise, x_lf)
         return samples
 
     def adversarial_loss_discriminator(self, fake_pred, real_pred):
@@ -100,7 +100,7 @@ class SRrcGAN(pl.LightningModule):
         return 0.001 * torch.mean(real_pred ** 2)
 
     def training_step(self, batch, batch_idx, optimizer_idx):
-        y, x, _, _ = batch
+        y, x, x_lf, _, _ = batch
 
         # train generator
         if optimizer_idx == 1:
@@ -108,7 +108,7 @@ class SRrcGAN(pl.LightningModule):
                 size=(y.size(0), self.args.num_z_train, self.args.in_chans, x.shape[-1], x.shape[-1]),
                 device=self.device)
             for z in range(self.args.num_z_train):
-                gens[:, z, :, :, :] = self.forward(y)
+                gens[:, z, :, :, :] = self.forward(y, x_lf)
 
             avg_recon = torch.mean(gens, dim=1)
 
@@ -127,7 +127,7 @@ class SRrcGAN(pl.LightningModule):
 
         # train discriminator
         if optimizer_idx == 0:
-            x_hat = self.forward(y)
+            x_hat = self.forward(y, x_lf)
 
             real_pred = self.discriminator(x)
             fake_pred = self.discriminator(x_hat)
@@ -144,7 +144,7 @@ class SRrcGAN(pl.LightningModule):
             return d_loss
 
     def validation_step(self, batch, batch_idx, external_test=False):
-        y, x, _, _ = batch
+        y, x, x_lf, _, _ = batch
 
         if external_test:
             num_code = self.args.num_z_test
@@ -154,7 +154,7 @@ class SRrcGAN(pl.LightningModule):
         gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, x.shape[-1], x.shape[-1]),
                            device=self.device)
         for z in range(num_code):
-            gens[:, z, :, :, :] = self.forward(y)
+            gens[:, z, :, :, :] = self.forward(y, x_lf)
 
         avg = torch.mean(gens, dim=1)
 
