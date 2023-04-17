@@ -53,7 +53,7 @@ class LRHR_IMGDataset(data.Dataset):
     def __init__(self, cfg, scale, mode):
         super(LRHR_IMGDataset, self).__init__()
         self.scale = scale
-        self.crop_size = 240
+        self.crop_size = 160
 
         self.hr_file_path = cfg.data_path + f"/{scale}/hr/{mode}"
         augment = True

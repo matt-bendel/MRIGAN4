@@ -168,7 +168,7 @@ class SRrcGAN(pl.LightningModule):
         ############################################
 
         if batch_idx == 0:
-            if self.global_rank == 0 and self.current_epoch % 5 == 0:
+            if self.global_rank == 0 and self.current_epoch % 50 == 0:
                 self.logger.log_image(
                     key=f"epoch_{self.current_epoch}_img",
                     images=[Image.fromarray(np.uint8(x[0].cpu().numpy().transpose(1, 2, 0) * 255), 'RGB'),
@@ -198,7 +198,7 @@ class SRrcGAN(pl.LightningModule):
         else:
             self.is_good_model = 0
 
-        if self.global_rank == 0 and self.current_epoch % 1 == 0:
+        if self.global_rank == 0 and self.current_epoch % 100 == 0:
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE - rcGAN - SR",
                       f"Std. Dev. Weight: {self.std_mult:.4f}\nMetrics:\nPSNR: {avg_psnr:.2f}\nSINGLE PSNR: {avg_single_psnr:.2f}\nPSNR Diff: {psnr_diff}",
                       file_name="variation_gif.gif")
@@ -210,7 +210,14 @@ class SRrcGAN(pl.LightningModule):
                                  betas=(self.args.beta_1, self.args.beta_2))
         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.args.lr,
                                  betas=(self.args.beta_1, self.args.beta_2))
-        return [opt_d, opt_g], []
+
+        milestones = [50000, 100000, 200000, 300000]
+        gamma = 0.5
+
+        schedule_g = torch.optim.lr_scheduler.MultiStepLR(opt_g, milestones, gamma)
+        schedule_d = torch.optim.lr_scheduler.MultiStepLR(opt_d, milestones, gamma)
+
+        return [opt_d, opt_g], [schedule_d, schedule_g]
 
     def on_save_checkpoint(self, checkpoint):
         checkpoint["beta_std"] = self.std_mult
