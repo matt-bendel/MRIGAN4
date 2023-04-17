@@ -16,6 +16,7 @@ from models.architectures.super_res_gen import SRVGGNetCompact
 from evaluation_scripts.metrics import psnr
 from mail import send_mail
 from torchmetrics.functional import peak_signal_noise_ratio
+from losses.perceptual import PerceptualLoss
 
 class SRrcGAN(pl.LightningModule):
     def __init__(self, args, num_realizations, default_model_descriptor, exp_name, noise_type, num_gpus, upscale_factor=4):
@@ -33,6 +34,8 @@ class SRrcGAN(pl.LightningModule):
         self.generator = SRVGGNetCompact(num_in_ch=self.in_chans, upscale=upscale_factor)
 
         self.discriminator = UNetDiscriminatorSN(num_in_ch=3)
+
+        self.perceptual_loss = PerceptualLoss()
 
         self.std_mult = 1
         self.is_good_model = 0
@@ -70,7 +73,7 @@ class SRrcGAN(pl.LightningModule):
     def forward(self, y):
         num_vectors = y.size(0)
         noise = self.get_noise(num_vectors, y.shape[-1])
-        samples = self.generator(torch.cat([y, noise], dim=1))
+        samples = self.generator(y, noise)
         return samples
 
     def adversarial_loss_discriminator(self, fake_pred, real_pred):
@@ -110,6 +113,7 @@ class SRrcGAN(pl.LightningModule):
 
             # adversarial loss is binary cross-entropy
             g_loss = self.adversarial_loss_generator(gens)
+            # g_loss += 1e-2 * self.perceptual_loss(avg_recon, x)
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
             self.log('g_loss', g_loss, prog_bar=True)

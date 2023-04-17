@@ -1,3 +1,4 @@
+import torch
 from torch import nn as nn
 from torch.nn import functional as F
 
@@ -52,8 +53,8 @@ class SRVGGNetCompact(nn.Module):
         # upsample
         self.upsampler = nn.PixelShuffle(upscale)
 
-    def forward(self, x):
-        out = x
+    def forward(self, x, z):
+        out = torch.cat([x, z], dim=1)
         for i in range(0, len(self.body)):
             out = self.body[i](out)
 
