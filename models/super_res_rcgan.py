@@ -151,8 +151,6 @@ class SRrcGAN(pl.LightningModule):
             gens[:, z, :, :, :] = self.forward(y)
 
         avg = torch.mean(gens, dim=1)
-        print(avg.shape)
-        exit()
 
         avg_list = []
         gt_list = []
