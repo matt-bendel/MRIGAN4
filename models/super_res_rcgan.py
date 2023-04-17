@@ -178,8 +178,10 @@ class SRrcGAN(pl.LightningModule):
                 self.logger.log_image(
                     key=f"epoch_{self.current_epoch}_img",
                     images=[Image.fromarray(np.uint8(x[0].cpu().numpy().transpose(1, 2, 0) * 255), 'RGB'),
-                            Image.fromarray(np.uint8(avg[0].cpu().numpy().transpose(1, 2, 0) * 255), 'RGB')],
-                    caption=["GT", f"Recon"]
+                            Image.fromarray(np.uint8(avg[0].cpu().numpy().transpose(1, 2, 0) * 255), 'RGB'),
+                            Image.fromarray(np.uint8(gens[0, 0].cpu().numpy().transpose(1, 2, 0) * 255), 'RGB'),
+                            Image.fromarray(np.uint8(avg[0, 1].cpu().numpy().transpose(1, 2, 0) * 255), 'RGB')],
+                    caption=["GT", f"Recon", "Samp 1", "Samp 2"]
                 )
 
             self.trainer.strategy.barrier()
