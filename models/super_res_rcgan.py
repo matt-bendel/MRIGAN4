@@ -21,7 +21,7 @@ from losses.perceptual import PerceptualLoss
 
 class SRrcGAN(pl.LightningModule):
     def __init__(self, args, num_realizations, default_model_descriptor, exp_name, noise_type, num_gpus,
-                 upscale_factor=4):
+                 upscale_factor=4, t=-1):
         super().__init__()
         self.args = args
         self.num_realizations = num_realizations
@@ -32,7 +32,7 @@ class SRrcGAN(pl.LightningModule):
 
         self.in_chans = args.in_chans + self.num_realizations * 2
         self.out_chans = args.out_chans
-        self.texture_gain = 0.8
+        self.texture_gain = t
 
         self.generator = RRDBNet(self.in_chans, self.out_chans, upscale=upscale_factor)
 
@@ -77,8 +77,13 @@ class SRrcGAN(pl.LightningModule):
         noise = self.get_noise(num_vectors, y.shape[-1])
         gain_channel = torch.ones([y.size(0), 1, y.shape[-1], y.shape[-1]], device=self.device)
 
+        texture_gain = self.texture_gain
+
+        if texture_gain == -1:
+            texture_gain = np.random.rand()
+
         for i in range(y.size(0)):
-            t = gain_channel[i, 0, :, :] * self.texture_gain
+            t = gain_channel[i, 0, :, :] * texture_gain
             gain_channel[i, 0, :, :] = t
 
         samples = self.generator(y, noise, x_lf, gain_channel)
@@ -122,9 +127,9 @@ class SRrcGAN(pl.LightningModule):
             # adversarial loss is binary cross-entropy
             g_loss = self.adversarial_loss_generator(gens)
 
-            # for z in range(self.args.num_z_train):
-            #     loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
-            #     g_loss += 1e-3 * loss
+            for z in range(self.args.num_z_train):
+                loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
+                g_loss += 1e-2 * loss
 
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
@@ -211,7 +216,7 @@ class SRrcGAN(pl.LightningModule):
         psnr_diff = psnr_diff
 
         mu_0 = 2e-2
-        if self.current_epoch % 25 == 0:
+        if self.current_epoch % 10 == 0:
             self.std_mult += mu_0 * psnr_diff
 
         if np.abs(psnr_diff) <= 0.25:
@@ -232,7 +237,7 @@ class SRrcGAN(pl.LightningModule):
         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.args.lr,
                                  betas=(self.args.beta_1, self.args.beta_2))
 
-        milestones = [50000, 100000, 200000, 300000]
+        milestones = [25000, 50000, 150000, 300000]
         gamma = 0.5
 
         schedule_g = torch.optim.lr_scheduler.MultiStepLR(opt_g, milestones, gamma)
