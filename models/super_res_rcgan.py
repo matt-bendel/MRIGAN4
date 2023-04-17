@@ -83,7 +83,7 @@ class SRrcGAN(pl.LightningModule):
     def adversarial_loss_generator(self, gens):
         gen_pred_loss = self.discriminator(gens.reshape(-1, 3, gens.shape[-1], gens.shape[-1]))
 
-        adv_weight = 1e-4
+        adv_weight = 1e-3
 
         return - adv_weight * gen_pred_loss.mean()
 
