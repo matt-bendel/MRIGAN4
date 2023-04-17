@@ -18,8 +18,10 @@ from mail import send_mail
 from torchmetrics.functional import peak_signal_noise_ratio
 from losses.perceptual import PerceptualLoss
 
+
 class SRrcGAN(pl.LightningModule):
-    def __init__(self, args, num_realizations, default_model_descriptor, exp_name, noise_type, num_gpus, upscale_factor=4):
+    def __init__(self, args, num_realizations, default_model_descriptor, exp_name, noise_type, num_gpus,
+                 upscale_factor=4):
         super().__init__()
         self.args = args
         self.num_realizations = num_realizations
@@ -88,7 +90,7 @@ class SRrcGAN(pl.LightningModule):
 
     def l1_std_p(self, avg_recon, gens, x):
         return F.l1_loss(avg_recon, x) - self.std_mult * np.sqrt(
-            2 / (np.pi * self.args.num_z_train * (self.args.num_z_train+ 1))) * torch.std(gens, dim=1).mean()
+            2 / (np.pi * self.args.num_z_train * (self.args.num_z_train + 1))) * torch.std(gens, dim=1).mean()
 
     def gradient_penalty(self, x_hat, x):
         gradient_penalty = self.compute_gradient_penalty(x.data, x_hat.data)
@@ -136,7 +138,9 @@ class SRrcGAN(pl.LightningModule):
             return d_loss
 
     def validation_step(self, batch, batch_idx, external_test=False):
-        y, x, _, _= batch
+        y, x, _, _ = batch
+        print(y.shape)
+        print(x.shape)
 
         if external_test:
             num_code = self.args.num_z_test
@@ -166,12 +170,12 @@ class SRrcGAN(pl.LightningModule):
 
         ############################################
 
-        # TODO: Plot as tensors using torch function
         if batch_idx == 0:
             if self.global_rank == 0 and self.current_epoch % 5 == 0:
                 self.logger.log_image(
                     key=f"epoch_{self.current_epoch}_img",
-                    images=[Image.fromarray(np.uint8(x[0].cpu().numpy().transpose(1,2,0)*255), 'L'), Image.fromarray(np.uint8(avg[0].cpu().numpy().transpose(1,2,0)*255), 'L')],
+                    images=[Image.fromarray(np.uint8(x[0].cpu().numpy().transpose(1, 2, 0) * 255), 'RGB'),
+                            Image.fromarray(np.uint8(avg[0].cpu().numpy().transpose(1, 2, 0) * 255), 'RGB')],
                     caption=["GT", f"Recon"]
                 )
 
