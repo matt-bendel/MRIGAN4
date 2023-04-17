@@ -165,7 +165,7 @@ class SRrcGAN(pl.LightningModule):
 
         psnr_8s = torch.stack(psnr_8s)
         psnr_1s = torch.stack(psnr_1s)
-        print(psnr_1s)
+        print(psnr_8s)
 
         self.log('psnr_8_step', psnr_8s.mean(), on_step=True, on_epoch=False, prog_bar=True)
         self.log('psnr_1_step', psnr_1s.mean(), on_step=True, on_epoch=False, prog_bar=True)
