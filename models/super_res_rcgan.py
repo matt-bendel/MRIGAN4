@@ -172,7 +172,7 @@ class SRrcGAN(pl.LightningModule):
         psnr_1s[psnr_1s < 0] = 0
         psnr_8s[psnr_8s < 0] = 0
 
-        if self.global_rank == 0 and self.current_epoch > 1:
+        if self.global_rank == 1 and self.current_epoch > 1:
             print(psnr_1s)
 
         self.log('psnr_8_step', psnr_8s.mean(), on_step=True, on_epoch=False, prog_bar=True)
