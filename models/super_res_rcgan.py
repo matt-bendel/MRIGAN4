@@ -56,8 +56,7 @@ class SRrcGAN(pl.LightningModule):
         # Get random interpolation between real and fake samples
         interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
         d_interpolates = self.discriminator(interpolates)
-        fake = Tensor(real_samples.shape[0], 1).fill_(1.0).to(
-            self.device)
+        fake = Tensor(real_samples.shape[0], 1, real_samples.shape[-1], real_samples.shape[-1]).fill_(1.0).to(self.device)
 
         # Get gradient w.r.t. interpolates
         gradients = autograd.grad(
