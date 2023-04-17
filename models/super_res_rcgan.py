@@ -114,8 +114,11 @@ class SRrcGAN(pl.LightningModule):
 
             # adversarial loss is binary cross-entropy
             g_loss = self.adversarial_loss_generator(gens)
-            loss, _ = self.perceptual_loss(avg_recon, x)
-            g_loss += 1e-1 * loss
+
+            for z in range(self.args.num_z_train):
+                loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
+                g_loss += 1e-1 * loss
+
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
             if torch.isnan(g_loss):
