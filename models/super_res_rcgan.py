@@ -39,7 +39,7 @@ class SRrcGAN(pl.LightningModule):
 
         self.perceptual_loss = PerceptualLoss()
 
-        self.std_mult = 0.5
+        self.std_mult = 1
         self.is_good_model = 0
 
         self.save_hyperparameters()  # Save passed values
@@ -83,7 +83,7 @@ class SRrcGAN(pl.LightningModule):
     def adversarial_loss_generator(self, gens):
         gen_pred_loss = self.discriminator(gens.reshape(-1, 3, gens.shape[-1], gens.shape[-1]))
 
-        adv_weight = 1e-3
+        adv_weight = 1e-4
 
         return - adv_weight * gen_pred_loss.mean()
 
@@ -196,7 +196,7 @@ class SRrcGAN(pl.LightningModule):
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
         psnr_diff = psnr_diff
 
-        mu_0 = 1e-3
+        mu_0 = 2e-2
         self.std_mult += mu_0 * psnr_diff
 
         if np.abs(psnr_diff) <= 0.25:
