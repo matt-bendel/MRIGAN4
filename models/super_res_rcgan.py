@@ -113,21 +113,15 @@ class SRrcGAN(pl.LightningModule):
             avg_recon = torch.mean(gens, dim=1)
 
             # adversarial loss is binary cross-entropy
-            adv_loss = self.adversarial_loss_generator(gens)
-            percep_loss = 0
+            g_loss = self.adversarial_loss_generator(gens)
 
             for z in range(self.args.num_z_train):
                 loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
-                percep_loss += 1e-2 * loss
+                g_loss += 1e-2 * loss
 
-            l1_std_p = self.l1_std_p(avg_recon, gens, x)
+            g_loss += self.l1_std_p(avg_recon, gens, x)
 
-            g_loss = adv_loss + percep_loss + l1_std_p
             if torch.isnan(g_loss):
-                print("NAN LOSS - G")
-                print(adv_loss)
-                print(percep_loss)
-                print(l1_std_p)
                 exit()
 
             self.log('g_loss', g_loss, prog_bar=True)
@@ -146,7 +140,6 @@ class SRrcGAN(pl.LightningModule):
             d_loss += self.drift_penalty(real_pred)
 
             if torch.isnan(d_loss):
-                print("NAN LOSS - D")
                 exit()
 
             self.log('d_loss', d_loss, prog_bar=True)
@@ -205,6 +198,9 @@ class SRrcGAN(pl.LightningModule):
 
         avg_psnr = avg_psnr.cpu().numpy()
         avg_single_psnr = avg_single_psnr.cpu().numpy()
+
+        print(avg_single_psnr)
+        print(avg_psnr)
 
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
         psnr_diff = psnr_diff
