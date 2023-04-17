@@ -32,8 +32,9 @@ class SRrcGAN(pl.LightningModule):
 
         self.in_chans = args.in_chans + self.num_realizations * 2
         self.out_chans = args.out_chans
+        self.texture_gain = 0.8
 
-        self.generator = RRDBNet(self.in_chans, self.out_chans, scale=upscale_factor)
+        self.generator = RRDBNet(self.in_chans, self.out_chans, upscale=upscale_factor)
 
         self.discriminator = UNetDiscriminatorSN(num_in_ch=3)
 
@@ -74,7 +75,13 @@ class SRrcGAN(pl.LightningModule):
     def forward(self, y, x_lf):
         num_vectors = y.size(0)
         noise = self.get_noise(num_vectors, y.shape[-1])
-        samples = self.generator(y, noise, x_lf)
+        gain_channel = torch.ones([y.size(0), 1, y.shape[-1], y.shape[-1]], device=self.device)
+
+        for i in range(y.size(0)):
+            t = gain_channel[i, 0, :, :] * self.texture_gain
+            gain_channel[i, 0, :, :] = t
+
+        samples = self.generator(y, noise, x_lf, gain_channel)
         return samples
 
     def adversarial_loss_discriminator(self, fake_pred, real_pred):
@@ -115,9 +122,9 @@ class SRrcGAN(pl.LightningModule):
             # adversarial loss is binary cross-entropy
             g_loss = self.adversarial_loss_generator(gens)
 
-            for z in range(self.args.num_z_train):
-                loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
-                g_loss += 1e-3 * loss
+            # for z in range(self.args.num_z_train):
+            #     loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
+            #     g_loss += 1e-3 * loss
 
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
