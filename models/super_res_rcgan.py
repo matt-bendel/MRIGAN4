@@ -48,7 +48,7 @@ class SRrcGAN(pl.LightningModule):
         z = torch.randn(num_vectors, 2, resolution, resolution, device=self.device)
         return z
 
-    def compute_gradient_penalty(self, real_samples, fake_samples, y):
+    def compute_gradient_penalty(self, real_samples, fake_samples):
         """Calculates the gradient penalty loss for WGAN GP"""
         Tensor = torch.FloatTensor
         # Random weight term for interpolation between real and fake samples
