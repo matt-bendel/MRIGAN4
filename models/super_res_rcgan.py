@@ -139,8 +139,6 @@ class SRrcGAN(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx, external_test=False):
         y, x, _, _ = batch
-        print(y.shape)
-        print(x.shape)
 
         if external_test:
             num_code = self.args.num_z_test
@@ -153,6 +151,8 @@ class SRrcGAN(pl.LightningModule):
             gens[:, z, :, :, :] = self.forward(y)
 
         avg = torch.mean(gens, dim=1)
+        print(avg.shape)
+        exit()
 
         avg_list = []
         gt_list = []
