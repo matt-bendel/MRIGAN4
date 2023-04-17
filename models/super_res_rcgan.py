@@ -157,8 +157,6 @@ class SRrcGAN(pl.LightningModule):
 
         avg = torch.mean(gens, dim=1)
 
-        avg_list = []
-        gt_list = []
         psnr_8s = []
         psnr_1s = []
 
@@ -167,6 +165,7 @@ class SRrcGAN(pl.LightningModule):
 
         psnr_8s = torch.stack(psnr_8s)
         psnr_1s = torch.stack(psnr_1s)
+        print(psnr_1s)
 
         self.log('psnr_8_step', psnr_8s.mean(), on_step=True, on_epoch=False, prog_bar=True)
         self.log('psnr_1_step', psnr_1s.mean(), on_step=True, on_epoch=False, prog_bar=True)
@@ -189,9 +188,6 @@ class SRrcGAN(pl.LightningModule):
     def validation_epoch_end(self, validation_step_outputs):
         avg_psnr = self.all_gather(torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()).mean()
         avg_single_psnr = self.all_gather(torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean()).mean()
-
-        print(avg_psnr)
-        print(avg_single_psnr)
 
         avg_psnr = avg_psnr.cpu().numpy()
         avg_single_psnr = avg_single_psnr.cpu().numpy()
