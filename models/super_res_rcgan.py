@@ -12,7 +12,7 @@ from matplotlib import cm
 from PIL import Image
 from torch.nn import functional as F
 from models.architectures.super_res_disc import UNetDiscriminatorSN
-from models.architectures.super_res_gen import SRVGGNetCompact
+from models.architectures.super_res_gen import RRDBNet
 from evaluation_scripts.metrics import psnr
 from mail import send_mail
 from torchmetrics.functional import peak_signal_noise_ratio
@@ -33,7 +33,7 @@ class SRrcGAN(pl.LightningModule):
         self.in_chans = args.in_chans + self.num_realizations * 2
         self.out_chans = args.out_chans
 
-        self.generator = SRVGGNetCompact(num_in_ch=self.in_chans, upscale=upscale_factor)
+        self.generator = RRDBNet(self.in_chans, self.out_chans, scale=upscale_factor)
 
         self.discriminator = UNetDiscriminatorSN(num_in_ch=3)
 
