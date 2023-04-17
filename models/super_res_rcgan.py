@@ -36,7 +36,6 @@ class SRrcGAN(pl.LightningModule):
 
         self.std_mult = 1
         self.is_good_model = 0
-        self.resolution = self.args.im_size
 
         self.save_hyperparameters()  # Save passed values
 
