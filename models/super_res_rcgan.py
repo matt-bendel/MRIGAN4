@@ -17,8 +17,8 @@ from evaluation_scripts.metrics import psnr
 from mail import send_mail
 from torchmetrics.functional import peak_signal_noise_ratio
 
-class rcGAN(pl.LightningModule):
-    def __init__(self, args, num_realizations, default_model_descriptor, exp_name, noise_type, num_gpus):
+class SRrcGAN(pl.LightningModule):
+    def __init__(self, args, num_realizations, default_model_descriptor, exp_name, noise_type, num_gpus, upscale_factor=4):
         super().__init__()
         self.args = args
         self.num_realizations = num_realizations
@@ -30,9 +30,9 @@ class rcGAN(pl.LightningModule):
         self.in_chans = args.in_chans + self.num_realizations * 2
         self.out_chans = args.out_chans
 
-        self.generator = None# TODO
+        self.generator = SRVGGNetCompact(num_in_ch=self.in_chans, upscale=upscale_factor)
 
-        self.discriminator = None# TODO
+        self.discriminator = UNetDiscriminatorSN(num_in_ch=3)
 
         self.std_mult = 1
         self.is_good_model = 0
@@ -40,14 +40,9 @@ class rcGAN(pl.LightningModule):
 
         self.save_hyperparameters()  # Save passed values
 
-    def get_noise(self, num_vectors, mask):
-        z = torch.randn(num_vectors, 2, self.resolution, self.resolution, device=self.device)
+    def get_noise(self, num_vectors, resolution):
+        z = torch.randn(num_vectors, 2, resolution, resolution, device=self.device)
         return z
-
-    def readd_measures(self, samples, measures, mask):
-        #TODO
-
-        return output_im
 
     def compute_gradient_penalty(self, real_samples, fake_samples, y):
         """Calculates the gradient penalty loss for WGAN GP"""
@@ -56,7 +51,7 @@ class rcGAN(pl.LightningModule):
         alpha = Tensor(np.random.random((real_samples.size(0), 1, 1, 1))).to(self.device)
         # Get random interpolation between real and fake samples
         interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
-        d_interpolates = self.discriminator(input=interpolates, y=y)
+        d_interpolates = self.discriminator(interpolates)
         fake = Tensor(real_samples.shape[0], 1).fill_(1.0).to(
             self.device)
 
@@ -73,30 +68,19 @@ class rcGAN(pl.LightningModule):
         gradient_penalty = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
         return gradient_penalty
 
-    def forward(self, y, mask):
+    def forward(self, y):
         num_vectors = y.size(0)
-        noise = self.get_noise(num_vectors, mask)
-        samples = self.generator(torch.cat([y, noise], dim=1)) # TODO
-        samples = self.readd_measures(samples, y, mask)
+        noise = self.get_noise(num_vectors, y.shape[-1])
+        samples = self.generator(torch.cat([y, noise], dim=1))
         return samples
 
     def adversarial_loss_discriminator(self, fake_pred, real_pred):
         return fake_pred.mean() - real_pred.mean()
 
-    def adversarial_loss_generator(self, y, gens):
-        fake_pred = torch.zeros(size=(y.shape[0], self.args.num_z_train), device=self.device)
-        for k in range(y.shape[0]):
-            cond = torch.zeros(1, gens.shape[2], gens.shape[3], gens.shape[4], device=self.device)
-            cond[0, :, :, :] = y[k, :, :, :]
-            cond = cond.repeat(self.args.num_z_train, 1, 1, 1)
-            temp = self.discriminator(input=gens[k], y=cond)
-            fake_pred[k] = temp[:, 0]
+    def adversarial_loss_generator(self, gens):
+        gen_pred_loss = self.discriminator(gens.reshape(-1, 3, gens.shape[-1], gens.shape[-1]))
 
-        gen_pred_loss = torch.mean(fake_pred[0])
-        for k in range(y.shape[0] - 1):
-            gen_pred_loss += torch.mean(fake_pred[k + 1])
-
-        adv_weight = 1e-5 # TODO
+        adv_weight = 1e-5
 
         return - adv_weight * gen_pred_loss.mean()
 
@@ -104,8 +88,8 @@ class rcGAN(pl.LightningModule):
         return F.l1_loss(avg_recon, x) - self.std_mult * np.sqrt(
             2 / (np.pi * self.args.num_z_train * (self.args.num_z_train+ 1))) * torch.std(gens, dim=1).mean()
 
-    def gradient_penalty(self, x_hat, x, y):
-        gradient_penalty = self.compute_gradient_penalty(x.data, x_hat.data, y.data)
+    def gradient_penalty(self, x_hat, x):
+        gradient_penalty = self.compute_gradient_penalty(x.data, x_hat.data)
 
         return self.args.gp_weight * gradient_penalty
 
@@ -113,21 +97,20 @@ class rcGAN(pl.LightningModule):
         return 0.001 * torch.mean(real_pred ** 2)
 
     def training_step(self, batch, batch_idx, optimizer_idx):
-        # TODO: BIG UPDATE
-        y, x, mean, std = batch
+        y, x, _, _ = batch
 
         # train generator
         if optimizer_idx == 1:
             gens = torch.zeros(
-                size=(y.size(0), self.args.num_z_train, self.args.in_chans, self.args.im_size, self.args.im_size),
+                size=(y.size(0), self.args.num_z_train, self.args.in_chans, x.shape[-1], x.shape[-1]),
                 device=self.device)
             for z in range(self.args.num_z_train):
-                gens[:, z, :, :, :] = self.forward(y, mask)
+                gens[:, z, :, :, :] = self.forward(y)
 
             avg_recon = torch.mean(gens, dim=1)
 
             # adversarial loss is binary cross-entropy
-            g_loss = self.adversarial_loss_generator(y, gens)
+            g_loss = self.adversarial_loss_generator(gens)
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
             self.log('g_loss', g_loss, prog_bar=True)
@@ -136,13 +119,13 @@ class rcGAN(pl.LightningModule):
 
         # train discriminator
         if optimizer_idx == 0:
-            x_hat = self.forward(y, mask)
+            x_hat = self.forward(y)
 
-            real_pred = self.discriminator(input=x, y=y)
-            fake_pred = self.discriminator(input=x_hat, y=y)
+            real_pred = self.discriminator(x)
+            fake_pred = self.discriminator(x_hat)
 
             d_loss = self.adversarial_loss_discriminator(fake_pred, real_pred)
-            d_loss += self.gradient_penalty(x_hat, x, y)
+            d_loss += self.gradient_penalty(x_hat, x)
             d_loss += self.drift_penalty(real_pred)
 
             self.log('d_loss', d_loss, prog_bar=True)
@@ -150,58 +133,30 @@ class rcGAN(pl.LightningModule):
             return d_loss
 
     def validation_step(self, batch, batch_idx, external_test=False):
-        # TODO: BIG UPDATE
-        y, x, mask, mean, std, maps, _, _ = batch
-
-        fig_count = 0
+        y, x, _, _= batch
 
         if external_test:
             num_code = self.args.num_z_test
         else:
             num_code = self.args.num_z_valid
 
-        gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, self.args.im_size, self.args.im_size),
+        gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, x.shape[-1], x.shape[-1]),
                            device=self.device)
         for z in range(num_code):
-            gens[:, z, :, :, :] = self.forward(y, mask) * std[:, None, None, None] + mean[:, None, None, None] # EXPERIMENTAL UN
+            gens[:, z, :, :, :] = self.forward(y)
 
         avg = torch.mean(gens, dim=1)
 
-        avg_gen = self.reformat(avg)
-        gt = self.reformat(x * std[:, None, None, None] + mean[:, None, None, None])
-
-        mag_avg_list = []
-        mag_single_list = []
-        mag_gt_list = []
+        avg_list = []
+        gt_list = []
         psnr_8s = []
         psnr_1s = []
 
-        for j in range(y.size(0)):
-            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), sp.from_pytorch(maps[j].cpu(), iscomplex=True))
-
-            ############# EXPERIMENTAL #################
-            # ON CPU
-            avg_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(avg_gen[j].cpu(), iscomplex=True))).unsqueeze(0).unsqueeze(0).to(self.device)
-            single_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[:, 0])[j].cpu(), iscomplex=True))).unsqueeze(0).unsqueeze(0).to(self.device)
-            gt_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(gt[j].cpu(), iscomplex=True))).unsqueeze(0).unsqueeze(0).to(self.device)
-
-            # ON GPU
-            # avg_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(avg_gen[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
-            # single_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[:, 0])[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
-            # gt_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(gt[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
-
-            psnr_8s.append(peak_signal_noise_ratio(avg_sp_out, gt_sp_out))
-            psnr_1s.append(peak_signal_noise_ratio(single_sp_out, gt_sp_out))
-
-            mag_avg_list.append(avg_sp_out)
-            mag_single_list.append(single_sp_out)
-            mag_gt_list.append(gt_sp_out)
+        psnr_8s.append(peak_signal_noise_ratio(avg, x))
+        psnr_1s.append(peak_signal_noise_ratio(gens, x))
 
         psnr_8s = torch.stack(psnr_8s)
         psnr_1s = torch.stack(psnr_1s)
-        mag_avg_gen = torch.cat(mag_avg_list, dim=0)
-        mag_single_gen = torch.cat(mag_single_list, dim=0)
-        mag_gt = torch.cat(mag_gt_list, dim=0)
 
         self.log('psnr_8_step', psnr_8s.mean(), on_step=True, on_epoch=False, prog_bar=True)
         self.log('psnr_1_step', psnr_1s.mean(), on_step=True, on_epoch=False, prog_bar=True)
@@ -210,20 +165,11 @@ class rcGAN(pl.LightningModule):
 
         # TODO: Plot as tensors using torch function
         if batch_idx == 0:
-            if self.global_rank == 0 and self.current_epoch % 5 == 0 and fig_count == 0:
-                fig_count += 1
-                avg_gen_np = mag_avg_gen[0, 0, :, :].cpu().numpy()
-                gt_np = mag_gt[0, 0, :, :].cpu().numpy()
-
-                plot_avg_np = (avg_gen_np - np.min(avg_gen_np)) / (np.max(avg_gen_np) - np.min(avg_gen_np))
-                plot_gt_np = (gt_np - np.min(gt_np)) / (np.max(gt_np) - np.min(gt_np))
-
-                np_psnr = psnr(gt_np, avg_gen_np)
-
+            if self.global_rank == 0 and self.current_epoch % 5 == 0:
                 self.logger.log_image(
                     key=f"epoch_{self.current_epoch}_img",
-                    images=[Image.fromarray(np.uint8(plot_gt_np*255), 'L'), Image.fromarray(np.uint8(plot_avg_np*255), 'L'), Image.fromarray(np.uint8(cm.jet(5*np.abs(plot_gt_np - plot_avg_np))*255))],
-                    caption=["GT", f"Recon: PSNR (NP): {np_psnr:.2f}", "Error"]
+                    images=[Image.fromarray(np.uint8(x[0].cpu().numpy().transpose(1,2,0)*255), 'L'), Image.fromarray(np.uint8(avg[0].cpu().numpy().transpose(1,2,0)*255), 'L')],
+                    caption=["GT", f"Recon"]
                 )
 
             self.trainer.strategy.barrier()
@@ -249,7 +195,7 @@ class rcGAN(pl.LightningModule):
             self.is_good_model = 0
 
         if self.global_rank == 0 and self.current_epoch % 1 == 0:
-            send_mail(f"EPOCH {self.current_epoch + 1} UPDATE - rcGAN",
+            send_mail(f"EPOCH {self.current_epoch + 1} UPDATE - rcGAN - SR",
                       f"Std. Dev. Weight: {self.std_mult:.4f}\nMetrics:\nPSNR: {avg_psnr:.2f}\nSINGLE PSNR: {avg_single_psnr:.2f}\nPSNR Diff: {psnr_diff}",
                       file_name="variation_gif.gif")
 

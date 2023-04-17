@@ -50,5 +50,6 @@ def create_arg_parser():
     parser.add_argument('--noise-structure', default=0, type=int, help='Mini batch size')
     parser.add_argument('--num-gpus', default=1, type=int, help='Mini batch size')
     parser.add_argument('--mask-type', default=2, type=int, help='Mini batch size')
+    parser.add_argument('--sr-scale', default=4, type=int, help='Mini batch size')
 
     return parser

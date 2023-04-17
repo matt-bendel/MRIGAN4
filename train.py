@@ -11,8 +11,10 @@ from data_loaders.MRIDataModule import MRIDataModule
 from datasets.fastmri_multicoil_general import FastMRIDataModule
 from data_loaders.CelebAHQDataModule import CelebAHQDataModule
 from data_loaders.BSD400DataModule import BSD400DataModule
+from data_loaders.SRDataModule import SRDataModule
 from utils.parse_args import create_arg_parser
 from models.rcGAN import rcGAN
+from models.super_res_rcgan import SRrcGAN
 from models.adler import Adler
 from models.ohayon import Ohayon
 from models.mri_unet import MRIUnet
@@ -89,8 +91,10 @@ if __name__ == '__main__':
         if args.dp:
             cfg.batch_size = cfg.batch_size * args.num_gpus
 
-        dm = CelebAHQDataModule(cfg, args.mask_type) # TODO: SR DataModule
-        model = InpaintUNet(cfg, args.num_noise, args.default_model_descriptor, args.exp_name) # TODO: SR rcGAN
+        dm = SRDataModule(cfg, args.sr_scale)
+
+        noise_structure = {"AWGN": args.awgn, "structure": args.noise_structure}
+        model = SRrcGAN(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure, args.num_gpus, args.sr_scale)
     elif args.cs:
         with open('configs/cs/config.yml', 'r') as f:
             cfg = yaml.load(f, Loader=yaml.FullLoader)
