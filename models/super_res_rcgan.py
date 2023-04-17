@@ -163,7 +163,7 @@ class SRrcGAN(pl.LightningModule):
         psnr_1s = []
 
         psnr_8s.append(peak_signal_noise_ratio(avg, x))
-        psnr_1s.append(peak_signal_noise_ratio(gens, x))
+        psnr_1s.append(peak_signal_noise_ratio(gens[:, 0, :, :, :], x))
 
         psnr_8s = torch.stack(psnr_8s)
         psnr_1s = torch.stack(psnr_1s)
