@@ -173,9 +173,6 @@ class SRrcGAN(pl.LightningModule):
         psnr_8s = torch.nan_to_num(psnr_8s, nan=0.0, posinf=100, neginf=0)
         psnr_1s = torch.nan_to_num(psnr_1s, nan=0.0, posinf=100, neginf=0)
 
-        if self.global_rank == 1 and self.current_epoch > 1:
-            print(psnr_1s)
-
         self.log('psnr_8_step', psnr_8s.mean(), on_step=True, on_epoch=False, prog_bar=True)
         self.log('psnr_1_step', psnr_1s.mean(), on_step=True, on_epoch=False, prog_bar=True)
 
@@ -203,8 +200,6 @@ class SRrcGAN(pl.LightningModule):
         avg_psnr = avg_psnr.cpu().numpy()
         avg_single_psnr = avg_single_psnr.cpu().numpy()
 
-        print(avg_single_psnr)
-
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
         psnr_diff = psnr_diff
 
@@ -216,10 +211,10 @@ class SRrcGAN(pl.LightningModule):
         else:
             self.is_good_model = 0
 
-        # if self.global_rank == 0 and self.current_epoch % 50 == 0:
-        #     send_mail(f"EPOCH {self.current_epoch + 1} UPDATE - rcGAN - SR",
-        #               f"Std. Dev. Weight: {self.std_mult:.4f}\nMetrics:\nPSNR: {avg_psnr:.2f}\nSINGLE PSNR: {avg_single_psnr:.2f}\nPSNR Diff: {psnr_diff}",
-        #               file_name="variation_gif.gif")
+        if self.global_rank == 0 and self.current_epoch % 50 == 0:
+            send_mail(f"EPOCH {self.current_epoch + 1} UPDATE - rcGAN - SR",
+                      f"Std. Dev. Weight: {self.std_mult:.4f}\nMetrics:\nPSNR: {avg_psnr:.2f}\nSINGLE PSNR: {avg_single_psnr:.2f}\nPSNR Diff: {psnr_diff}",
+                      file_name="variation_gif.gif")
 
         self.trainer.strategy.barrier()
 
