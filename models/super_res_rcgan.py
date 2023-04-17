@@ -173,7 +173,7 @@ class SRrcGAN(pl.LightningModule):
         psnr_8s[psnr_8s < 0] = 0
 
         if self.global_rank == 0 and self.current_epoch > 1:
-            print(psnr_8s)
+            print(psnr_1s)
 
         self.log('psnr_8_step', psnr_8s.mean(), on_step=True, on_epoch=False, prog_bar=True)
         self.log('psnr_1_step', psnr_1s.mean(), on_step=True, on_epoch=False, prog_bar=True)
@@ -201,6 +201,8 @@ class SRrcGAN(pl.LightningModule):
 
         avg_psnr = avg_psnr.cpu().numpy()
         avg_single_psnr = avg_single_psnr.cpu().numpy()
+
+        print(avg_single_psnr)
 
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
         psnr_diff = psnr_diff
