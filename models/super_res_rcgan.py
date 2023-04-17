@@ -169,8 +169,9 @@ class SRrcGAN(pl.LightningModule):
 
         psnr_8s = torch.stack(psnr_8s)
         psnr_1s = torch.stack(psnr_1s)
-        psnr_1s[psnr_1s < 0] = 0
-        psnr_8s[psnr_8s < 0] = 0
+
+        psnr_8s = torch.nan_to_num(psnr_8s, nan=0.0, posinf=100, neginf=0)
+        psnr_1s = torch.nan_to_num(psnr_1s, nan=0.0, posinf=100, neginf=0)
 
         if self.global_rank == 1 and self.current_epoch > 1:
             print(psnr_1s)
