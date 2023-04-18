@@ -97,7 +97,7 @@ class SRrcGAN(pl.LightningModule):
         for k in range(y.shape[0] - 1):
             gen_pred_loss += torch.mean(fake_pred[k + 1])
 
-        adv_weight = 3e-5
+        adv_weight = 1e-4 #3e-5
 
         return - adv_weight * gen_pred_loss.mean()
 
@@ -129,9 +129,9 @@ class SRrcGAN(pl.LightningModule):
             # adversarial loss is binary cross-entropy
             g_loss = self.adversarial_loss_generator(y, gens)
 
-            # for z in range(self.args.num_z_train):
-            #     loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
-            #     g_loss += 1e-2 * loss
+            for z in range(self.args.num_z_train):
+                loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
+                g_loss += 1e-2 * loss
 
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
