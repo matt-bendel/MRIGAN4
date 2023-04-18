@@ -32,12 +32,12 @@ class SRrcGAN(pl.LightningModule):
         self.noise_type = noise_type
         self.num_gpus = num_gpus
 
-        self.in_chans = args.in_chans + self.num_realizations * 2
+        self.in_chans = args.in_chans
         self.out_chans = args.out_chans
 
-        self.generator = Generator(128)
+        self.generator = Generator(args.im_size)
 
-        self.discriminator = Discriminator(128)
+        self.discriminator = Discriminator(args.im_size)
 
         self.perceptual_loss = PerceptualLoss()
 
