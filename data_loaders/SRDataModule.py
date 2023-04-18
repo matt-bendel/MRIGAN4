@@ -104,7 +104,7 @@ class LRHR_IMGDataset(data.Dataset):
         std = torch.tensor([0.5, 0.5, 0.5])
         hr = (hr - mean[:, None, None]) / std[:, None, None]
         lf = (lf - mean[:, None, None]) / std[:, None, None]
-        return lr, hr, lf
+        return lf, hr, mean, std
 
 
 def random_flip(img, seg, hf):

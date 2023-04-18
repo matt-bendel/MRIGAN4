@@ -13,6 +13,8 @@ from PIL import Image
 from torch.nn import functional as F
 from models.architectures.super_res_disc import UNetDiscriminatorSN
 from models.architectures.super_res_gen import RRDBNet
+from models.comodgan.co_mod_gan_sr import Generator, Discriminator
+
 from evaluation_scripts.metrics import psnr
 from mail import send_mail
 from torchmetrics.functional import peak_signal_noise_ratio
@@ -32,11 +34,10 @@ class SRrcGAN(pl.LightningModule):
 
         self.in_chans = args.in_chans + self.num_realizations * 2
         self.out_chans = args.out_chans
-        self.texture_gain = t
 
-        self.generator = RRDBNet(self.in_chans, self.out_chans, upscale=upscale_factor)
+        self.generator = Generator(128)
 
-        self.discriminator = UNetDiscriminatorSN(num_in_ch=3)
+        self.discriminator = Discriminator(128)
 
         self.perceptual_loss = PerceptualLoss()
 
@@ -45,19 +46,21 @@ class SRrcGAN(pl.LightningModule):
 
         self.save_hyperparameters()  # Save passed values
 
-    def get_noise(self, num_vectors, resolution):
-        z = torch.randn(num_vectors, 2, resolution, resolution, device=self.device)
-        return z
+    def get_noise(self, num_vectors):
+        return [torch.randn(num_vectors, 512, device=self.device)]
 
-    def compute_gradient_penalty(self, real_samples, fake_samples):
+    def compute_gradient_penalty(self, real_samples, fake_samples, y):
         """Calculates the gradient penalty loss for WGAN GP"""
         Tensor = torch.FloatTensor
         # Random weight term for interpolation between real and fake samples
         alpha = Tensor(np.random.random((real_samples.size(0), 1, 1, 1))).to(self.device)
         # Get random interpolation between real and fake samples
         interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
-        d_interpolates = self.discriminator(interpolates)
-        fake = Tensor(real_samples.shape[0], 1, real_samples.shape[-1], real_samples.shape[-1]).fill_(1.0).to(self.device)
+        d_interpolates = self.discriminator(input=interpolates, label=y)
+        # fake = Tensor(real_samples.shape[0], 1, d_interpolates.shape[-1], d_interpolates.shape[-1]).fill_(1.0).to(
+        #     self.device)
+        fake = Tensor(real_samples.shape[0], 1).fill_(1.0).to(
+            self.device)
 
         # Get gradient w.r.t. interpolates
         gradients = autograd.grad(
@@ -72,30 +75,29 @@ class SRrcGAN(pl.LightningModule):
         gradient_penalty = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
         return gradient_penalty
 
-    def forward(self, y, x_lf):
+    def forward(self, y):
         num_vectors = y.size(0)
-        noise = self.get_noise(num_vectors, y.shape[-1])
-        gain_channel = torch.ones([y.size(0), 1, y.shape[-1], y.shape[-1]], device=self.device)
-
-        texture_gain = self.texture_gain
-
-        if texture_gain == -1:
-            texture_gain = np.random.rand()
-
-        for i in range(y.size(0)):
-            t = gain_channel[i, 0, :, :] * texture_gain
-            gain_channel[i, 0, :, :] = t
-
-        samples = self.generator(y, noise, x_lf, gain_channel)
+        noise = self.get_noise(num_vectors)
+        samples = self.generator(y, y, noise)
         return samples
 
     def adversarial_loss_discriminator(self, fake_pred, real_pred):
         return fake_pred.mean() - real_pred.mean()
 
-    def adversarial_loss_generator(self, gens):
-        gen_pred_loss = self.discriminator(gens.reshape(-1, 3, gens.shape[-1], gens.shape[-1]))
+    def adversarial_loss_generator(self, y, gens):
+        fake_pred = torch.zeros(size=(y.shape[0], self.args.num_z_train), device=self.device)
+        for k in range(y.shape[0]):
+            cond = torch.zeros(1, gens.shape[2], gens.shape[3], gens.shape[4], device=self.device)
+            cond[0, :, :, :] = y[k, :, :, :]
+            cond = cond.repeat(self.args.num_z_train, 1, 1, 1)
+            temp = self.discriminator(input=gens[k], y=cond)
+            fake_pred[k] = temp[:, 0]
 
-        adv_weight = 1e-4
+        gen_pred_loss = torch.mean(fake_pred[0])
+        for k in range(y.shape[0] - 1):
+            gen_pred_loss += torch.mean(fake_pred[k + 1])
+
+        adv_weight = 3e-5
 
         return - adv_weight * gen_pred_loss.mean()
 
@@ -103,8 +105,8 @@ class SRrcGAN(pl.LightningModule):
         return F.l1_loss(avg_recon, x) - self.std_mult * np.sqrt(
             2 / (np.pi * self.args.num_z_train * (self.args.num_z_train + 1))) * torch.std(gens, dim=1).mean()
 
-    def gradient_penalty(self, x_hat, x):
-        gradient_penalty = self.compute_gradient_penalty(x.data, x_hat.data)
+    def gradient_penalty(self, x_hat, x, y):
+        gradient_penalty = self.compute_gradient_penalty(x.data, x_hat.data, y.data)
 
         return self.args.gp_weight * gradient_penalty
 
@@ -112,7 +114,7 @@ class SRrcGAN(pl.LightningModule):
         return 0.001 * torch.mean(real_pred ** 2)
 
     def training_step(self, batch, batch_idx, optimizer_idx):
-        y, x, x_lf, _, _ = batch
+        y, x, _, _ = batch
 
         # train generator
         if optimizer_idx == 1:
@@ -120,16 +122,16 @@ class SRrcGAN(pl.LightningModule):
                 size=(y.size(0), self.args.num_z_train, self.args.in_chans, x.shape[-1], x.shape[-1]),
                 device=self.device)
             for z in range(self.args.num_z_train):
-                gens[:, z, :, :, :] = self.forward(y, x_lf)
+                gens[:, z, :, :, :] = self.forward(y)
 
             avg_recon = torch.mean(gens, dim=1)
 
             # adversarial loss is binary cross-entropy
-            g_loss = self.adversarial_loss_generator(gens)
+            g_loss = self.adversarial_loss_generator(y, gens)
 
-            for z in range(self.args.num_z_train):
-                loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
-                g_loss += 1e-2 * loss
+            # for z in range(self.args.num_z_train):
+            #     loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
+            #     g_loss += 1e-2 * loss
 
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
@@ -142,13 +144,13 @@ class SRrcGAN(pl.LightningModule):
 
         # train discriminator
         if optimizer_idx == 0:
-            x_hat = self.forward(y, x_lf)
+            x_hat = self.forward(y)
 
-            real_pred = self.discriminator(x)
-            fake_pred = self.discriminator(x_hat)
+            real_pred = self.discriminator(input=x, label=y)
+            fake_pred = self.discriminator(input=x_hat, label=y)
 
             d_loss = self.adversarial_loss_discriminator(fake_pred, real_pred)
-            d_loss += self.gradient_penalty(x_hat, x)
+            d_loss += self.gradient_penalty(x_hat, x, y)
             d_loss += self.drift_penalty(real_pred)
 
             if torch.isnan(d_loss):
@@ -159,7 +161,7 @@ class SRrcGAN(pl.LightningModule):
             return d_loss
 
     def validation_step(self, batch, batch_idx, external_test=False):
-        y, x, x_lf, _, _ = batch
+        y, x, mean, std = batch
 
         if external_test:
             num_code = self.args.num_z_test
@@ -169,9 +171,11 @@ class SRrcGAN(pl.LightningModule):
         gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, x.shape[-1], x.shape[-1]),
                            device=self.device)
         for z in range(num_code):
-            gens[:, z, :, :, :] = self.forward(y, x_lf)
+            gens[:, z, :, :, :] = self.forward(y) * std[:, :, None, None] + mean[:, :, None, None]
 
         avg = torch.mean(gens, dim=1)
+        x = x * std[:, :, None, None] + mean[:, :, None, None]
+        y = y * std[:, :, None, None] + mean[:, :, None, None]
 
         psnr_8s = []
         psnr_1s = []
@@ -195,10 +199,11 @@ class SRrcGAN(pl.LightningModule):
                 self.logger.log_image(
                     key=f"epoch_{self.current_epoch}_img",
                     images=[Image.fromarray(np.uint8(x[0].cpu().numpy().transpose(1, 2, 0) * 255), 'RGB'),
+                            Image.fromarray(np.uint8(y[0].cpu().numpy().transpose(1, 2, 0) * 255), 'RGB'),
                             Image.fromarray(np.uint8(avg[0].cpu().numpy().transpose(1, 2, 0) * 255), 'RGB'),
                             Image.fromarray(np.uint8(gens[0, 0].cpu().numpy().transpose(1, 2, 0) * 255), 'RGB'),
                             Image.fromarray(np.uint8(gens[0, 1].cpu().numpy().transpose(1, 2, 0) * 255), 'RGB')],
-                    caption=["GT", f"Recon", "Samp 1", "Samp 2"]
+                    caption=["GT", f"Aliased", "Avg", "Samp 1", "Samp 2"]
                 )
 
             self.trainer.strategy.barrier()
