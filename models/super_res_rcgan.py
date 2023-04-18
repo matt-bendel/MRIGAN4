@@ -90,7 +90,7 @@ class SRrcGAN(pl.LightningModule):
             cond = torch.zeros(1, gens.shape[2], gens.shape[3], gens.shape[4], device=self.device)
             cond[0, :, :, :] = y[k, :, :, :]
             cond = cond.repeat(self.args.num_z_train, 1, 1, 1)
-            temp = self.discriminator(input=gens[k], y=cond)
+            temp = self.discriminator(input=gens[k], label=cond)
             fake_pred[k] = temp[:, 0]
 
         gen_pred_loss = torch.mean(fake_pred[0])
