@@ -237,7 +237,7 @@ class SRrcGAN(pl.LightningModule):
         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.args.lr,
                                  betas=(self.args.beta_1, self.args.beta_2))
 
-        milestones = [25000, 50000, 150000, 300000]
+        milestones = [25000, 50000, 75000, 90000]
         gamma = 0.5
 
         schedule_g = torch.optim.lr_scheduler.MultiStepLR(opt_g, milestones, gamma)
