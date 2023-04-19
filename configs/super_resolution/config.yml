@@ -5,7 +5,7 @@ num_z_test: 32
 num_z_valid: 8
 num_z_train: 2
 
-im_size: 128
+im_size: 256
 in_chans: 3
 out_chans: 3
 data_path: "/storage/sr_data/"
