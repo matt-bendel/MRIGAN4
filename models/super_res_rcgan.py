@@ -195,9 +195,9 @@ class SRrcGAN(pl.LightningModule):
         ############################################
 
         if batch_idx == 0:
-            if self.global_rank == 0 and self.current_epoch % 50 == 0:
+            if (self.global_rank == 0 or self.global_rank == 1) and self.current_epoch % 50 == 0:
                 self.logger.log_image(
-                    key=f"epoch_{self.current_epoch}_img",
+                    key=f"epoch_{self.current_epoch}_img_gpu_{self.global_rank}",
                     images=[Image.fromarray(np.uint8(x[0].cpu().numpy().transpose(1, 2, 0) * 255), 'RGB'),
                             Image.fromarray(np.uint8(y[0].cpu().numpy().transpose(1, 2, 0) * 255), 'RGB'),
                             Image.fromarray(np.uint8(avg[0].cpu().numpy().transpose(1, 2, 0) * 255), 'RGB'),

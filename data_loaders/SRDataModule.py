@@ -153,9 +153,12 @@ class SRDataModule(pl.LightningDataModule):
 
     def setup(self, stage):
         # Assign train/val datasets for use in dataloaders
-        train_data = LRHR_IMGDataset(self.args, self.scale, "train")
-        dev_data = LRHR_IMGDataset(self.args, self.scale, "val")
-        test_data = None  # LRHR_IMGDataset(self.args, self.scale, "test")
+        dataset = LRHR_IMGDataset(self.args, self.scale, "train")
+        train_data, dev_data = torch.utils.data.random_split(
+            dataset, [700, 100],
+            generator=torch.Generator().manual_seed(0)
+        )
+        test_data = LRHR_IMGDataset(self.args, self.scale, "val")
 
         self.train, self.validate, self.test = train_data, dev_data, test_data
 
@@ -179,10 +182,11 @@ class SRDataModule(pl.LightningDataModule):
             pin_memory=False,
         )
 
-    # def test_dataloader(self):
-    #     return DataLoader(
-    #         dataset=self.test,
-    #         batch_size=self.args.batch_size,
-    #         num_workers=20,
-    #         pin_memory=True,
-    #     )
+    def test_dataloader(self):
+        return DataLoader(
+            dataset=self.test,
+            batch_size=1,
+            drop_last=False,
+            num_workers=5,
+            pin_memory=False,
+        )
