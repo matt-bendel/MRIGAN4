@@ -129,9 +129,9 @@ class SRrcGAN(pl.LightningModule):
             # adversarial loss is binary cross-entropy
             g_loss = self.adversarial_loss_generator(y, gens)
 
-            for z in range(self.args.num_z_train):
-                loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
-                g_loss += 1e-3 * loss
+            # for z in range(self.args.num_z_train):
+            #     loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
+            #     g_loss += 1e-3 * loss
 
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
@@ -245,10 +245,10 @@ class SRrcGAN(pl.LightningModule):
         milestones = [10000, 25000, 50000, 80000]
         gamma = 0.5
 
-        schedule_g = torch.optim.lr_scheduler.MultiStepLR(opt_g, milestones, gamma)
-        schedule_d = torch.optim.lr_scheduler.MultiStepLR(opt_d, milestones, gamma)
+        # schedule_g = torch.optim.lr_scheduler.MultiStepLR(opt_g, milestones, gamma)
+        # schedule_d = torch.optim.lr_scheduler.MultiStepLR(opt_d, milestones, gamma)
 
-        return [opt_d, opt_g], [schedule_d, schedule_g]
+        return [opt_d, opt_g], []
 
     def on_save_checkpoint(self, checkpoint):
         checkpoint["beta_std"] = self.std_mult
