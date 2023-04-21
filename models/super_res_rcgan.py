@@ -129,9 +129,9 @@ class SRrcGAN(pl.LightningModule):
             # adversarial loss is binary cross-entropy
             g_loss = self.adversarial_loss_generator(y, gens)
 
-            # for z in range(self.args.num_z_train):
-            #     loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
-            #     g_loss += 1e-3 * loss
+            for z in range(self.args.num_z_train):
+                loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
+                g_loss += 1e-2 * loss
 
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
@@ -194,10 +194,10 @@ class SRrcGAN(pl.LightningModule):
 
         ############################################
 
-        if batch_idx == 0:
-            if (self.global_rank == 0 or self.global_rank == 1) and self.current_epoch % 50 == 0:
+        if batch_idx == 0 or batch_idx == 1:
+            if (self.global_rank == 0) and self.current_epoch % 25 == 0:
                 self.logger.log_image(
-                    key=f"epoch_{self.current_epoch}_img_gpu_{self.global_rank}",
+                    key=f"epoch_{self.current_epoch}_img_num_{batch_idx}",
                     images=[Image.fromarray(np.uint8(x[0].cpu().numpy().transpose(1, 2, 0) * 255), 'RGB'),
                             Image.fromarray(np.uint8(y[0].cpu().numpy().transpose(1, 2, 0) * 255), 'RGB'),
                             Image.fromarray(np.uint8(avg[0].cpu().numpy().transpose(1, 2, 0) * 255), 'RGB'),
@@ -221,7 +221,7 @@ class SRrcGAN(pl.LightningModule):
         psnr_diff = psnr_diff
 
         mu_0 = 2e-2
-        if self.current_epoch % 10 == 0:
+        if self.current_epoch % 5 == 0:
             self.std_mult += mu_0 * psnr_diff
 
         if np.abs(psnr_diff) <= 0.25:
@@ -229,7 +229,7 @@ class SRrcGAN(pl.LightningModule):
         else:
             self.is_good_model = 0
 
-        if self.global_rank == 0 and self.current_epoch % 50 == 0:
+        if self.global_rank == 0 and self.current_epoch % 25 == 0:
             send_mail(f"EPOCH {self.current_epoch + 1} UPDATE - rcGAN - SR",
                       f"Std. Dev. Weight: {self.std_mult:.4f}\nMetrics:\nPSNR: {avg_psnr:.2f}\nSINGLE PSNR: {avg_single_psnr:.2f}\nPSNR Diff: {psnr_diff}",
                       file_name="variation_gif.gif")
