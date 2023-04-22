@@ -131,7 +131,7 @@ class SRrcGAN(pl.LightningModule):
 
             for z in range(self.args.num_z_train):
                 loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
-                g_loss += 1e-2 * loss
+                g_loss += 1e-3 * loss
 
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
@@ -195,7 +195,7 @@ class SRrcGAN(pl.LightningModule):
         ############################################
 
         if batch_idx == 0 or batch_idx == 1:
-            if (self.global_rank == 0) and self.current_epoch % 25 == 0:
+            if (self.global_rank == 0) and self.current_epoch % 200 == 0:
                 self.logger.log_image(
                     key=f"epoch_{self.current_epoch}_img_num_{batch_idx}",
                     images=[Image.fromarray(np.uint8(x[0].cpu().numpy().transpose(1, 2, 0) * 255), 'RGB'),
@@ -243,10 +243,10 @@ class SRrcGAN(pl.LightningModule):
                                  betas=(self.args.beta_1, self.args.beta_2))
 
         milestones = [10000, 25000, 50000, 80000]
-        gamma = 0.5
+        gamma = 0.75
 
-        # schedule_g = torch.optim.lr_scheduler.MultiStepLR(opt_g, milestones, gamma)
-        # schedule_d = torch.optim.lr_scheduler.MultiStepLR(opt_d, milestones, gamma)
+        schedule_g = torch.optim.lr_scheduler.MultiStepLR(opt_g, milestones, gamma)
+        schedule_d = torch.optim.lr_scheduler.MultiStepLR(opt_d, milestones, gamma)
 
         return [opt_d, opt_g], []
 
