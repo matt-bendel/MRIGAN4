@@ -127,7 +127,7 @@ if __name__ == "__main__":
 
             num_code = 32
 
-            gens = torch.zeros(size=(y.size(0), 10, model.args.in_chans, x.shape[-1], x.shape[-1])).cuda()
+            gens = torch.zeros(size=(y.size(0), num_code, model.args.in_chans, x.shape[-1], x.shape[-1])).cuda()
             for z in range(num_code):
                 gens[:, z, :, :, :] = model.forward(y) * std[:, :, None, None] + mean[:, :, None, None]
 
