@@ -139,8 +139,9 @@ if __name__ == "__main__":
                 x = transform(x[j])
                 x.save(cfg.checkpoint_dir + f'/gt/gt_{total}.png')
 
-                temp = transform(avg[j])
-                temp.save(cfg.checkpoint_dir + f'/avg/{total:06d}_sample{0:05d}.png')
+                for l in range(4):
+                    temp = transform(avg[j])
+                    temp.save(cfg.checkpoint_dir + f'/avg/{total:06d}_sample{l:05d}.png')
 
                 # for z in range(num_code):
                 #     temp = transform(gens[j, z])
