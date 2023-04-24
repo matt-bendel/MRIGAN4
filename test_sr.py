@@ -125,7 +125,7 @@ if __name__ == "__main__":
             mean = mean.cuda()
             std = std.cuda()
 
-            num_code = 10
+            num_code = 32
 
             gens = torch.zeros(size=(y.size(0), 10, model.args.in_chans, x.shape[-1], x.shape[-1])).cuda()
             for z in range(num_code):
@@ -139,9 +139,12 @@ if __name__ == "__main__":
                 x = transform(x[j])
                 x.save(cfg.checkpoint_dir + f'/gt/gt_{total}.png')
 
-                for z in range(num_code):
-                    temp = transform(gens[j, z])
-                    temp.save(cfg.checkpoint_dir + f'/samps/{total:06d}_sample{z:05d}.png')
+                temp = transform(avg[j])
+                temp.save(cfg.checkpoint_dir + f'/avg/{total:06d}_sample{0:05d}.png')
+
+                # for z in range(num_code):
+                #     temp = transform(gens[j, z])
+                #     temp.save(cfg.checkpoint_dir + f'/samps/{total:06d}_sample{z:05d}.png')
 
                 total += 1
 
