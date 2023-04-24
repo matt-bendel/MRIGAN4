@@ -113,7 +113,7 @@ if __name__ == "__main__":
 
     with torch.no_grad():
         model = SRrcGAN.load_from_checkpoint(
-            checkpoint_path=cfg.checkpoint_dir + '/checkpoint-epoch=800.ckpt')
+            checkpoint_path=cfg.checkpoint_dir + '/neurips/checkpoint-epoch=319.ckpt')
         model.cuda()
         model.eval()
         total = 901
@@ -143,9 +143,9 @@ if __name__ == "__main__":
                     temp = transform(avg[j])
                     temp.save(cfg.checkpoint_dir + f'/avg/{total:06d}_sample{l:05d}.png')
 
-                # for z in range(num_code):
-                #     temp = transform(gens[j, z])
-                #     temp.save(cfg.checkpoint_dir + f'/samps/{total:06d}_sample{z:05d}.png')
+                for z in range(num_code):
+                    temp = transform(gens[j, z])
+                    temp.save(cfg.checkpoint_dir + f'/samps/{total:06d}_sample{z:05d}.png')
 
                 total += 1
 
