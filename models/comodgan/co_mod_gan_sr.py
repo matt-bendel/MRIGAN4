@@ -263,7 +263,8 @@ class G_synthesis_co_mod_gan(nn.Module):
             x, y = block(x, y, dlatents_in, x_global, E_features)
         raw_out = y
         raw_out_lf = F.interpolate(F.interpolate(raw_out, scale_factor=1/4, mode='bicubic'), scale_factor=4, mode='bicubic')
-        return raw_out - raw_out_lf + lf_in
+        # return raw_out - raw_out_lf + lf_in
+        return raw_out + lf_in
 
 #----------------------------------------------------------------------------
 # Main generator network.
