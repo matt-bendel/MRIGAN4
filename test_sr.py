@@ -107,7 +107,7 @@ if __name__ == "__main__":
         cfg.batch_size = cfg.batch_size * args.num_gpus
 
     dm = SRDataModule(cfg, args.sr_scale)
-    dm.setup()
+    dm.setup('')
     test_loader = dm.test_dataloader()
     transform = T.ToPILImage()
 
