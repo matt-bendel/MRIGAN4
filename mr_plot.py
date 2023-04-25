@@ -175,7 +175,7 @@ if __name__ == "__main__":
                 count = 1
                 for method in keys:
                     ax = plt.subplot(gs[2, count])
-                    ax.imshow(np_stds[method], cmap='viridis', vmin=0, vmax=3e-4)
+                    ax.imshow(np_stds[method], cmap='viridis', vmin=0, vmax=6e-4)
                     ax.set_xticklabels([])
                     ax.set_yticklabels([])
                     ax.set_xticks([])
