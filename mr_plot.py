@@ -14,11 +14,8 @@ from models.rcGAN import rcGAN
 from models.adler import Adler
 from models.ohayon import Ohayon
 from utils.math import complex_abs, tensor_to_complex_np
-from evaluation_scripts.metrics import psnr, ssim
-from evaluation_scripts.fid.embeddings import VGG16Embedding
-from evaluation_scripts.cfid.cfid_metric import CFIDMetric
-from evaluation_scripts.fid.fid_metric import FIDMetric
 import matplotlib.pyplot as plt
+from matplotlib import gridspec
 import sigpy as sp
 
 # M_1: 2.15
@@ -138,41 +135,43 @@ if __name__ == "__main__":
 
                 keys = ['rcgan', 'ohayon', 'adler']
                 # OG FIG
-                fig = plt.figure()
-                fig.subplots_adjust(wspace=0, hspace=0)
-                plt.tight_layout(pad=0.00)
+                nrow = 3
+                ncol = 4
 
-                plt.box(False)
-                plt.subplot(3, 4, 1)
-                plt.imshow(np_gt, cmap='gray', vmin=0, vmax=np.max(np_gt))
-                plt.axis('off')
-                plt.grid(visible=None)
+                fig = plt.figure(figsize=(ncol + 1, nrow + 1))
 
-                count = 2
+                gs = gridspec.GridSpec(nrow, ncol,
+                                       wspace=0.0, hspace=0.0,
+                                       top=1. - 0.5 / (nrow + 1), bottom=0.5 / (nrow + 1),
+                                       left=0.5 / (ncol + 1), right=1 - 0.5 / (ncol + 1))
+
+                ax = plt.subplot(gs[0, 0])
+                ax.imshow(np_gt, cmap='gray', vmin=0, vmax=np.max(np_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+
+                count = 1
                 for method in keys:
-                    plt.box(False)
-                    plt.subplot(3, 4, count)
-                    plt.imshow(np_avgs[method], cmap='gray', vmin=0, vmax=np.max(np_gt))
-                    plt.axis('off')
-                    plt.grid(visible=None)
+                    ax = plt.subplot(gs[0, count])
+                    ax.imshow(np_avgs[method], cmap='gray', vmin=0, vmax=np.max(np_gt))
+                    ax.set_xticklabels([])
+                    ax.set_yticklabels([])
                     count += 1
 
-                count += 1
+                count = 1
                 for method in keys:
-                    plt.box(False)
-                    plt.subplot(3, 4, count)
-                    plt.imshow(np.abs(np_avgs[method] - np_gt), cmap='jet', vmin=0, vmax=0.0001)
-                    plt.axis('off')
-                    plt.grid(visible=None)
+                    ax = plt.subplot(gs[1, count])
+                    ax.imshow(np.abs(np_avgs[method] - np_gt), cmap='jet', vmin=0, vmax=0.0001)
+                    ax.set_xticklabels([])
+                    ax.set_yticklabels([])
                     count += 1
 
-                count += 1
+                count = 1
                 for method in keys:
-                    plt.box(False)
-                    plt.subplot(3, 4, count)
-                    plt.imshow(np_stds[method], cmap='viridis', vmin=0, vmax=5e-6)
-                    plt.axis('off')
-                    plt.grid(visible=None)
+                    ax = plt.subplot(gs[2, count])
+                    ax.imshow(np_stds[method], cmap='viridis', vmin=0, vmax=5e-6)
+                    ax.set_xticklabels([])
+                    ax.set_yticklabels([])
                     count += 1
 
 
