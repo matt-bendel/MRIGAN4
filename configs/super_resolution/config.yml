@@ -15,7 +15,7 @@ num_grow_ch: 32
 skip_connection: True
 
 #optimizer:
-lr: 0.002
+lr: 0.001
 beta_1: 0
 beta_2: 0.99
 gp_weight: 10
