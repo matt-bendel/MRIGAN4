@@ -53,7 +53,7 @@ if __name__ == "__main__":
         cfg = yaml.load(f, Loader=yaml.FullLoader)
         cfg = json.loads(json.dumps(cfg), object_hook=load_object)
 
-    cfg.batch_size = cfg.batch_size * 4
+    cfg.batch_size = cfg.batch_size
     dm = MRIDataModule(cfg, args.mask_type, big_test=True)
 
     dm.setup()
