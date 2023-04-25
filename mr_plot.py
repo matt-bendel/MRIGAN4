@@ -149,6 +149,8 @@ if __name__ == "__main__":
                 ax.imshow(np_gt, cmap='gray', vmin=0, vmax=np.max(np_gt))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
 
                 count = 1
                 for method in keys:
@@ -156,6 +158,8 @@ if __name__ == "__main__":
                     ax.imshow(np_avgs[method], cmap='gray', vmin=0, vmax=np.max(np_gt))
                     ax.set_xticklabels([])
                     ax.set_yticklabels([])
+                    ax.set_xticks([])
+                    ax.set_yticks([])
                     count += 1
 
                 count = 1
@@ -164,14 +168,18 @@ if __name__ == "__main__":
                     ax.imshow(np.abs(np_avgs[method] - np_gt), cmap='jet', vmin=0, vmax=0.0001)
                     ax.set_xticklabels([])
                     ax.set_yticklabels([])
+                    ax.set_xticks([])
+                    ax.set_yticks([])
                     count += 1
 
                 count = 1
                 for method in keys:
                     ax = plt.subplot(gs[2, count])
-                    ax.imshow(np_stds[method], cmap='viridis', vmin=0, vmax=6e-6)
+                    ax.imshow(np_stds[method], cmap='viridis', vmin=0, vmax=3e-5)
                     ax.set_xticklabels([])
                     ax.set_yticklabels([])
+                    ax.set_xticks([])
+                    ax.set_yticks([])
                     count += 1
 
 
