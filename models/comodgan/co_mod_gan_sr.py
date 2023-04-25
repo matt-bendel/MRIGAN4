@@ -262,7 +262,6 @@ class G_synthesis_co_mod_gan(nn.Module):
             block = getattr(self, 'G_%dx%d' % (2**res, 2**res))
             x, y = block(x, y, dlatents_in, x_global, E_features)
         raw_out = y
-        raw_out_lf = F.interpolate(F.interpolate(raw_out, scale_factor=1/4, mode='bicubic'), scale_factor=4, mode='bicubic')
         return raw_out
 
 #----------------------------------------------------------------------------
