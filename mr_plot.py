@@ -144,7 +144,7 @@ if __name__ == "__main__":
 
                 plt.box(False)
                 plt.subplot(3, 4, 1)
-                plt.imshow(np_gt)
+                plt.imshow(np_gt, cmap='gray', vmin=0, vmax=np.max(np_gt))
                 plt.axis('off')
                 plt.grid(visible=None)
 
@@ -152,7 +152,7 @@ if __name__ == "__main__":
                 for method in keys:
                     plt.box(False)
                     plt.subplot(3, 4, count)
-                    plt.imshow(np_avgs[method])
+                    plt.imshow(np_avgs[method], cmap='gray', vmin=0, vmax=np.max(np_gt))
                     plt.axis('off')
                     plt.grid(visible=None)
                     count += 1
@@ -161,7 +161,7 @@ if __name__ == "__main__":
                 for method in keys:
                     plt.box(False)
                     plt.subplot(3, 4, count)
-                    plt.imshow(np.abs(np_avgs[method] - np_gt), cmap='jet')
+                    plt.imshow(np.abs(np_avgs[method] - np_gt), cmap='jet', vmin=0, vmax=0.0001)
                     plt.axis('off')
                     plt.grid(visible=None)
                     count += 1
@@ -170,7 +170,7 @@ if __name__ == "__main__":
                 for method in keys:
                     plt.box(False)
                     plt.subplot(3, 4, count)
-                    plt.imshow(np_stds[method], cmap='viridis')
+                    plt.imshow(np_stds[method], cmap='viridis', vmin=0, vmax=5e-6)
                     plt.axis('off')
                     plt.grid(visible=None)
                     count += 1
