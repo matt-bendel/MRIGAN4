@@ -146,7 +146,7 @@ if __name__ == "__main__":
                 plt.subplot(3, 4, 1)
                 plt.imshow(np_gt)
                 plt.axis('off')
-                plt.grid(b=None)
+                plt.grid(visible=None)
 
                 count = 2
                 for method in keys:
@@ -154,7 +154,7 @@ if __name__ == "__main__":
                     plt.subplot(3, 4, count)
                     plt.imshow(np_avgs[method])
                     plt.axis('off')
-                    plt.grid(b=None)
+                    plt.grid(visible=None)
                     count += 1
 
                 count += 1
@@ -163,7 +163,7 @@ if __name__ == "__main__":
                     plt.subplot(3, 4, count)
                     plt.imshow(np.abs(np_avgs[method] - np_gt), cmap='jet')
                     plt.axis('off')
-                    plt.grid(b=None)
+                    plt.grid(visible=None)
                     count += 1
 
                 count += 1
@@ -172,7 +172,7 @@ if __name__ == "__main__":
                     plt.subplot(3, 4, count)
                     plt.imshow(np_stds[method], cmap='viridis')
                     plt.axis('off')
-                    plt.grid(b=None)
+                    plt.grid(visible=None)
                     count += 1
 
 
