@@ -97,7 +97,7 @@ class SRrcGAN(pl.LightningModule):
         for k in range(y.shape[0] - 1):
             gen_pred_loss += torch.mean(fake_pred[k + 1])
 
-        adv_weight = 1e-3
+        adv_weight = 5e-3
 
         return - adv_weight * gen_pred_loss.mean()
 
@@ -131,7 +131,7 @@ class SRrcGAN(pl.LightningModule):
 
             for z in range(self.args.num_z_train):
                 loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
-                g_loss += 1e-4 * loss
+                g_loss += loss / self.args.num_z_train
 
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
@@ -221,7 +221,7 @@ class SRrcGAN(pl.LightningModule):
         psnr_diff = psnr_diff
 
         mu_0 = 2e-2
-        if self.current_epoch % 25 == 0:
+        if self.current_epoch % 10 == 0:
             self.std_mult += mu_0 * psnr_diff
 
         if np.abs(psnr_diff) <= 0.25:
