@@ -165,7 +165,7 @@ if __name__ == "__main__":
                 count = 1
                 for method in keys:
                     ax = plt.subplot(gs[1, count])
-                    ax.imshow(np.abs(np_avgs[method] - np_gt), cmap='jet', vmin=0, vmax=0.0001)
+                    ax.imshow(np.abs(np_avgs[method] - np_gt), cmap='jet', vmin=0, vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
                     ax.set_xticklabels([])
                     ax.set_yticklabels([])
                     ax.set_xticks([])
@@ -175,7 +175,7 @@ if __name__ == "__main__":
                 count = 1
                 for method in keys:
                     ax = plt.subplot(gs[2, count])
-                    ax.imshow(np_stds[method], cmap='viridis', vmin=0, vmax=6e-4)
+                    ax.imshow(np_stds[method], cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
                     ax.set_xticklabels([])
                     ax.set_yticklabels([])
                     ax.set_xticks([])
