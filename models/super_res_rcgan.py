@@ -97,7 +97,7 @@ class SRrcGAN(pl.LightningModule):
         for k in range(y.shape[0] - 1):
             gen_pred_loss += torch.mean(fake_pred[k + 1])
 
-        adv_weight = 3e-5
+        adv_weight = 5e-3
 
         return - adv_weight * gen_pred_loss.mean()
 
@@ -171,11 +171,11 @@ class SRrcGAN(pl.LightningModule):
         gens = torch.zeros(size=(y.size(0), 8, self.args.in_chans, x.shape[-1], x.shape[-1]),
                            device=self.device)
         for z in range(num_code):
-            gens[:, z, :, :, :] = self.forward(y) * std[:, :, None, None] + mean[:, :, None, None]
+            gens[:, z, :, :, :] = (self.forward(y) * std[:, :, None, None] + mean[:, :, None, None]).clamp(0, 1)
 
         avg = torch.mean(gens, dim=1)
-        x = x * std[:, :, None, None] + mean[:, :, None, None]
-        y = y * std[:, :, None, None] + mean[:, :, None, None]
+        x = (x * std[:, :, None, None] + mean[:, :, None, None]).clamp(0, 1)
+        y = (y * std[:, :, None, None] + mean[:, :, None, None]).clamp(0, 1)
 
         psnr_8s = []
         psnr_1s = []
