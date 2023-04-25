@@ -112,6 +112,8 @@ if __name__ == "__main__":
 
             np_gt = None
 
+            # TODO: Add Langevin, L1+SSIM model
+
             for j in range(y.size(0)):
                 S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
 
@@ -134,6 +136,10 @@ if __name__ == "__main__":
                 np_stds['adler'] = np.std(np.stack(np_samps['adler']), axis=0)
 
                 keys = ['rcgan', 'ohayon', 'adler']
+                zoom_start = 120
+                zoom_length = 80
+
+                # TODO: Add PSNR, SSIM to OG fig plot
                 # OG FIG
                 nrow = 3
                 ncol = 4
@@ -184,5 +190,9 @@ if __name__ == "__main__":
 
 
                 plt.savefig('test_og.png', bbox_inches='tight', dpi=300)
+
+                # TODO: Samp Grid (my idea): zoomed
+                # TODO: Rizwan Idea: zoomed, 1st row avg, 2nd error, 3rd std. dev, 4, 5, 6 samps
+                # TODO: Rizwan Idea (mine): zoomed, 1st row avg, 2nd error, 3rd std. dev, 4 grid of 4 samps
                 exit()
 
