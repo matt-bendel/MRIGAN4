@@ -130,8 +130,8 @@ if __name__ == "__main__":
                         S.H * tensor_to_complex_np((gens_adler[j, z] * std[j] + mean[j]).cpu())).abs().numpy())
 
                 np_stds['rcgan'] = np.std(np.stack(np_samps['rcgan']), axis=0)
-                np_stds['ohayon'] = np.std(np.stack(np_samps['rcgan']), axis=0)
-                np_stds['adler'] = np.std(np.stack(np_samps['rcgan']), axis=0)
+                np_stds['ohayon'] = np.std(np.stack(np_samps['ohayon']), axis=0)
+                np_stds['adler'] = np.std(np.stack(np_samps['adler']), axis=0)
 
                 keys = ['rcgan', 'ohayon', 'adler']
                 # OG FIG
@@ -175,7 +175,7 @@ if __name__ == "__main__":
                 count = 1
                 for method in keys:
                     ax = plt.subplot(gs[2, count])
-                    ax.imshow(np_stds[method], cmap='viridis', vmin=0, vmax=3e-5)
+                    ax.imshow(np_stds[method], cmap='viridis', vmin=0, vmax=3e-4)
                     ax.set_xticklabels([])
                     ax.set_yticklabels([])
                     ax.set_xticks([])
