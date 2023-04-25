@@ -138,7 +138,7 @@ class SRrcGAN(pl.LightningModule):
             if torch.isnan(g_loss):
                 exit()
 
-            self.log('g_loss', g_loss, prog_bar=True)
+            # self.log('g_loss', g_loss, prog_bar=True)
 
             return g_loss
 
@@ -156,7 +156,7 @@ class SRrcGAN(pl.LightningModule):
             if torch.isnan(d_loss):
                 exit()
 
-            self.log('d_loss', d_loss, prog_bar=True)
+            # self.log('d_loss', d_loss, prog_bar=True)
 
             return d_loss
 
