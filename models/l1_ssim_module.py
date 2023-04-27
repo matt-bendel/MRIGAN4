@@ -80,7 +80,7 @@ class L1SSIMMRI(pl.LightningModule):
         alpha = 0.84
 
         # adversarial loss is binary cross-entropy
-        loss = (1 - alpha) * F.l1_loss(x_hat, x) + alpha * self.ssim_loss(x_hat, x)
+        loss = (1 - alpha) * F.l1_loss(x_hat, x) - alpha * self.ssim_loss(x_hat, x)
 
         self.log('loss', loss, prog_bar=True)
 
