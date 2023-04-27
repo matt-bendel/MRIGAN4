@@ -72,7 +72,7 @@ class L1SSIMMRI(pl.LightningModule):
         samples = self.readd_measures(samples, y, mask)
         return samples
 
-    def training_step(self, batch, batch_idx, optimizer_idx):
+    def training_step(self, batch, batch_idx):
         y, x, mask, mean, std, _, _, _ = batch
 
         # train generator
