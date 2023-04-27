@@ -68,8 +68,7 @@ class L1SSIMMRI(pl.LightningModule):
         return output_im
 
     def forward(self, y, mask):
-        num_vectors = y.size(0)
-        samples = self.generator(y)
+        samples = self.unet(y)
         samples = self.readd_measures(samples, y, mask)
         return samples
 
