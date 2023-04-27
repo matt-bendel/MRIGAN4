@@ -140,14 +140,14 @@ squared_prev_steps_decaying_avg = 0
 grads_decaying_avg = 0
 
 fig, (k_and_x, x_and_y) = plt.subplots(1, 2, figsize=(9,5))
-k_and_x.set_xlabel('k')
+k_and_x.set_xlabel('t')
 k_and_x.set_ylabel('x', rotation=0)
 x_and_y.set_xlabel('x')
-x_and_y.set_ylabel('y', rotation=0)
+x_and_y.set_ylabel('f(x)', rotation=0)
 plot_func(x_and_y, f)
 x_and_y.plot(x, f(x), '.', color=cur_color[:])
 k_and_x.plot(k, x, '.', color=cur_color[:])
 plt.tight_layout()
 
-ani = FuncAnimation(fig, update, blit=False, repeat=False, interval=INTERVAL)
-plt.show()
+ani = FuncAnimation(fig, update, frames=300, blit=True, repeat=False, interval=INTERVAL)
+ani.save(f'{METHOD}_animation.gif', writer='imagemagick', fps=60)
