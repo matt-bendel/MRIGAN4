@@ -92,7 +92,7 @@ class L1SSIMMRI(pl.LightningModule):
 
         fig_count = 0
 
-        x_hat = self.reformat(self.forward(y, mask)) * std[:, None, None, None] + mean[:, None, None, None]
+        x_hat = self.reformat(self.forward(y, mask) * std[:, None, None, None] + mean[:, None, None, None])
         gt = self.reformat(x * std[:, None, None, None] + mean[:, None, None, None])
 
         mag_avg_list = []
