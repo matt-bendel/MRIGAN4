@@ -112,7 +112,7 @@ class L1SSIMMRI(pl.LightningModule):
             # single_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(self.reformat(gens[:, 0])[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
             # gt_sp_out = complex_abs(sp.to_pytorch(S.H * sp.from_pytorch(gt[j], iscomplex=True))).unsqueeze(0).unsqueeze(0)
 
-            psnr_8s.append(peak_signal_noise_ratio(x_hat, gt_sp_out))
+            psnr_8s.append(peak_signal_noise_ratio(x_hat_sp_out, gt_sp_out))
 
             mag_avg_list.append(x_hat_sp_out)
             mag_gt_list.append(gt_sp_out)
