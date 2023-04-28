@@ -13,6 +13,7 @@ from pytorch_lightning import seed_everything
 from models.rcGAN import rcGAN
 from models.adler import Adler
 from models.ohayon import Ohayon
+from models.l1_ssim_module import L1SSIMMRI
 from utils.math import complex_abs, tensor_to_complex_np
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
@@ -60,14 +61,17 @@ if __name__ == "__main__":
         rcGAN_model = rcGAN.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + '/neurips/rcgan/checkpoint_best.ckpt')
         ohayon_model = Ohayon.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + '/neurips/ohayon_2/checkpoint_best.ckpt')
         adler_model = Adler.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + '/neurips/adler/checkpoint_best.ckpt')
+        l1_ssim_model = L1SSIMMRI.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + '/neurips/l1_ssim/checkpoint_best.ckpt')
 
         rcGAN_model.cuda()
         ohayon_model.cuda()
         adler_model.cuda()
+        l1_ssim_model.cuda()
 
         rcGAN_model.eval()
         ohayon_model.eval()
         adler_model.eval()
+        l1_ssim_model.eval()
 
         for i, data in enumerate(test_loader):
             y, x, mask, mean, std, maps, fname, slice = data
@@ -80,19 +84,23 @@ if __name__ == "__main__":
             gens_rcgan = torch.zeros(size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
             gens_ohayon = torch.zeros(size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
             gens_adler = torch.zeros(size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
+            gens_l1_ssim = torch.zeros(size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
 
             for z in range(cfg.num_z_test):
                 gens_rcgan[:, z, :, :, :, :] = rcGAN_model.reformat(rcGAN_model.forward(y, mask))
                 gens_ohayon[:, z, :, :, :, :] = ohayon_model.reformat(ohayon_model.forward(y, mask))
                 gens_adler[:, z, :, :, :, :] = adler_model.reformat(adler_model.forward(y, mask))
+                gens_l1_ssim[:, z, :, :, :, :] = l1_ssim_model.reformat(l1_ssim_model.forward(y, mask))
 
             avg_rcgan = torch.mean(gens_rcgan, dim=1)
             avg_ohayon = torch.mean(gens_ohayon, dim=1)
             avg_adler = torch.mean(gens_adler, dim=1)
+            avg_l1_ssim = torch.mean(gens_l1_ssim, dim=1)
 
             gt = rcGAN_model.reformat(x)
 
             np_avgs = {
+                'l1_ssim': None,
                 'rcgan': None,
                 'ohayon': None,
                 'adler': None
@@ -122,6 +130,7 @@ if __name__ == "__main__":
                 np_avgs['rcgan'] = torch.tensor(S.H * tensor_to_complex_np((avg_rcgan[j] * std[j] + mean[j]).cpu())).abs().numpy()
                 np_avgs['ohayon'] = torch.tensor(S.H * tensor_to_complex_np((avg_ohayon[j] * std[j] + mean[j]).cpu())).abs().numpy()
                 np_avgs['adler'] = torch.tensor(S.H * tensor_to_complex_np((avg_adler[j] * std[j] + mean[j]).cpu())).abs().numpy()
+                np_avgs['l1_ssim'] = torch.tensor(S.H * tensor_to_complex_np((avg_l1_ssim[j] * std[j] + mean[j]).cpu())).abs().numpy()
 
                 for z in range(cfg.num_z_test):
                     np_samps['rcgan'].append(torch.tensor(
@@ -135,14 +144,38 @@ if __name__ == "__main__":
                 np_stds['ohayon'] = np.std(np.stack(np_samps['ohayon']), axis=0)
                 np_stds['adler'] = np.std(np.stack(np_samps['adler']), axis=0)
 
-                keys = ['rcgan', 'ohayon', 'adler']
+                recon_directory = f'/storage/fastMRI_brain/Langevin_Recons_R=8/'
+                langevin_recons = np.zeros((32, 384, 384))
+                recon_object = None
+
+                for l in range(cfg.num_z_test):
+                    try:
+                        new_filename = recon_directory + fname[j] + f'|langevin|slide_idx_{slice[j]}_R=8_sample={l}_outputs.pt'
+                        recon_object = torch.load(new_filename)
+                    except Exception as e:
+                        print(e)
+                        exceptions = True
+                        break
+                    # temp_recon = unnormalize(recon_object['mvue'], recon_object['zfr'])
+
+                    langevin_recons[l] = complex_abs(recon_object['mvue'][0].permute(1, 2, 0)).cpu().numpy()
+
+                if exceptions:
+                    exceptions = False
+                    continue
+
+                langevin_gt = recon_object['gt'][0][0].abs().cpu().numpy()
+                langevin_avg = np.mean(langevin_recons, axis=0)
+                langevin_std = np.std(langevin_recons, axis=0)
+
+                keys = ['l1_ssim', 'rcgan', 'ohayon', 'adler']
                 zoom_start = 120
                 zoom_length = 80
 
                 # TODO: Add PSNR, SSIM to OG fig plot
                 # OG FIG
                 nrow = 3
-                ncol = 4
+                ncol = 6
 
                 fig = plt.figure(figsize=(ncol + 1, nrow + 1))
 
@@ -168,26 +201,49 @@ if __name__ == "__main__":
                     ax.set_yticks([])
                     count += 1
 
+                ax = plt.subplot(gs[0, count])
+                ax.imshow(langevin_avg, cmap='gray', vmin=0, vmax=np.max(langevin_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
                 count = 1
                 for method in keys:
                     ax = plt.subplot(gs[1, count])
-                    ax.imshow(np.abs(np_avgs[method] - np_gt), cmap='jet', vmin=0, vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
+                    ax.imshow(2*np.abs(np_avgs[method] - np_gt), cmap='jet', vmin=0, vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
                     ax.set_xticklabels([])
                     ax.set_yticklabels([])
                     ax.set_xticks([])
                     ax.set_yticks([])
                     count += 1
+
+                ax = plt.subplot(gs[1, count])
+                ax.imshow(2*np.abs(langevin_avg - langevin_gt), cmap='jet', vmin=0,
+                          vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
 
                 count = 1
                 for method in keys:
-                    ax = plt.subplot(gs[2, count])
-                    ax.imshow(np_stds[method], cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
-                    ax.set_xticklabels([])
-                    ax.set_yticklabels([])
-                    ax.set_xticks([])
-                    ax.set_yticks([])
+                    if method != 'l1_ssim':
+                        ax = plt.subplot(gs[2, count])
+                        ax.imshow(np_stds[method], cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
+                        ax.set_xticklabels([])
+                        ax.set_yticklabels([])
+                        ax.set_xticks([])
+                        ax.set_yticks([])
+
                     count += 1
 
+                ax = plt.subplot(gs[2, count])
+                ax.imshow(langevin_std, cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
 
                 plt.savefig('test_og.png', bbox_inches='tight', dpi=300)
 
