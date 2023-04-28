@@ -110,6 +110,7 @@ if __name__ == "__main__":
     dm.setup('')
     test_loader = dm.test_dataloader()
     transform = T.ToPILImage()
+    num_runs = 10
 
     with torch.no_grad():
         model = SRrcGAN.load_from_checkpoint(
@@ -118,34 +119,35 @@ if __name__ == "__main__":
         model.eval()
         total = 901
 
-        for i, data in enumerate(test_loader):
-            y, x, mean, std = data
-            y = y.cuda()
-            x = x.cuda()
-            mean = mean.cuda()
-            std = std.cuda()
+        for j in range(num_runs):
+            for i, data in enumerate(test_loader):
+                y, x, mean, std = data
+                y = y.cuda()
+                x = x.cuda()
+                mean = mean.cuda()
+                std = std.cuda()
 
-            num_code = 32
+                num_code = 10
 
-            gens = torch.zeros(size=(y.size(0), num_code, model.args.in_chans, x.shape[-1], x.shape[-1])).cuda()
-            for z in range(num_code):
-                gens[:, z, :, :, :] = model.forward(y) * std[:, :, None, None] + mean[:, :, None, None]
-
-            avg = torch.mean(gens, dim=1)
-            x = x * std[:, :, None, None] + mean[:, :, None, None]
-            y = y * std[:, :, None, None] + mean[:, :, None, None]
-
-            for j in range(y.size(0)):
-                x = transform(x[j])
-                x.save(cfg.checkpoint_dir + f'/gt/gt_{total}.png')
-
-                for l in range(4):
-                    temp = transform(avg[j])
-                    temp.save(cfg.checkpoint_dir + f'/avg/{total:06d}_sample{l:05d}.png')
-
+                gens = torch.zeros(size=(y.size(0), num_code, model.args.in_chans, x.shape[-1], x.shape[-1])).cuda()
                 for z in range(num_code):
-                    temp = transform(gens[j, z])
-                    temp.save(cfg.checkpoint_dir + f'/samps/{total:06d}_sample{z:05d}.png')
+                    gens[:, z, :, :, :] = model.forward(y) * std[:, :, None, None] + mean[:, :, None, None]
 
-                total += 1
+                avg = torch.mean(gens, dim=1)
+                x = x * std[:, :, None, None] + mean[:, :, None, None]
+                y = y * std[:, :, None, None] + mean[:, :, None, None]
+
+                for j in range(y.size(0)):
+                    x = transform(x[j])
+                    x.save(cfg.checkpoint_dir + f'/gt/gt_{total}.png')
+
+                    for l in range(num_code):
+                        temp = transform(avg[j])
+                        temp.save(cfg.checkpoint_dir + f'/avg/{total:06d}_sample{l:05d}.png')
+
+                    for z in range(num_code):
+                        temp = transform(gens[j, z])
+                        temp.save(cfg.checkpoint_dir + f'/samps/{total:06d}_sample{z:05d}.png')
+
+                    total += 1
 
