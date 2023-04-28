@@ -266,8 +266,8 @@ if __name__ == "__main__":
                         tl = cbar.ax.get_yticklabels()
 
                         # set the alignment for the first and the last
-                        tl[0].set_horizontalalignment('bottom')
-                        tl[-1].set_horizontalalignment('top')
+                        tl[0].set_verticalalignment('bottom')
+                        tl[-1].set_verticalalignment('top')
 
                     count += 1
 
