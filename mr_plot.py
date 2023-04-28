@@ -248,7 +248,26 @@ if __name__ == "__main__":
                         ax.set_xticks([])
                         ax.set_yticks([])
 
-                        plt.colorbar(im, ax=[ax], location='left')
+                        # fig.subplots_adjust(right=0.85)  # Make room for colorbar
+
+                        # Get position of final error map axis
+                        [[x10, y10], [x11, y11]] = ax.get_position().get_points()
+
+                        # Appropriately rescale final axis so that colorbar does not effect formatting
+                        pad = 0.01
+                        width = 0.02
+                        cbar_ax = fig.add_axes([x10 - 2*pad, y10, width, y11 - y10])
+                        cbar = fig.colorbar(im, cax=cbar_ax, format='%.0e',
+                                            orientation='vertical')  # Generate colorbar
+                        cbar.ax.locator_params(nbins=3)
+                        cbar.ax.xaxis.set_ticks_position("left")
+                        cbar.ax.tick_params(labelsize=6)
+                        cbar.ax.tick_params(rotation=0)
+                        tl = cbar.ax.get_yticklabels()
+
+                        # set the alignment for the first and the last
+                        tl[0].set_horizontalalignment('bottom')
+                        tl[-1].set_horizontalalignment('top')
 
                     count += 1
 
@@ -299,7 +318,7 @@ if __name__ == "__main__":
                         inner = gs[0, count].subgridspec(2, 2)
                         for samp in range(4):
                             ax = fig.add_subplot(inner[samp])
-                            ax.imshow(np_samps[method][zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
+                            ax.imshow(np_samps[method][samp][zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
                             ax.set_xticklabels([])
                             ax.set_yticklabels([])
                             ax.set_xticks([])
