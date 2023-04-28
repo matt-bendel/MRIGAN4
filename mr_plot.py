@@ -294,12 +294,16 @@ if __name__ == "__main__":
                     plt.subplots_adjust(wspace=0, hspace=0)
                     count += 1
 
-                # ax = plt.subplot(gs[0, count])
-                # ax.imshow(langevin_avg, cmap='gray', vmin=0, vmax=np.max(langevin_gt))
-                # ax.set_xticklabels([])
-                # ax.set_yticklabels([])
-                # ax.set_xticks([])
-                # ax.set_yticks([])
+                inner = gs[0, count].subgridspec(2, 2)
+                for samp in range(4):
+                    ax = fig.add_subplot(inner[samp])
+                    ax.imshow(langevin_recons[samp, zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length],
+                              cmap='gray', vmin=0, vmax=np.max(langevin_gt))
+                    ax.set_xticklabels([])
+                    ax.set_yticklabels([])
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+                plt.subplots_adjust(wspace=0, hspace=0)
 
                 plt.savefig('test_my_grid.png', bbox_inches='tight', dpi=300)
 
