@@ -131,7 +131,8 @@ class SRrcGAN(pl.LightningModule):
 
             for z in range(self.args.num_z_train):
                 loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
-                g_loss += 1e-2 * loss / self.args.num_z_train
+                g_loss += 1e-3 * loss / self.args.num_z_train
+                g_loss += 1e-1 * F.mse_loss(F.interpolate(gens[:, z, :, :, :], scale_factor=1/4, mode='bicubic'), F.interpolate(x, scale_factor=1/4, mode='bicubic'))
 
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
