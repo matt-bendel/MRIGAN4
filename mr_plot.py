@@ -294,7 +294,7 @@ if __name__ == "__main__":
                         inner = gs[0, count].subgridspec(2, 2)
                         for samp in range(4):
                             ax = fig.add_subplot(inner[samp])
-                            ax.imshow(np_avgs[method][zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
+                            ax.imshow(np_samps[method][zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
                             ax.set_xticklabels([])
                             ax.set_yticklabels([])
                             ax.set_xticks([])
@@ -318,7 +318,7 @@ if __name__ == "__main__":
 
                 # TODO: top row: zoomed avg, next two rows samps.
                 nrow = 3
-                ncol = 6
+                ncol = 7
 
                 fig = plt.figure(figsize=(ncol + 1, nrow + 1))
 
@@ -334,29 +334,50 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                count = 1
+                ax = plt.subplot(gs[0, 1])
+                ax.imshow(np_gt[zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                count = 3
                 for method in keys:
                     ax = plt.subplot(gs[0, count])
-                    ax.imshow(np_avgs[method], cmap='gray', vmin=0, vmax=np.max(np_gt))
+                    ax.imshow(np_avgs[method][zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
                     ax.set_xticklabels([])
                     ax.set_yticklabels([])
                     ax.set_xticks([])
                     ax.set_yticks([])
                     count += 1
 
+                ax = plt.subplot(gs[0, count])
+                ax.imshow(langevin_avg[zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(langevin_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
                 for samp in range(2):
-                    count = 2
+                    count = 3
                     for method in keys:
                         if method != 'l1_ssim':
-                            ax = plt.subplot(gs[0, count])
-                            ax.imshow(np_avgs[method], cmap='gray', vmin=0, vmax=np.max(np_gt))
+                            ax = plt.subplot(gs[samp+1, count])
+                            ax.imshow(np_samps[method][zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
                             ax.set_xticklabels([])
                             ax.set_yticklabels([])
                             ax.set_xticks([])
                             ax.set_yticks([])
                             count += 1
 
-                plt.savefig('test_my_grid.png', bbox_inches='tight', dpi=300)
+                    ax = plt.subplot(gs[0, count])
+                    ax.imshow(langevin_recons[samp][zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(langevin_gt))
+                    ax.set_xticklabels([])
+                    ax.set_yticklabels([])
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+
+                plt.savefig('test_phil.png', bbox_inches='tight', dpi=300)
 
                 # TODO: Rizwan Idea: zoomed, 1st row avg, 2nd error, 3rd std. dev, 4, 5, 6 samps
                 # TODO: Rizwan Idea (mine): zoomed, 1st row avg, 2nd error, 3rd std. dev, 4 grid of 4 samps
