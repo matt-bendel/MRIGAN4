@@ -173,7 +173,8 @@ if __name__ == "__main__":
                 zoom_start = 120
                 zoom_length = 80
 
-                # TODO: Add PSNR, SSIM to OG fig plot
+                # TODO: OG fig plot
+                # TODO: Colorbars, metrics
                 # OG FIG
                 nrow = 3
                 ncol = 6
@@ -229,7 +230,6 @@ if __name__ == "__main__":
 
                 count = 1
                 for method in keys:
-                    # TODO: Std. Map L1
                     if method != 'l1_ssim':
                         ax = plt.subplot(gs[2, count])
                         ax.imshow(np_stds[method], cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
@@ -317,6 +317,47 @@ if __name__ == "__main__":
                 plt.savefig('test_my_grid.png', bbox_inches='tight', dpi=300)
 
                 # TODO: top row: zoomed avg, next two rows samps.
+                nrow = 3
+                ncol = 6
+
+                fig = plt.figure(figsize=(ncol + 1, nrow + 1))
+
+                gs = gridspec.GridSpec(nrow, ncol,
+                                       wspace=0.0, hspace=0.0,
+                                       top=1. - 0.5 / (nrow + 1), bottom=0.5 / (nrow + 1),
+                                       left=0.5 / (ncol + 1), right=1 - 0.5 / (ncol + 1))
+
+                ax = plt.subplot(gs[0, 0])
+                ax.imshow(np_gt, cmap='gray', vmin=0, vmax=np.max(np_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                count = 1
+                for method in keys:
+                    ax = plt.subplot(gs[0, count])
+                    ax.imshow(np_avgs[method], cmap='gray', vmin=0, vmax=np.max(np_gt))
+                    ax.set_xticklabels([])
+                    ax.set_yticklabels([])
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+                    count += 1
+
+                for samp in range(2):
+                    count = 2
+                    for method in keys:
+                        if method != 'l1_ssim':
+                            ax = plt.subplot(gs[0, count])
+                            ax.imshow(np_avgs[method], cmap='gray', vmin=0, vmax=np.max(np_gt))
+                            ax.set_xticklabels([])
+                            ax.set_yticklabels([])
+                            ax.set_xticks([])
+                            ax.set_yticks([])
+                            count += 1
+
+                plt.savefig('test_my_grid.png', bbox_inches='tight', dpi=300)
+
                 # TODO: Rizwan Idea: zoomed, 1st row avg, 2nd error, 3rd std. dev, 4, 5, 6 samps
                 # TODO: Rizwan Idea (mine): zoomed, 1st row avg, 2nd error, 3rd std. dev, 4 grid of 4 samps
                 exit()
