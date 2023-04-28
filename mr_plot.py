@@ -202,6 +202,9 @@ if __name__ == "__main__":
                     ax.set_xticks([])
                     ax.set_yticks([])
                     count += 1
+                    # ax.text(0.46, 0.04, f'PSNR: {psnr_val:.2f}  SSIM: {ssim_val:.4f}',
+                    #         horizontalalignment='center', verticalalignment='center', fontsize=3.5, color='yellow',
+                    #         transform=ax.transAxes)
 
                 ax = plt.subplot(gs[0, count])
                 ax.imshow(langevin_avg, cmap='gray', vmin=0, vmax=np.max(langevin_gt))
@@ -404,7 +407,7 @@ if __name__ == "__main__":
                     for method in keys:
                         if method != 'l1_ssim':
                             ax = plt.subplot(gs[samp+1, count])
-                            ax.imshow(np_samps[method][zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
+                            ax.imshow(np_samps[method][samp][zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
                             ax.set_xticklabels([])
                             ax.set_yticklabels([])
                             ax.set_xticks([])
@@ -412,7 +415,7 @@ if __name__ == "__main__":
                             count += 1
 
                     ax = plt.subplot(gs[0, count])
-                    ax.imshow(langevin_recons[samp][zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(langevin_gt))
+                    ax.imshow(langevin_recons[samp, zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(langevin_gt))
                     ax.set_xticklabels([])
                     ax.set_yticklabels([])
                     ax.set_xticks([])
