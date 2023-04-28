@@ -17,6 +17,7 @@ from models.rcGAN import rcGAN
 from models.adler import Adler
 from models.ohayon import Ohayon
 from models.CoModGAN import InpaintUNet
+from models.l1_ssim_module import L1SSIMMRI
 from utils.math import complex_abs, tensor_to_complex_np
 from evaluation_scripts.metrics import psnr, ssim
 from evaluation_scripts.fid.embeddings import VGG16Embedding
@@ -124,7 +125,7 @@ if __name__ == "__main__":
         if args.rcgan:
             model_alias = Ohayon
         else:
-            model_alias = MRIUnet
+            model_alias = L1SSIMMRI
     elif args.inpaint:
         with open('configs/inpaint/config.yml', 'r') as f:
             cfg = yaml.load(f, Loader=yaml.FullLoader)
