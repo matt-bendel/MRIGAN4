@@ -213,11 +213,14 @@ if __name__ == "__main__":
                 count = 1
                 for method in keys:
                     ax = plt.subplot(gs[1, count])
-                    ax.imshow(2*np.abs(np_avgs[method] - np_gt), cmap='jet', vmin=0, vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
+                    im = ax.imshow(2*np.abs(np_avgs[method] - np_gt), cmap='jet', vmin=0, vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
                     ax.set_xticklabels([])
                     ax.set_yticklabels([])
                     ax.set_xticks([])
                     ax.set_yticks([])
+
+                    if count == 1:
+                        plt.colorbar(im, ax=[ax], location='left')
                     count += 1
 
                 ax = plt.subplot(gs[1, count])
@@ -239,11 +242,13 @@ if __name__ == "__main__":
                         ax.set_yticks([])
                     else:
                         ax = plt.subplot(gs[2, count])
-                        ax.imshow(np.zeros(384, 384), cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
+                        im = ax.imshow(np.zeros((384, 384)), cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
                         ax.set_xticklabels([])
                         ax.set_yticklabels([])
                         ax.set_xticks([])
                         ax.set_yticks([])
+
+                        plt.colorbar(im, ax=[ax], location='left')
 
                     count += 1
 
