@@ -278,6 +278,7 @@ if __name__ == "__main__":
                 ax.set_yticklabels([])
                 ax.set_xticks([])
                 ax.set_yticks([])
+                plt.subplots_adjust(wspace=0, hspace=0)
 
                 count = 2
                 for method in keys:
@@ -289,6 +290,8 @@ if __name__ == "__main__":
                         ax.set_yticklabels([])
                         ax.set_xticks([])
                         ax.set_yticks([])
+
+                    plt.subplots_adjust(wspace=0, hspace=0)
                     count += 1
 
                 # ax = plt.subplot(gs[0, count])
