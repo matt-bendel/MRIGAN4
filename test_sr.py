@@ -113,7 +113,7 @@ if __name__ == "__main__":
 
     with torch.no_grad():
         model = SRrcGAN.load_from_checkpoint(
-            checkpoint_path=cfg.checkpoint_dir + '/neurips/checkpoint-epoch=319.ckpt')
+            checkpoint_path=cfg.checkpoint_dir + '/neurips/checkpoint-epoch=1783.ckpt')
         model.cuda()
         model.eval()
         total = 901
