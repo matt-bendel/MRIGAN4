@@ -237,6 +237,13 @@ if __name__ == "__main__":
                         ax.set_yticklabels([])
                         ax.set_xticks([])
                         ax.set_yticks([])
+                    else:
+                        ax = plt.subplot(gs[2, count])
+                        ax.imshow(np.zeros(384, 384), cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
+                        ax.set_xticklabels([])
+                        ax.set_yticklabels([])
+                        ax.set_xticks([])
+                        ax.set_yticks([])
 
                     count += 1
 
