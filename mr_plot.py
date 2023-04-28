@@ -265,7 +265,7 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                inner = gs[0, count].subgridspec(2, 2)
+                inner = gs[0, 1].subgridspec(2, 2)
                 ax = fig.add_subplot(inner[0, 0])
                 ax.imshow(np_gt[zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
                 ax.set_xticklabels([])
