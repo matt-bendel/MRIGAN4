@@ -220,7 +220,24 @@ if __name__ == "__main__":
                     ax.set_yticks([])
 
                     if count == 1:
-                        plt.colorbar(im, ax=[ax], location='left')
+                        [[x10, y10], [x11, y11]] = ax.get_position().get_points()
+
+                        # Appropriately rescale final axis so that colorbar does not effect formatting
+                        pad = 0.01
+                        width = 0.02
+                        cbar_ax = fig.add_axes([x10 - 2 * pad, y10, width, y11 - y10])
+                        cbar = fig.colorbar(im, cax=cbar_ax, format='%.0e',
+                                            orientation='vertical')  # Generate colorbar
+                        cbar.ax.locator_params(nbins=3)
+                        cbar.ax.yaxis.set_ticks_position("left")
+                        cbar.ax.tick_params(labelsize=6)
+                        cbar.ax.tick_params(rotation=0)
+                        tl = cbar.ax.get_yticklabels()
+
+                        # set the alignment for the first and the last
+                        tl[0].set_verticalalignment('bottom')
+                        tl[-1].set_verticalalignment('top')
+
                     count += 1
 
                 ax = plt.subplot(gs[1, count])
@@ -365,7 +382,7 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                count = 3
+                count = 2
                 for method in keys:
                     ax = plt.subplot(gs[0, count])
                     ax.imshow(np_avgs[method][zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
