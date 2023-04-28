@@ -266,13 +266,13 @@ if __name__ == "__main__":
                 ax.set_yticks([])
 
                 inner = gs[0, count].subgridspec(2, 2)
-                ax = plt.subplot(gs[0, count], inner[0])
+                ax = fig.add_subplot(inner[0, 0])
                 ax.imshow(np_gt[zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
                 ax.set_xticks([])
                 ax.set_yticks([])
-                ax = plt.subplot(gs[0, count], inner[1])
+                ax = fig.add_subplot(inner[0, 0])
                 ax.imshow(np_avgs['l1_ssim'][zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
@@ -283,7 +283,7 @@ if __name__ == "__main__":
                 for method in keys:
                     inner = gs[0, count].subgridspec(2, 2)
                     for samp in range(4):
-                        ax = plt.subplot(gs[0, count], inner[samp])
+                        ax = fig.add_subplot(inner[samp])
                         ax.imshow(np_avgs[method], cmap='gray', vmin=0, vmax=np.max(np_gt))
                         ax.set_xticklabels([])
                         ax.set_yticklabels([])
