@@ -147,6 +147,7 @@ if __name__ == "__main__":
                 recon_directory = f'/storage/fastMRI_brain/Langevin_Recons_R=8/'
                 langevin_recons = np.zeros((32, 384, 384))
                 recon_object = None
+                exceptions = False
 
                 for l in range(cfg.num_z_test):
                     try:
@@ -248,6 +249,57 @@ if __name__ == "__main__":
                 plt.savefig('test_og.png', bbox_inches='tight', dpi=300)
 
                 # TODO: Samp Grid (my idea): zoomed
+                nrow = 1
+                ncol = 6
+                fig = plt.figure(figsize=(ncol + 1, nrow + 1))
+
+                gs = gridspec.GridSpec(nrow, ncol,
+                                       wspace=0.0, hspace=0.0,
+                                       top=1. - 0.5 / (nrow + 1), bottom=0.5 / (nrow + 1),
+                                       left=0.5 / (ncol + 1), right=1 - 0.5 / (ncol + 1))
+
+                ax = plt.subplot(gs[0, 0])
+                ax.imshow(np_gt, cmap='gray', vmin=0, vmax=np.max(np_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                inner = gs[0, count].subgridspec(2, 2)
+                ax = plt.subplot(gs[0, count], inner[0])
+                ax.imshow(np_gt[zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+                ax = plt.subplot(gs[0, count], inner[1])
+                ax.imshow(np_avgs['l1_ssim'][zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                count = 2
+                for method in keys:
+                    inner = gs[0, count].subgridspec(2, 2)
+                    for samp in range(4):
+                        ax = plt.subplot(gs[0, count], inner[samp])
+                        ax.imshow(np_avgs[method], cmap='gray', vmin=0, vmax=np.max(np_gt))
+                        ax.set_xticklabels([])
+                        ax.set_yticklabels([])
+                        ax.set_xticks([])
+                        ax.set_yticks([])
+                    count += 1
+
+                # ax = plt.subplot(gs[0, count])
+                # ax.imshow(langevin_avg, cmap='gray', vmin=0, vmax=np.max(langevin_gt))
+                # ax.set_xticklabels([])
+                # ax.set_yticklabels([])
+                # ax.set_xticks([])
+                # ax.set_yticks([])
+
+                plt.savefig('test_my_grid.png', bbox_inches='tight', dpi=300)
+
                 # TODO: Rizwan Idea: zoomed, 1st row avg, 2nd error, 3rd std. dev, 4, 5, 6 samps
                 # TODO: Rizwan Idea (mine): zoomed, 1st row avg, 2nd error, 3rd std. dev, 4 grid of 4 samps
                 exit()
