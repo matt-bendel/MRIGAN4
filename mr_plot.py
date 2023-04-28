@@ -220,7 +220,7 @@ if __name__ == "__main__":
                     count += 1
 
                 ax = plt.subplot(gs[1, count])
-                ax.imshow(2*np.abs(langevin_avg - langevin_gt), cmap='jet', vmin=0,
+                ax.imshow(3*np.abs(langevin_avg - langevin_gt), cmap='jet', vmin=0,
                           vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
