@@ -260,7 +260,7 @@ if __name__ == "__main__":
                         cbar = fig.colorbar(im, cax=cbar_ax, format='%.0e',
                                             orientation='vertical')  # Generate colorbar
                         cbar.ax.locator_params(nbins=3)
-                        cbar.ax.xaxis.set_ticks_position("left")
+                        cbar.ax.yaxis.set_ticks_position("left")
                         cbar.ax.tick_params(labelsize=6)
                         cbar.ax.tick_params(rotation=0)
                         tl = cbar.ax.get_yticklabels()
