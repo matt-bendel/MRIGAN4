@@ -229,6 +229,7 @@ if __name__ == "__main__":
 
                 count = 1
                 for method in keys:
+                    # TODO: Std. Map L1
                     if method != 'l1_ssim':
                         ax = plt.subplot(gs[2, count])
                         ax.imshow(np_stds[method], cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
@@ -293,7 +294,7 @@ if __name__ == "__main__":
                             ax.set_yticks([])
 
                         plt.subplots_adjust(wspace=0, hspace=0)
-                    count += 1
+                        count += 1
 
                 inner = gs[0, count].subgridspec(2, 2)
                 for samp in range(4):
@@ -308,6 +309,7 @@ if __name__ == "__main__":
 
                 plt.savefig('test_my_grid.png', bbox_inches='tight', dpi=300)
 
+                # TODO: top row: zoomed avg, next two rows samps.
                 # TODO: Rizwan Idea: zoomed, 1st row avg, 2nd error, 3rd std. dev, 4, 5, 6 samps
                 # TODO: Rizwan Idea (mine): zoomed, 1st row avg, 2nd error, 3rd std. dev, 4 grid of 4 samps
                 exit()
