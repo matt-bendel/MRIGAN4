@@ -250,7 +250,7 @@ if __name__ == "__main__":
 
                 # TODO: Samp Grid (my idea): zoomed
                 nrow = 1
-                ncol = 6
+                ncol = 7
                 fig = plt.figure(figsize=(ncol + 1, nrow + 1))
 
                 gs = gridspec.GridSpec(nrow, ncol,
