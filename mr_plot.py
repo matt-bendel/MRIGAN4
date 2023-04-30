@@ -220,8 +220,8 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                psnr_val = psnr(np_gt, langevin_avg)
-                ssim_val = ssim(np_gt, langevin_avg)
+                psnr_val = psnr(langevin_gt, langevin_avg)
+                ssim_val = ssim(langevin_gt, langevin_avg)
 
                 ax.text(0.46, 0.04, f'PSNR: {psnr_val:.2f}  SSIM: {ssim_val:.4f}',
                         horizontalalignment='center', verticalalignment='center', fontsize=3.5, color='yellow',
