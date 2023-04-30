@@ -559,7 +559,7 @@ if __name__ == "__main__":
                     ax.set_xticks([])
                     ax.set_yticks([])
 
-                    if count == 1:
+                    if count == 2:
                         [[x10, y10], [x11, y11]] = ax.get_position().get_points()
 
                         # Appropriately rescale final axis so that colorbar does not effect formatting
