@@ -216,10 +216,10 @@ class SRrcGAN(pl.LightningModule):
         avg_psnr = self.all_gather(torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()).mean()
         avg_single_psnr = self.all_gather(torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean()).mean()
 
+        self.log('val_psnr', avg_psnr, sync_dist=True)
+
         avg_psnr = avg_psnr.cpu().numpy()
         avg_single_psnr = avg_single_psnr.cpu().numpy()
-
-        self.log('val_psnr', avg_psnr, sync_dist=True)
 
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
         psnr_diff = psnr_diff
