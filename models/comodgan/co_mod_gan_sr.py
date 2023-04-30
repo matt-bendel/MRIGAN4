@@ -78,7 +78,7 @@ class G_synthesis_co_mod_gan(nn.Module):
         resample_kernel = [1,3,3,1]
 
         resolution_log2 = int(np.log2(resolution))
-        e_res_log2 = int(np.log2(resolution//scale))
+        e_res_log2 = int(np.log2(resolution))
         def nf(stage): return np.clip(int(fmap_base / (2.0 ** (stage * fmap_decay))), fmap_min, fmap_max)
         self.nf = nf
         super().__init__()
