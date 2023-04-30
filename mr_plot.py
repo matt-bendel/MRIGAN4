@@ -473,6 +473,12 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
+                rect = patches.Rectangle((zoom_start, zoom_start), zoom_length, zoom_length, linewidth=1, edgecolor='r',
+                                         facecolor='none')
+
+                # Add the patch to the Axes
+                ax.add_patch(rect)
+
                 ax = plt.subplot(gs[0, 1])
                 ax.imshow(np_gt[zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length], cmap='gray',
                           vmin=0, vmax=np.max(np_gt))
@@ -623,6 +629,12 @@ if __name__ == "__main__":
                 ax.set_yticklabels([])
                 ax.set_xticks([])
                 ax.set_yticks([])
+
+                rect = patches.Rectangle((zoom_start, zoom_start), zoom_length, zoom_length, linewidth=1, edgecolor='r',
+                                         facecolor='none')
+
+                # Add the patch to the Axes
+                ax.add_patch(rect)
 
                 ax = plt.subplot(gs[0, 1])
                 ax.imshow(np_gt[zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length], cmap='gray',
