@@ -344,7 +344,7 @@ if __name__ == "__main__":
                         ax.set_xticks([])
                         ax.set_yticks([])
                         ax.patch.set_edgecolor('blue')
-                        ax.patch.set_linewidth('1')
+                        ax.patch.set_linewidth(1)
 
                         for samp in range(3):
                             ax = fig.add_subplot(inner[samp+1])
@@ -367,7 +367,7 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
                 ax.patch.set_edgecolor('blue')
-                ax.patch.set_linewidth('1')
+                ax.patch.set_linewidth(1)
                 for samp in range(3):
                     ax = fig.add_subplot(inner[samp+1])
                     ax.imshow(langevin_recons[samp, zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length],
