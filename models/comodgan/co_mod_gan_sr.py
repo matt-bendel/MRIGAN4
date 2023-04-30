@@ -68,8 +68,7 @@ class G_mapping(nn.Module):
 class G_synthesis_co_mod_gan(nn.Module):
     def __init__(
             self,
-            resolution,
-            scale
+            resolution
             ):
         fmap_base = 16 << 10
         fmap_decay = 1.0
