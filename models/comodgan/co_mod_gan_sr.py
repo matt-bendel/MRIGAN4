@@ -144,8 +144,8 @@ class G_synthesis_co_mod_gan(nn.Module):
                 return x, E_features
         def make_encoder(channel_in=num_channels+1):
             Es = []
-            for res in range(self.e_res_log2, 2, -1):
-                if res == self.e_res_log2:
+            for res in range(self.resolution_log2, 2, -1):
+                if res == self.resolution_log2:
                     Es.append(
                             (
                                 '%dx%d_0' % (2**res, 2**res),
@@ -276,11 +276,10 @@ class G_synthesis_co_mod_gan(nn.Module):
 class Generator(BaseNetwork):
     def __init__(
             self,
-    resolution,
-    scale):                                          # Arguments for sub-networks (mapping and synthesis).
+    resolution):                                          # Arguments for sub-networks (mapping and synthesis).
         super().__init__()
         self.G_mapping = G_mapping()
-        self.G_synthesis = G_synthesis_co_mod_gan(resolution, scale)
+        self.G_synthesis = G_synthesis_co_mod_gan(resolution)
 
     def forward(
             self,
