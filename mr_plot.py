@@ -444,7 +444,7 @@ if __name__ == "__main__":
                 plt.savefig('test_phil.png', bbox_inches='tight', dpi=300)
 
                 # TODO: Rizwan Idea: zoomed, 1st row avg, 2nd error, 3rd std. dev, 4, 5, 6 samps
-                nrow = 4
+                nrow = 6
                 ncol = 7
 
                 fig = plt.figure(figsize=(ncol + 1, nrow + 1))
@@ -595,7 +595,7 @@ if __name__ == "__main__":
                 plt.savefig('test_rizwan.png', bbox_inches='tight', dpi=300)
 
                 # TODO: Rizwan Idea (mine): zoomed, 1st row avg, 2nd error, 3rd std. dev, 4 grid of 4 samps
-                nrow = 6
+                nrow = 4
                 ncol = 7
 
                 fig = plt.figure(figsize=(ncol + 1, nrow + 1))
