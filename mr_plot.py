@@ -174,7 +174,7 @@ if __name__ == "__main__":
                 zoom_length = 80
 
                 # TODO: OG fig plot
-                # TODO: Colorbars, metrics
+                # TODO: metrics
                 # OG FIG
                 nrow = 3
                 ncol = 6
@@ -336,8 +336,18 @@ if __name__ == "__main__":
                 for method in keys:
                     if method != 'l1_ssim':
                         inner = gs[0, count].subgridspec(2, 2)
-                        for samp in range(4):
-                            ax = fig.add_subplot(inner[samp])
+                        ax = fig.add_subplot(inner[samp])
+                        ax.imshow(np_avgs[method][zoom_start:zoom_start + zoom_length,
+                                  zoom_start:zoom_start + zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
+                        ax.set_xticklabels([])
+                        ax.set_yticklabels([])
+                        ax.set_xticks([])
+                        ax.set_yticks([])
+                        ax.patch.set_edgecolor('blue')
+                        ax.patch.set_linewidth('1')
+
+                        for samp in range(3):
+                            ax = fig.add_subplot(inner[samp+1])
                             ax.imshow(np_samps[method][samp][zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
                             ax.set_xticklabels([])
                             ax.set_yticklabels([])
@@ -348,8 +358,18 @@ if __name__ == "__main__":
                         count += 1
 
                 inner = gs[0, count].subgridspec(2, 2)
-                for samp in range(4):
-                    ax = fig.add_subplot(inner[samp])
+                ax = fig.add_subplot(inner[0])
+                ax.imshow(
+                    langevin_avg[zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length],
+                    cmap='gray', vmin=0, vmax=np.max(langevin_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+                ax.patch.set_edgecolor('blue')
+                ax.patch.set_linewidth('1')
+                for samp in range(3):
+                    ax = fig.add_subplot(inner[samp+1])
                     ax.imshow(langevin_recons[samp, zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length],
                               cmap='gray', vmin=0, vmax=np.max(langevin_gt))
                     ax.set_xticklabels([])
@@ -424,6 +444,316 @@ if __name__ == "__main__":
                 plt.savefig('test_phil.png', bbox_inches='tight', dpi=300)
 
                 # TODO: Rizwan Idea: zoomed, 1st row avg, 2nd error, 3rd std. dev, 4, 5, 6 samps
+                nrow = 4
+                ncol = 7
+
+                fig = plt.figure(figsize=(ncol + 1, nrow + 1))
+
+                gs = gridspec.GridSpec(nrow, ncol,
+                                       wspace=0.0, hspace=0.0,
+                                       top=1. - 0.5 / (nrow + 1), bottom=0.5 / (nrow + 1),
+                                       left=0.5 / (ncol + 1), right=1 - 0.5 / (ncol + 1))
+
+                ax = plt.subplot(gs[0, 0])
+                ax.imshow(np_gt, cmap='gray', vmin=0, vmax=np.max(np_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                ax = plt.subplot(gs[0, 1])
+                ax.imshow(np_gt[zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length], cmap='gray',
+                          vmin=0, vmax=np.max(np_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                count = 2
+                for method in keys:
+                    ax = plt.subplot(gs[0, count])
+                    ax.imshow(np_avgs[method][zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length],
+                              cmap='gray', vmin=0, vmax=np.max(np_gt))
+                    ax.set_xticklabels([])
+                    ax.set_yticklabels([])
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+                    count += 1
+
+                ax = plt.subplot(gs[0, count])
+                ax.imshow(langevin_avg[zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length],
+                          cmap='gray', vmin=0, vmax=np.max(langevin_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                count = 2
+                for method in keys:
+                    ax = plt.subplot(gs[1, count])
+                    im = ax.imshow(2*np.abs(np_avgs[method] - np_gt), cmap='jet', vmin=0, vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
+                    ax.set_xticklabels([])
+                    ax.set_yticklabels([])
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+
+                    if count == 1:
+                        [[x10, y10], [x11, y11]] = ax.get_position().get_points()
+
+                        # Appropriately rescale final axis so that colorbar does not effect formatting
+                        pad = 0.01
+                        width = 0.02
+                        cbar_ax = fig.add_axes([x10 - 2 * pad, y10, width, y11 - y10])
+                        cbar = fig.colorbar(im, cax=cbar_ax, format='%.0e',
+                                            orientation='vertical')  # Generate colorbar
+                        cbar.ax.locator_params(nbins=3)
+                        cbar.ax.yaxis.set_ticks_position("left")
+                        cbar.ax.tick_params(labelsize=6)
+                        cbar.ax.tick_params(rotation=0)
+                        tl = cbar.ax.get_yticklabels()
+
+                        # set the alignment for the first and the last
+                        tl[0].set_verticalalignment('bottom')
+                        tl[-1].set_verticalalignment('top')
+
+                    count += 1
+
+                ax = plt.subplot(gs[1, count])
+                ax.imshow(3*np.abs(langevin_avg - langevin_gt), cmap='jet', vmin=0,
+                          vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                count = 2
+                for method in keys:
+                    if method != 'l1_ssim':
+                        ax = plt.subplot(gs[2, count])
+                        ax.imshow(np_stds[method], cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
+                        ax.set_xticklabels([])
+                        ax.set_yticklabels([])
+                        ax.set_xticks([])
+                        ax.set_yticks([])
+                    else:
+                        ax = plt.subplot(gs[2, count])
+                        im = ax.imshow(np.zeros((384, 384)), cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
+                        ax.set_xticklabels([])
+                        ax.set_yticklabels([])
+                        ax.set_xticks([])
+                        ax.set_yticks([])
+
+                        # fig.subplots_adjust(right=0.85)  # Make room for colorbar
+
+                        # Get position of final error map axis
+                        [[x10, y10], [x11, y11]] = ax.get_position().get_points()
+
+                        # Appropriately rescale final axis so that colorbar does not effect formatting
+                        pad = 0.01
+                        width = 0.02
+                        cbar_ax = fig.add_axes([x10 - 2*pad, y10, width, y11 - y10])
+                        cbar = fig.colorbar(im, cax=cbar_ax, format='%.0e',
+                                            orientation='vertical')  # Generate colorbar
+                        cbar.ax.locator_params(nbins=3)
+                        cbar.ax.yaxis.set_ticks_position("left")
+                        cbar.ax.tick_params(labelsize=6)
+                        cbar.ax.tick_params(rotation=0)
+                        tl = cbar.ax.get_yticklabels()
+
+                        # set the alignment for the first and the last
+                        tl[0].set_verticalalignment('bottom')
+                        tl[-1].set_verticalalignment('top')
+
+                    count += 1
+
+                ax = plt.subplot(gs[2, count])
+                ax.imshow(langevin_std, cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                for samp in range(3):
+                    count = 2
+                    for method in keys:
+                        if method != 'l1_ssim':
+                            ax = plt.subplot(gs[samp+1, count])
+                            ax.imshow(np_samps[method][samp][zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
+                            ax.set_xticklabels([])
+                            ax.set_yticklabels([])
+                            ax.set_xticks([])
+                            ax.set_yticks([])
+                            count += 1
+
+                    ax = plt.subplot(gs[samp+1, count])
+                    ax.imshow(langevin_recons[samp, zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(langevin_gt))
+                    ax.set_xticklabels([])
+                    ax.set_yticklabels([])
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+
+                plt.savefig('test_rizwan.png', bbox_inches='tight', dpi=300)
+
                 # TODO: Rizwan Idea (mine): zoomed, 1st row avg, 2nd error, 3rd std. dev, 4 grid of 4 samps
+                nrow = 6
+                ncol = 7
+
+                fig = plt.figure(figsize=(ncol + 1, nrow + 1))
+
+                gs = gridspec.GridSpec(nrow, ncol,
+                                       wspace=0.0, hspace=0.0,
+                                       top=1. - 0.5 / (nrow + 1), bottom=0.5 / (nrow + 1),
+                                       left=0.5 / (ncol + 1), right=1 - 0.5 / (ncol + 1))
+
+                ax = plt.subplot(gs[0, 0])
+                ax.imshow(np_gt, cmap='gray', vmin=0, vmax=np.max(np_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                ax = plt.subplot(gs[0, 1])
+                ax.imshow(np_gt[zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length], cmap='gray',
+                          vmin=0, vmax=np.max(np_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                count = 2
+                for method in keys:
+                    ax = plt.subplot(gs[0, count])
+                    ax.imshow(np_avgs[method][zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length],
+                              cmap='gray', vmin=0, vmax=np.max(np_gt))
+                    ax.set_xticklabels([])
+                    ax.set_yticklabels([])
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+                    count += 1
+
+                ax = plt.subplot(gs[0, count])
+                ax.imshow(langevin_avg[zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length],
+                          cmap='gray', vmin=0, vmax=np.max(langevin_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                count = 2
+                for method in keys:
+                    ax = plt.subplot(gs[1, count])
+                    im = ax.imshow(2 * np.abs(np_avgs[method] - np_gt), cmap='jet', vmin=0,
+                                   vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
+                    ax.set_xticklabels([])
+                    ax.set_yticklabels([])
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+
+                    if count == 1:
+                        [[x10, y10], [x11, y11]] = ax.get_position().get_points()
+
+                        # Appropriately rescale final axis so that colorbar does not effect formatting
+                        pad = 0.01
+                        width = 0.02
+                        cbar_ax = fig.add_axes([x10 - 2 * pad, y10, width, y11 - y10])
+                        cbar = fig.colorbar(im, cax=cbar_ax, format='%.0e',
+                                            orientation='vertical')  # Generate colorbar
+                        cbar.ax.locator_params(nbins=3)
+                        cbar.ax.yaxis.set_ticks_position("left")
+                        cbar.ax.tick_params(labelsize=6)
+                        cbar.ax.tick_params(rotation=0)
+                        tl = cbar.ax.get_yticklabels()
+
+                        # set the alignment for the first and the last
+                        tl[0].set_verticalalignment('bottom')
+                        tl[-1].set_verticalalignment('top')
+
+                    count += 1
+
+                ax = plt.subplot(gs[1, count])
+                ax.imshow(3 * np.abs(langevin_avg - langevin_gt), cmap='jet', vmin=0,
+                          vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                count = 2
+                for method in keys:
+                    if method != 'l1_ssim':
+                        ax = plt.subplot(gs[2, count])
+                        ax.imshow(np_stds[method], cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
+                        ax.set_xticklabels([])
+                        ax.set_yticklabels([])
+                        ax.set_xticks([])
+                        ax.set_yticks([])
+                    else:
+                        ax = plt.subplot(gs[2, count])
+                        im = ax.imshow(np.zeros((384, 384)), cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
+                        ax.set_xticklabels([])
+                        ax.set_yticklabels([])
+                        ax.set_xticks([])
+                        ax.set_yticks([])
+
+                        # fig.subplots_adjust(right=0.85)  # Make room for colorbar
+
+                        # Get position of final error map axis
+                        [[x10, y10], [x11, y11]] = ax.get_position().get_points()
+
+                        # Appropriately rescale final axis so that colorbar does not effect formatting
+                        pad = 0.01
+                        width = 0.02
+                        cbar_ax = fig.add_axes([x10 - 2 * pad, y10, width, y11 - y10])
+                        cbar = fig.colorbar(im, cax=cbar_ax, format='%.0e',
+                                            orientation='vertical')  # Generate colorbar
+                        cbar.ax.locator_params(nbins=3)
+                        cbar.ax.yaxis.set_ticks_position("left")
+                        cbar.ax.tick_params(labelsize=6)
+                        cbar.ax.tick_params(rotation=0)
+                        tl = cbar.ax.get_yticklabels()
+
+                        # set the alignment for the first and the last
+                        tl[0].set_verticalalignment('bottom')
+                        tl[-1].set_verticalalignment('top')
+
+                    count += 1
+
+                ax = plt.subplot(gs[2, count])
+                ax.imshow(langevin_std, cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                count = 2
+                for method in keys:
+                    if method != 'l1_ssim':
+                        inner = gs[3, count].subgridspec(2, 2)
+                        for samp in range(4):
+                            ax = fig.add_subplot(inner[samp])
+                            ax.imshow(np_samps[method][samp][zoom_start:zoom_start + zoom_length,
+                                      zoom_start:zoom_start + zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
+                            ax.set_xticklabels([])
+                            ax.set_yticklabels([])
+                            ax.set_xticks([])
+                            ax.set_yticks([])
+
+                        plt.subplots_adjust(wspace=0, hspace=0)
+                        count += 1
+
+                inner = gs[3, count].subgridspec(2, 2)
+                for samp in range(4):
+                    ax = fig.add_subplot(inner[samp])
+                    ax.imshow(
+                        langevin_recons[samp, zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length],
+                        cmap='gray', vmin=0, vmax=np.max(langevin_gt))
+                    ax.set_xticklabels([])
+                    ax.set_yticklabels([])
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+                plt.subplots_adjust(wspace=0, hspace=0)
+
+                plt.savefig('test_rizwan_mine.png', bbox_inches='tight', dpi=300)
+
                 exit()
 
