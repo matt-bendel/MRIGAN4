@@ -6,6 +6,7 @@ import json
 import pathlib
 
 import numpy as np
+import matplotlib.patches as patches
 
 from data_loaders.MRIDataModule import MRIDataModule
 from utils.parse_args import create_arg_parser
@@ -316,6 +317,11 @@ if __name__ == "__main__":
                 ax.set_yticklabels([])
                 ax.set_xticks([])
                 ax.set_yticks([])
+
+                rect = patches.Rectangle((zoom_start, zoom_start), zoom_length, zoom_length, linewidth=1, edgecolor='r', facecolor='none')
+
+                # Add the patch to the Axes
+                ax.add_patch(rect)
 
                 inner = gs[0, 1].subgridspec(2, 2)
                 ax = fig.add_subplot(inner[0, 0])
