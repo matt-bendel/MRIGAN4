@@ -207,9 +207,9 @@ if __name__ == "__main__":
                     psnr_val = psnr(np_gt, np_avgs[method])
                     ssim_val = ssim(np_gt, np_avgs[method])
 
-                    ax.text(0.46, 0.04, f'PSNR: {psnr_val:.2f}  SSIM: {ssim_val:.4f}',
-                            horizontalalignment='center', verticalalignment='center', fontsize=3.5, color='yellow',
-                            transform=ax.transAxes)
+                    # ax.text(0.46, 0.04, f'PSNR: {psnr_val:.2f}  SSIM: {ssim_val:.4f}',
+                    #         horizontalalignment='center', verticalalignment='center', fontsize=3.5, color='yellow',
+                    #         transform=ax.transAxes)
                     count += 1
 
 
@@ -223,9 +223,9 @@ if __name__ == "__main__":
                 psnr_val = psnr(langevin_gt, langevin_avg)
                 ssim_val = ssim(langevin_gt, langevin_avg)
 
-                ax.text(0.46, 0.04, f'PSNR: {psnr_val:.2f}  SSIM: {ssim_val:.4f}',
-                        horizontalalignment='center', verticalalignment='center', fontsize=3.5, color='yellow',
-                        transform=ax.transAxes)
+                # ax.text(0.46, 0.04, f'PSNR: {psnr_val:.2f}  SSIM: {ssim_val:.4f}',
+                #         horizontalalignment='center', verticalalignment='center', fontsize=3.5, color='yellow',
+                #         transform=ax.transAxes)
 
                 count = 1
                 for method in keys:
