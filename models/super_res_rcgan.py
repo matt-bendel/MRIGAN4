@@ -36,7 +36,7 @@ class SRrcGAN(pl.LightningModule):
         self.in_chans = args.in_chans
         self.out_chans = args.out_chans
 
-        self.generator = Generator(args.im_size, upscale_factor)
+        self.generator = Generator(args.im_size)
 
         self.discriminator = Discriminator(args.im_size)
 
