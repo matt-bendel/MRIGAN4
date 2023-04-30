@@ -404,6 +404,12 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
+                rect = patches.Rectangle((zoom_start, zoom_start), zoom_length, zoom_length, linewidth=1, edgecolor='r',
+                                         facecolor='none')
+
+                # Add the patch to the Axes
+                ax.add_patch(rect)
+
                 ax = plt.subplot(gs[0, 1])
                 ax.imshow(np_gt[zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
                 ax.set_xticklabels([])
@@ -580,7 +586,7 @@ if __name__ == "__main__":
                 ax.set_yticks([])
 
                 for samp in range(3):
-                    count = 2
+                    count = 3
                     for method in keys:
                         if method != 'l1_ssim':
                             ax = plt.subplot(gs[samp+3, count])
