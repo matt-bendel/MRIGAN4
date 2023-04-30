@@ -323,6 +323,11 @@ if __name__ == "__main__":
                 # Add the patch to the Axes
                 ax.add_patch(rect)
 
+                x_coord = zoom_start + zoom_length
+                y_coords = [zoom_start, zoom_start+zoom_length]
+                ax.plot([x_coord, y_coords[0]], [384, 0], color="red", linewidth=1)
+                ax.plot([x_coord, y_coords[1]], [384, 384], color="red", linewidth=1)
+
                 inner = gs[0, 1].subgridspec(2, 2)
                 ax = fig.add_subplot(inner[0, 0])
                 ax.imshow(np_gt[zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
