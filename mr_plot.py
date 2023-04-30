@@ -323,10 +323,9 @@ if __name__ == "__main__":
                 # Add the patch to the Axes
                 ax.add_patch(rect)
 
+                ax1 = ax
                 x_coord = zoom_start + zoom_length
                 y_coords = [zoom_start, zoom_start+zoom_length]
-                ax.plot([x_coord, 384], [y_coords[0], 0], color="red", linewidth=1)
-                ax.plot([x_coord, 384], [y_coords[1], 384], color="red", linewidth=1)
 
                 inner = gs[0, 1].subgridspec(2, 2)
                 ax = fig.add_subplot(inner[0, 0])
@@ -335,6 +334,10 @@ if __name__ == "__main__":
                 ax.set_yticklabels([])
                 ax.set_xticks([])
                 ax.set_yticks([])
+
+                connection_path_1 = patches.ConnectionPatch(xya=[x_coord, y_coords[0]], xyb=[0, 0], coordsA=ax1.transData, coordsB=ax.transData, color='r')
+                fig.add_artist(connection_path_1)
+
                 ax = fig.add_subplot(inner[0, 1])
                 ax.imshow(np_avgs['l1_ssim'][zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
                 ax.set_xticklabels([])
