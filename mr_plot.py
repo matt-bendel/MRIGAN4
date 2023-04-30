@@ -337,6 +337,9 @@ if __name__ == "__main__":
 
                 connection_path_1 = patches.ConnectionPatch([x_coord, y_coords[0]], [0, 0], coordsA=ax1.transData, coordsB=ax.transData, color='r')
                 fig.add_artist(connection_path_1)
+                connection_path_2 = patches.ConnectionPatch([x_coord, y_coords[1]], [0, zoom_length], coordsA=ax1.transData,
+                                                            coordsB=ax.transData, color='r')
+                fig.add_artist(connection_path_2)
 
                 ax = fig.add_subplot(inner[0, 1])
                 ax.imshow(np_avgs['l1_ssim'][zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
