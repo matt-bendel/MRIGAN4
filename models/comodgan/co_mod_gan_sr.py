@@ -68,7 +68,8 @@ class G_mapping(nn.Module):
 class G_synthesis_co_mod_gan(nn.Module):
     def __init__(
             self,
-            resolution
+            resolution,
+            scale
             ):
         fmap_base = 16 << 10
         fmap_decay = 1.0
@@ -78,11 +79,13 @@ class G_synthesis_co_mod_gan(nn.Module):
         resample_kernel = [1,3,3,1]
 
         resolution_log2 = int(np.log2(resolution))
+        e_res_log2 = int(np.log2(resolution//scale))
         def nf(stage): return np.clip(int(fmap_base / (2.0 ** (stage * fmap_decay))), fmap_min, fmap_max)
         self.nf = nf
         super().__init__()
         self.num_layers = resolution_log2 * 2 - 2
         self.resolution_log2 = resolution_log2
+        self.e_res_log2 = e_res_log2
 
         class E_fromrgb(nn.Module): # res = 2..resolution_log2
             def __init__(self, res, channel_in=num_channels+1):
@@ -141,8 +144,8 @@ class G_synthesis_co_mod_gan(nn.Module):
                 return x, E_features
         def make_encoder(channel_in=num_channels+1):
             Es = []
-            for res in range(self.resolution_log2, 2, -1):
-                if res == self.resolution_log2:
+            for res in range(self.e_res_log2, 2, -1):
+                if res == self.e_res_log2:
                     Es.append(
                             (
                                 '%dx%d_0' % (2**res, 2**res),
@@ -273,10 +276,11 @@ class G_synthesis_co_mod_gan(nn.Module):
 class Generator(BaseNetwork):
     def __init__(
             self,
-    resolution):                                          # Arguments for sub-networks (mapping and synthesis).
+    resolution,
+    scale):                                          # Arguments for sub-networks (mapping and synthesis).
         super().__init__()
         self.G_mapping = G_mapping()
-        self.G_synthesis = G_synthesis_co_mod_gan(resolution)
+        self.G_synthesis = G_synthesis_co_mod_gan(resolution, scale)
 
     def forward(
             self,

@@ -103,6 +103,7 @@ class LRHR_IMGDataset(data.Dataset):
         mean = torch.tensor([0.5, 0.5, 0.5])
         std = torch.tensor([0.5, 0.5, 0.5])
         hr = (hr - mean[:, None, None]) / std[:, None, None]
+        lr = (lr - mean[:, None, None]) / std[:, None, None]
         lf = (lf - mean[:, None, None]) / std[:, None, None]
         return lf, hr, mean, std
 

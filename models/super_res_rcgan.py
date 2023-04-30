@@ -31,11 +31,12 @@ class SRrcGAN(pl.LightningModule):
         self.exp_name = exp_name
         self.noise_type = noise_type
         self.num_gpus = num_gpus
+        self.scale = upscale_factor
 
         self.in_chans = args.in_chans
         self.out_chans = args.out_chans
 
-        self.generator = Generator(args.im_size)
+        self.generator = Generator(args.im_size, upscale_factor)
 
         self.discriminator = Discriminator(args.im_size)
 
@@ -97,7 +98,7 @@ class SRrcGAN(pl.LightningModule):
         for k in range(y.shape[0] - 1):
             gen_pred_loss += torch.mean(fake_pred[k + 1])
 
-        adv_weight = 3e-5
+        adv_weight = 1e-4
 
         return - adv_weight * gen_pred_loss.mean()
 
@@ -131,8 +132,8 @@ class SRrcGAN(pl.LightningModule):
 
             for z in range(self.args.num_z_train):
                 loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
-                g_loss += 1e-3 * loss / self.args.num_z_train
-                g_loss += 1e-1 * F.mse_loss(F.interpolate(gens[:, z, :, :, :], scale_factor=1/4, mode='bicubic'), F.interpolate(x, scale_factor=1/4, mode='bicubic'))
+                g_loss += 1e-2 * loss / self.args.num_z_train
+                g_loss += F.mse_loss(F.interpolate(gens[:, z, :, :, :], scale_factor=1/self.scale, mode='bicubic'), F.interpolate(x, scale_factor=1/self.scale, mode='bicubic'))
 
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
@@ -217,6 +218,8 @@ class SRrcGAN(pl.LightningModule):
 
         avg_psnr = avg_psnr.cpu().numpy()
         avg_single_psnr = avg_single_psnr.cpu().numpy()
+
+        self.log('val_psnr', avg_psnr, sync_dist=True)
 
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
         psnr_diff = psnr_diff
