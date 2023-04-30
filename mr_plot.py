@@ -415,6 +415,8 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
+                ax1 = ax
+
                 rect = patches.Rectangle((zoom_start, zoom_start), zoom_length, zoom_length, linewidth=1, edgecolor='r',
                                          facecolor='none')
 
@@ -427,6 +429,14 @@ if __name__ == "__main__":
                 ax.set_yticklabels([])
                 ax.set_xticks([])
                 ax.set_yticks([])
+
+                connection_path_1 = patches.ConnectionPatch([x_coord, y_coords[0]], [0, 0], coordsA=ax1.transData,
+                                                            coordsB=ax.transData, color='r')
+                fig.add_artist(connection_path_1)
+                connection_path_2 = patches.ConnectionPatch([x_coord, y_coords[1]], [0, zoom_length],
+                                                            coordsA=ax1.transData,
+                                                            coordsB=ax.transData, color='r')
+                fig.add_artist(connection_path_2)
 
                 count = 2
                 for method in keys:
