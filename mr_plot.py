@@ -19,6 +19,7 @@ from utils.math import complex_abs, tensor_to_complex_np
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 import sigpy as sp
+from evaluation_scripts.metrics import psnr, ssim
 
 # M_1: 2.15
 # C_1: 3.50
@@ -202,10 +203,15 @@ if __name__ == "__main__":
                     ax.set_yticklabels([])
                     ax.set_xticks([])
                     ax.set_yticks([])
+
+                    psnr_val = psnr(np_gt, np_avgs[method])
+                    ssim_val = ssim(np_gt, np_avgs[method])
+
+                    ax.text(0.46, 0.04, f'PSNR: {psnr_val:.2f}  SSIM: {ssim_val:.4f}',
+                            horizontalalignment='center', verticalalignment='center', fontsize=3.5, color='yellow',
+                            transform=ax.transAxes)
                     count += 1
-                    # ax.text(0.46, 0.04, f'PSNR: {psnr_val:.2f}  SSIM: {ssim_val:.4f}',
-                    #         horizontalalignment='center', verticalalignment='center', fontsize=3.5, color='yellow',
-                    #         transform=ax.transAxes)
+
 
                 ax = plt.subplot(gs[0, count])
                 ax.imshow(langevin_avg, cmap='gray', vmin=0, vmax=np.max(langevin_gt))
@@ -213,6 +219,13 @@ if __name__ == "__main__":
                 ax.set_yticklabels([])
                 ax.set_xticks([])
                 ax.set_yticks([])
+
+                psnr_val = psnr(np_gt, langevin_avg)
+                ssim_val = ssim(np_gt, langevin_avg)
+
+                ax.text(0.46, 0.04, f'PSNR: {psnr_val:.2f}  SSIM: {ssim_val:.4f}',
+                        horizontalalignment='center', verticalalignment='center', fontsize=3.5, color='yellow',
+                        transform=ax.transAxes)
 
                 count = 1
                 for method in keys:
@@ -494,6 +507,8 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
+                ax1 = ax
+
                 rect = patches.Rectangle((zoom_start, zoom_start), zoom_length, zoom_length, linewidth=1, edgecolor='r',
                                          facecolor='none')
 
@@ -507,6 +522,14 @@ if __name__ == "__main__":
                 ax.set_yticklabels([])
                 ax.set_xticks([])
                 ax.set_yticks([])
+
+                connection_path_1 = patches.ConnectionPatch([x_coord, y_coords[0]], [0, 0], coordsA=ax1.transData,
+                                                            coordsB=ax.transData, color='r')
+                fig.add_artist(connection_path_1)
+                connection_path_2 = patches.ConnectionPatch([x_coord, y_coords[1]], [0, zoom_length],
+                                                            coordsA=ax1.transData,
+                                                            coordsB=ax.transData, color='r')
+                fig.add_artist(connection_path_2)
 
                 count = 2
                 for method in keys:
@@ -651,6 +674,8 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
+                ax1 = ax
+
                 rect = patches.Rectangle((zoom_start, zoom_start), zoom_length, zoom_length, linewidth=1, edgecolor='r',
                                          facecolor='none')
 
@@ -664,6 +689,14 @@ if __name__ == "__main__":
                 ax.set_yticklabels([])
                 ax.set_xticks([])
                 ax.set_yticks([])
+
+                connection_path_1 = patches.ConnectionPatch([x_coord, y_coords[0]], [0, 0], coordsA=ax1.transData,
+                                                            coordsB=ax.transData, color='r')
+                fig.add_artist(connection_path_1)
+                connection_path_2 = patches.ConnectionPatch([x_coord, y_coords[1]], [0, zoom_length],
+                                                            coordsA=ax1.transData,
+                                                            coordsB=ax.transData, color='r')
+                fig.add_artist(connection_path_2)
 
                 count = 2
                 for method in keys:
