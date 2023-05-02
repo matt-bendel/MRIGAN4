@@ -281,6 +281,6 @@ class UNetModel(nn.Module):
             output = layer(output, stack.pop())
 
         for layer in self.extra_upsample_layers:
-            output = layer(output, torch.zeros())
+            output = layer(output)
 
         return self.conv2(output)
