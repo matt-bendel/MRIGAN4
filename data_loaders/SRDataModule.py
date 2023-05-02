@@ -105,7 +105,7 @@ class LRHR_IMGDataset(data.Dataset):
         hr = (hr - mean[:, None, None]) / std[:, None, None]
         lr = (lr - mean[:, None, None]) / std[:, None, None]
         lf = (lf - mean[:, None, None]) / std[:, None, None]
-        return lf, hr, mean, std
+        return lr, hr, mean, std
 
 
 def random_flip(img, seg, hf):

@@ -12,7 +12,7 @@ from matplotlib import cm
 from PIL import Image
 from torch.nn import functional as F
 from models.architectures.super_res_disc import UNetDiscriminatorSN
-from models.architectures.super_res_gen import RRDBNet
+from models.architectures.our_gen_unet_only_sr import UNetModel
 from models.comodgan.co_mod_gan_sr import Generator, Discriminator
 
 from evaluation_scripts.metrics import psnr
@@ -33,12 +33,12 @@ class SRrcGAN(pl.LightningModule):
         self.num_gpus = num_gpus
         self.scale = upscale_factor
 
-        self.in_chans = args.in_chans
+        self.in_chans = args.in_chans + 2
         self.out_chans = args.out_chans
 
-        self.generator = Generator(args.im_size)
+        self.generator = UNetModel(self.in_chans, self.out_chans, scale=4)
 
-        self.discriminator = Discriminator(args.im_size)
+        self.discriminator = UNetDiscriminatorSN(3)
 
         self.perceptual_loss = PerceptualLoss()
 
@@ -47,8 +47,8 @@ class SRrcGAN(pl.LightningModule):
 
         self.save_hyperparameters()  # Save passed values
 
-    def get_noise(self, num_vectors):
-        return [torch.randn(num_vectors, 512, device=self.device)]
+    def get_noise(self, num_vectors, res):
+        return torch.randn(num_vectors, 2, res, res, device=self.device)
 
     def compute_gradient_penalty(self, real_samples, fake_samples, y):
         """Calculates the gradient penalty loss for WGAN GP"""
@@ -57,11 +57,11 @@ class SRrcGAN(pl.LightningModule):
         alpha = Tensor(np.random.random((real_samples.size(0), 1, 1, 1))).to(self.device)
         # Get random interpolation between real and fake samples
         interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
-        d_interpolates = self.discriminator(input=interpolates, label=y)
-        # fake = Tensor(real_samples.shape[0], 1, d_interpolates.shape[-1], d_interpolates.shape[-1]).fill_(1.0).to(
-        #     self.device)
-        fake = Tensor(real_samples.shape[0], 1).fill_(1.0).to(
+        d_interpolates = self.discriminator(interpolates)
+        fake = Tensor(real_samples.shape[0], 1, d_interpolates.shape[-1], d_interpolates.shape[-1]).fill_(1.0).to(
             self.device)
+        # fake = Tensor(real_samples.shape[0], 1).fill_(1.0).to(
+        #     self.device)
 
         # Get gradient w.r.t. interpolates
         gradients = autograd.grad(
@@ -78,29 +78,21 @@ class SRrcGAN(pl.LightningModule):
 
     def forward(self, y):
         num_vectors = y.size(0)
-        noise = self.get_noise(num_vectors)
-        samples = self.generator(y, y, noise)
+        noise = self.get_noise(num_vectors, y.shape[-1])
+        samples = self.generator(torch.cat([y, noise]))
         return samples
 
     def adversarial_loss_discriminator(self, fake_pred, real_pred):
         return fake_pred.mean() - real_pred.mean()
 
     def adversarial_loss_generator(self, y, gens):
-        fake_pred = torch.zeros(size=(y.shape[0], self.args.num_z_train), device=self.device)
+        adv_loss = 0
         for k in range(y.shape[0]):
-            cond = torch.zeros(1, gens.shape[2], gens.shape[3], gens.shape[4], device=self.device)
-            cond[0, :, :, :] = y[k, :, :, :]
-            cond = cond.repeat(self.args.num_z_train, 1, 1, 1)
-            temp = self.discriminator(input=gens[k], label=cond)
-            fake_pred[k] = temp[:, 0]
-
-        gen_pred_loss = torch.mean(fake_pred[0])
-        for k in range(y.shape[0] - 1):
-            gen_pred_loss += torch.mean(fake_pred[k + 1])
+            adv_loss += self.discriminator(input=gens[k]).mean()
 
         adv_weight = 1e-4
 
-        return - adv_weight * gen_pred_loss.mean()
+        return - adv_weight * adv_loss / self.args.num_z_train
 
     def l1_std_p(self, avg_recon, gens, x):
         return F.l1_loss(avg_recon, x) - self.std_mult * np.sqrt(
@@ -132,8 +124,7 @@ class SRrcGAN(pl.LightningModule):
 
             for z in range(self.args.num_z_train):
                 loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
-                g_loss += 1e-2 * loss / self.args.num_z_train
-                g_loss += F.mse_loss(F.interpolate(gens[:, z, :, :, :], scale_factor=1/self.scale, mode='bicubic'), F.interpolate(x, scale_factor=1/self.scale, mode='bicubic'))
+                g_loss += 1e-3 * loss / self.args.num_z_train
 
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
@@ -148,8 +139,8 @@ class SRrcGAN(pl.LightningModule):
         if optimizer_idx == 0:
             x_hat = self.forward(y)
 
-            real_pred = self.discriminator(input=x, label=y)
-            fake_pred = self.discriminator(input=x_hat, label=y)
+            real_pred = self.discriminator(x)
+            fake_pred = self.discriminator(x_hat)
 
             d_loss = self.adversarial_loss_discriminator(fake_pred, real_pred)
             d_loss += self.gradient_penalty(x_hat, x, y)
