@@ -259,7 +259,7 @@ class UNetModel(nn.Module):
             nn.Conv2d(ch // 2, out_chans, kernel_size=1),
         )
 
-    def forward(self, input):
+    def forward(self, input, lr):
         """
         Args:
             input (torch.Tensor): Input tensor of shape [batch_size, self.in_chans, height, width]
@@ -283,4 +283,8 @@ class UNetModel(nn.Module):
         for layer in self.extra_upsample_layers:
             output = layer(output)
 
-        return self.conv2(output)
+        final_out = self.conv2(output)
+
+        final_out_out_lf = F.interpolate(F.interpolate(final_out, scale_factor=1 / 4, mode='bicubic'), scale_factor=4, mode='bicubic')
+        up_lr = F.interpolate(lr, scale_factor=4, mode='bicubic')
+        return final_out - final_out_out_lf + up_lr

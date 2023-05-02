@@ -79,7 +79,7 @@ class SRrcGAN(pl.LightningModule):
     def forward(self, y):
         num_vectors = y.size(0)
         noise = self.get_noise(num_vectors, y.shape[-1])
-        samples = self.generator(torch.cat([y, noise], dim=1))
+        samples = self.generator(torch.cat([y, noise], dim=1), y)
         return samples
 
     def adversarial_loss_discriminator(self, fake_pred, real_pred):
@@ -90,7 +90,7 @@ class SRrcGAN(pl.LightningModule):
         for k in range(gens.shape[1]):
             adv_loss += self.discriminator(gens[:, k, :, :, :]).mean()
 
-        adv_weight = 1e-4
+        adv_weight = 1e-5
 
         return - adv_weight * adv_loss / self.args.num_z_train
 
