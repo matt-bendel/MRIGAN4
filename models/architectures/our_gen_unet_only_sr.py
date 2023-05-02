@@ -251,8 +251,8 @@ class UNetModel(nn.Module):
 
         self.up_sample_layers += [ConvUpBlock(ch * 2, ch)]
         self.extra_upsample_layers = nn.ModuleList()
-        self.exta_upsample_layers += [ConvUpBlockNoSkip(ch, ch,)]
-        self.exta_upsample_layers += [ConvUpBlockNoSkip(ch, ch)]
+        self.extra_upsample_layers += [ConvUpBlockNoSkip(ch, ch,)]
+        self.extra_upsample_layers += [ConvUpBlockNoSkip(ch, ch)]
 
         self.conv2 = nn.Sequential(
             nn.Conv2d(ch, ch // 2, kernel_size=1),
