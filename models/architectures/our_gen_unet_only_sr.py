@@ -172,8 +172,8 @@ class ConvUpBlockNoSkip(nn.Module):
         self.in_chans = in_chans
         self.out_chans = out_chans
 
-        self.conv_1 = nn.ConvTranspose2d(in_chans // 2, in_chans // 2, kernel_size=3, padding=1, stride=2)
-        self.bn = nn.BatchNorm2d(in_chans // 2)
+        self.conv_1 = nn.ConvTranspose2d(in_chans, in_chans, kernel_size=3, padding=1, stride=2)
+        self.bn = nn.BatchNorm2d(in_chans)
         self.activation = nn.PReLU()
 
         self.layers = nn.Sequential(
@@ -251,7 +251,7 @@ class UNetModel(nn.Module):
 
         self.up_sample_layers += [ConvUpBlock(ch * 2, ch)]
         self.extra_upsample_layers = nn.ModuleList()
-        self.extra_upsample_layers += [ConvUpBlockNoSkip(ch, ch,)]
+        self.extra_upsample_layers += [ConvUpBlockNoSkip(ch, ch)]
         self.extra_upsample_layers += [ConvUpBlockNoSkip(ch, ch)]
 
         self.conv2 = nn.Sequential(
