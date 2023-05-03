@@ -257,6 +257,7 @@ class UNetModel(nn.Module):
         self.conv2 = nn.Sequential(
             nn.Conv2d(ch, ch // 2, kernel_size=1),
             nn.Conv2d(ch // 2, out_chans, kernel_size=1),
+            ResidualBlock(out_chans)
         )
 
     def forward(self, input, lr):
@@ -285,6 +286,5 @@ class UNetModel(nn.Module):
 
         final_out = self.conv2(output)
 
-        final_out_out_lf = F.interpolate(F.interpolate(final_out, scale_factor=1 / 4, mode='bicubic'), scale_factor=4, mode='bicubic')
         up_lr = F.interpolate(lr, scale_factor=4, mode='bicubic')
-        return final_out - final_out_out_lf + up_lr
+        return final_out + up_lr

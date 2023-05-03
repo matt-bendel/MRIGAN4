@@ -90,7 +90,7 @@ class SRrcGAN(pl.LightningModule):
         for k in range(gens.shape[1]):
             adv_loss += self.discriminator(gens[:, k, :, :, :]).mean()
 
-        adv_weight = 1e-5
+        adv_weight = 3e-5
 
         return - adv_weight * adv_loss / self.args.num_z_train
 
@@ -124,7 +124,7 @@ class SRrcGAN(pl.LightningModule):
 
             for z in range(self.args.num_z_train):
                 loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
-                g_loss += 1e-3 * loss / self.args.num_z_train
+                g_loss += 2e-3 * loss / self.args.num_z_train
 
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
