@@ -261,7 +261,7 @@ class UNetModel(nn.Module):
             ResidualBlock(out_chans)
         )
 
-        self.torgb = ToRGB(out_chans, 1, upsample=False)
+        # self.torgb = ToRGB(out_chans, 1, upsample=False)
 
     def forward(self, input, lr):
         """
@@ -290,4 +290,4 @@ class UNetModel(nn.Module):
         final_out = self.conv2(output)
 
         up_lr = F.interpolate(lr, scale_factor=4, mode='bicubic')
-        return self.torgb(final_out + up_lr, None)
+        return final_out + up_lr
