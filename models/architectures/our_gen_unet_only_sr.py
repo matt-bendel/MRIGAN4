@@ -173,7 +173,7 @@ class ConvUpBlockNoSkip(nn.Module):
         self.in_chans = in_chans
         self.out_chans = out_chans
 
-        self.conv_1 = nn.ConvTranspose2d(in_chans, in_chans, kernel_size=3, padding=1, stride=2)
+        self.conv_1 = nn.Conv2d(in_chans, in_chans, kernel_size=3, padding=1)
         self.bn = nn.BatchNorm2d(in_chans)
         self.activation = nn.PReLU()
 
@@ -183,6 +183,8 @@ class ConvUpBlockNoSkip(nn.Module):
             nn.PReLU(),
             ResidualBlock(out_chans),
         )
+
+        self.upsample = nn.Upsample(scale_factor=2, mode='nearest')
 
     def forward(self, input):
         """
@@ -194,7 +196,7 @@ class ConvUpBlockNoSkip(nn.Module):
         """
         out_size = [input.shape[0], input.shape[1], input.shape[-1]*2, input.shape[-1]*2]
 
-        upsampled = self.activation(self.bn(self.conv_1(input, output_size=out_size)))
+        upsampled = self.activation(self.bn(self.conv_1(self.upsample(input))))
         return self.layers(upsampled)
 
 
@@ -260,8 +262,6 @@ class UNetModel(nn.Module):
             nn.Conv2d(ch // 2, out_chans, kernel_size=1),
             ResidualBlock(out_chans)
         )
-
-        # self.torgb = ToRGB(out_chans, 1, upsample=False)
 
     def forward(self, input, lr):
         """
