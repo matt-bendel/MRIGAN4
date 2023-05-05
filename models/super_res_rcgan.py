@@ -13,6 +13,7 @@ from PIL import Image
 from torch.nn import functional as F
 from models.architectures.super_res_disc import UNetDiscriminatorSN
 from models.architectures.our_gen_unet_only_sr import UNetModel
+from models.architectures.super_res_gen_new import SRGen
 from models.comodgan.co_mod_gan_sr import Generator, Discriminator
 
 from evaluation_scripts.metrics import psnr
@@ -36,7 +37,7 @@ class SRrcGAN(pl.LightningModule):
         self.in_chans = args.in_chans + 2
         self.out_chans = args.out_chans
 
-        self.generator = UNetModel(self.in_chans, self.out_chans, scale=4)
+        self.generator = SRGen(args.in_chans, upscale_factor) #UNetModel(self.in_chans, self.out_chans, scale=4)
 
         self.discriminator = UNetDiscriminatorSN(3)
 
@@ -47,8 +48,8 @@ class SRrcGAN(pl.LightningModule):
 
         self.save_hyperparameters()  # Save passed values
 
-    def get_noise(self, num_vectors, res):
-        return torch.randn(num_vectors, 2, res, res, device=self.device)
+    def get_noise(self, num_vectors, res1, res2):
+        return torch.randn(num_vectors, 1, res1, res2, device=self.device)
 
     def compute_gradient_penalty(self, real_samples, fake_samples, y):
         """Calculates the gradient penalty loss for WGAN GP"""
@@ -78,8 +79,8 @@ class SRrcGAN(pl.LightningModule):
 
     def forward(self, y):
         num_vectors = y.size(0)
-        noise = self.get_noise(num_vectors, y.shape[-1])
-        samples = self.generator(torch.cat([y, noise], dim=1), y)
+        noise = self.get_noise(num_vectors, y.shape[-2]*self.scale, y.shape[-1]*self.scale)
+        samples = self.generator(y, noise)
         return samples
 
     def adversarial_loss_discriminator(self, fake_pred, real_pred):
