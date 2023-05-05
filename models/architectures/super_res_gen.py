@@ -253,7 +253,6 @@ class UNet(nn.Module):
 
         for i, up in enumerate(self.up_path):
             x = up(x, blocks[-i - 1])
-            print(x.shape)
 
         output = self.last(x)
 
