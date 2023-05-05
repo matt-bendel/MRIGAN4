@@ -196,7 +196,7 @@ class UNet(nn.Module):
             n_classes=3,
             depth=4,
             wf=6,
-            padding=False,
+            padding=True,
             batch_norm=True,
             up_mode='upsample',
     ):

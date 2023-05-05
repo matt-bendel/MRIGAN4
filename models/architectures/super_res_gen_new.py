@@ -15,7 +15,6 @@ class SRGen(nn.Module):
     def forward(self, x, noise):
         out = self.rrdb(x)
         cat_tensor = torch.cat([out, noise], dim=1)
-        print(cat_tensor.shape)
         out = self.unet(cat_tensor)
         exit()
 
