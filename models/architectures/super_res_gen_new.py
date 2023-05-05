@@ -14,9 +14,10 @@ class SRGen(nn.Module):
         self.unet = UNet(in_channels=in_chans+1)
 
     def forward(self, x, noise):
-        out = self.rrdb(x)
-        cat_tensor = torch.cat([out, noise], dim=1)
-        out = self.unet(cat_tensor)
         up_lr = F.interpolate(x, scale_factor=self.scale, mode='bicubic')
 
-        return out + up_lr
+        out = self.rrdb(x) + up_lr
+        cat_tensor = torch.cat([out, noise], dim=1)
+        out = self.unet(cat_tensor)
+
+        return out
