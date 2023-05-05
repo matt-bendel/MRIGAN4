@@ -16,6 +16,7 @@ class SRGen(nn.Module):
         out = self.rrdb(x)
         cat_tensor = torch.cat([out, noise], dim=1)
         out = self.unet(cat_tensor)
+        print(out.shape)
         exit()
 
         return out
