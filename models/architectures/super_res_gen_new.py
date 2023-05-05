@@ -14,6 +14,6 @@ class SRGen(nn.Module):
 
     def forward(self, x, noise):
         out = self.rrdb(x)
-        out = self.UNet(torch.cat([x, noise], dim=1))
+        out = self.unet(torch.cat([x, noise], dim=1))
 
         return out
