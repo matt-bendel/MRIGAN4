@@ -9,6 +9,7 @@ from models.architectures.super_res_gen import RRDBNet, UNet
 class SRGen(nn.Module):
     def __init__(self, in_chans, scale):
         super(SRGen, self).__init__()
+        self.scale = scale
         self.rrdb = RRDBNet(in_chans)
         self.unet = UNet(in_channels=in_chans+1)
 
@@ -16,5 +17,6 @@ class SRGen(nn.Module):
         out = self.rrdb(x)
         cat_tensor = torch.cat([out, noise], dim=1)
         out = self.unet(cat_tensor)
+        up_lr = F.interpolate(x, scale_factor=self.scale, mode='bicubic')
 
-        return out
+        return out + up_lr
