@@ -14,9 +14,7 @@ class SRGen(nn.Module):
 
     def forward(self, x, noise):
         out = self.rrdb(x)
-        print(out.shape)
         out = self.unet(torch.cat([out, noise], dim=1))
-        print(noise.shape)
         print(out.shape)
         exit()
 
