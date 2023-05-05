@@ -108,7 +108,9 @@ class SRrcGAN(pl.LightningModule):
         return 0.001 * torch.mean(real_pred ** 2)
 
     def training_step(self, batch, batch_idx, optimizer_idx):
-        y, x, _, _ = batch
+        y, x, mean, std = batch
+
+        x = (x * std[:, :, None, None] + mean[:, :, None, None]).clamp(0, 1)
 
         # train generator
         if optimizer_idx == 1:
@@ -116,7 +118,7 @@ class SRrcGAN(pl.LightningModule):
                 size=(y.size(0), self.args.num_z_train, self.args.in_chans, x.shape[-1], x.shape[-1]),
                 device=self.device)
             for z in range(self.args.num_z_train):
-                gens[:, z, :, :, :] = self.forward(y)
+                gens[:, z, :, :, :] = (self.forward(y) * std[:, :, None, None] + mean[:, :, None, None]).clamp(0, 1)
 
             avg_recon = torch.mean(gens, dim=1)
 
