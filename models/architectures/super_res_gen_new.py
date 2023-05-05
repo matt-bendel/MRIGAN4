@@ -20,4 +20,4 @@ class SRGen(nn.Module):
         cat_tensor = torch.cat([out, noise], dim=1)
         out = self.unet(cat_tensor)
 
-        return out
+        return out + up_lr

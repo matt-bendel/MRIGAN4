@@ -130,6 +130,7 @@ class SRrcGAN(pl.LightningModule):
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
             if torch.isnan(g_loss):
+                print("G nan")
                 exit()
 
             self.log('g_loss', g_loss, prog_bar=True)
@@ -148,6 +149,7 @@ class SRrcGAN(pl.LightningModule):
             d_loss += self.drift_penalty(real_pred)
 
             if torch.isnan(d_loss):
+                print("D nan")
                 exit()
 
             self.log('d_loss', d_loss, prog_bar=True)
