@@ -135,7 +135,6 @@ class RRDB(nn.Module):
 
 class RRDBNet(nn.Module):
     def __init__(self, in_nc, out_nc=3, nf=64, nb=23, gc=32, scale=4, opt=None):
-        self.opt = opt
         super(RRDBNet, self).__init__()
         RRDB_block_f = functools.partial(RRDB, nf=nf, gc=gc)
         self.scale = scale

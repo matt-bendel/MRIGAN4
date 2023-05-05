@@ -8,6 +8,7 @@ from models.architectures.super_res_gen import RRDBNet, UNet
 
 class SRGen(nn.Module):
     def __init__(self, in_chans, scale):
+        super(SRGen, self).__init__()
         self.rrdb = RRDBNet(in_chans)
         self.unet = UNet(in_channels=in_chans+1)
 
