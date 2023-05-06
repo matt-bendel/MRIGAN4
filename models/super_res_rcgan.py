@@ -49,7 +49,7 @@ class SRrcGAN(pl.LightningModule):
         self.save_hyperparameters()  # Save passed values
 
     def get_noise(self, num_vectors, res1, res2):
-        return torch.randn(num_vectors, 1, res1, res2, device=self.device)
+        return torch.randn(num_vectors, 3, res1, res2, device=self.device)
 
     def compute_gradient_penalty(self, real_samples, fake_samples, y):
         """Calculates the gradient penalty loss for WGAN GP"""
@@ -125,7 +125,7 @@ class SRrcGAN(pl.LightningModule):
 
             for z in range(self.args.num_z_train):
                 loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
-                g_loss += 1e-4 * loss / self.args.num_z_train
+                g_loss += 1e-3 * loss / self.args.num_z_train
 
             g_loss += self.l1_std_p(avg_recon, gens, x)
 

@@ -11,11 +11,13 @@ class SRGen(nn.Module):
     def __init__(self, in_chans, scale):
         super(SRGen, self).__init__()
         self.scale = scale
-        self.rrdb = RRDBNet(in_chans+1)
+        self.rrdb = RRDBNet(in_chans+3)
         self.unet = UNetModel(in_chans, 3, 4)
 
     def forward(self, x, noise):
         out = self.rrdb(torch.cat([x, noise], dim=1))
+
+        # up_lr = F.interpolate(lr, scale_factor=4, mode='bicubic')
         out = self.unet(out, x)
 
         return out
