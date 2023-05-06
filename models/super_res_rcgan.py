@@ -79,7 +79,7 @@ class SRrcGAN(pl.LightningModule):
 
     def forward(self, y):
         num_vectors = y.size(0)
-        noise = self.get_noise(num_vectors, y.shape[-2]*self.scale, y.shape[-1]*self.scale)
+        noise = self.get_noise(num_vectors, y.shape[-2], y.shape[-1])
         samples = self.generator(y, noise)
         return samples
 
