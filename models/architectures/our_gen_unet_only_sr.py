@@ -284,9 +284,6 @@ class UNetModel(nn.Module):
         for layer in self.up_sample_layers:
             output = layer(output, stack.pop())
 
-        for layer in self.extra_upsample_layers:
-            output = layer(output)
-
         final_out = self.conv2(output)
 
         up_lr = F.interpolate(lr, scale_factor=4, mode='bicubic')
