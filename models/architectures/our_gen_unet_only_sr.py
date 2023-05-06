@@ -135,9 +135,10 @@ class ConvUpBlock(nn.Module):
         self.out_chans = out_chans
         self.no_skip = no_skip
 
-        self.conv_1 = nn.ConvTranspose2d(in_chans // 2, in_chans // 2, kernel_size=3, padding=1, stride=2)
+        self.conv_1 = nn.Conv2d(in_chans // 2, in_chans // 2, kernel_size=3, padding=1)
         self.bn = nn.BatchNorm2d(in_chans // 2)
         self.activation = nn.PReLU()
+        self.upsample = nn.Upsample(scale_factor=2, mode='nearest')
 
         self.layers = nn.Sequential(
             nn.Conv2d(in_chans, out_chans, kernel_size=3, padding=1),
@@ -156,7 +157,7 @@ class ConvUpBlock(nn.Module):
         """
 
         residual_skip = skip_input  # self.res_skip(skip_input)
-        upsampled = self.activation(self.bn(self.conv_1(input, output_size=residual_skip.size())))
+        upsampled = self.activation(self.bn(self.conv_1(self.upsample(input))))
         concat_tensor = torch.cat([residual_skip, upsampled], dim=1)
 
         return self.layers(concat_tensor)
