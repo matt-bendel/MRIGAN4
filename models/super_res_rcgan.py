@@ -34,7 +34,7 @@ class SRrcGAN(pl.LightningModule):
         self.num_gpus = num_gpus
         self.scale = upscale_factor
 
-        self.in_chans = args.in_chans + 2
+        self.in_chans = args.in_chans + 3
         self.out_chans = args.out_chans
 
         self.generator = UNetModel(self.in_chans, self.out_chans, scale=4) #SRGen(args.in_chans, upscale_factor) #
