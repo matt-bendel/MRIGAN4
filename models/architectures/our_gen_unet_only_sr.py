@@ -292,5 +292,5 @@ class UNetModel(nn.Module):
 
         final_out = self.conv2(output)
 
-        # up_lr = F.interpolate(lr, scale_factor=4, mode='bicubic')
-        return final_out
+        up_lr = F.interpolate(lr, scale_factor=4, mode='bicubic')
+        return final_out + up_lr
