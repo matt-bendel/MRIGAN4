@@ -91,7 +91,7 @@ class SRrcGAN(pl.LightningModule):
         for k in range(gens.shape[1]):
             adv_loss += torch.mean(self.discriminator(gens[:, k, :, :, :]), dim=0).sum() / self.args.num_z_train
 
-        adv_weight = 3e-3
+        adv_weight = 3e-5
 
         return - adv_weight * adv_loss / self.args.num_z_train
 
@@ -125,7 +125,9 @@ class SRrcGAN(pl.LightningModule):
 
             for z in range(self.args.num_z_train):
                 loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
-                g_loss += 1e-1 * loss / self.args.num_z_train
+                g_loss += 1e-3 * loss / self.args.num_z_train
+                lr_gen = F.interpolate(gens[:, z, :, :, :], mode='bicubic', scale_factor=1/4)
+                g_loss += 1e-1 * F.mse_loss(lr_gen, y) / self.args.num_z_train
 
             g_loss += self.l1_std_p(avg_recon, gens, x)
 
@@ -240,7 +242,7 @@ class SRrcGAN(pl.LightningModule):
         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.args.lr,
                                  betas=(self.args.beta_1, self.args.beta_2))
 
-        milestones = [10000, 25000, 50000, 80000]
+        milestones = [100000, 200000, 300000, 350000]
         gamma = 0.75
 
         schedule_g = torch.optim.lr_scheduler.MultiStepLR(opt_g, milestones, gamma)
