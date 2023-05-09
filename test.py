@@ -168,18 +168,18 @@ if __name__ == "__main__":
         # g = torch.nn.DataParallel(GeneratorModel(18, 16).cuda())
         # g.load_state_dict(checkpoint_gen['model'])
 
-        # model.generator = torch.nn.DataParallel(model.generator)
+        model.generator = torch.nn.DataParallel(model.generator)
         model.cuda()
         model.eval()
-
-        psnrs = []
-        ssims = []
-        apsds = []
-        lpipss = []
 
         n_samps = [1, 2, 4, 8, 16, 32]
 
         for n in n_samps:
+            psnrs = []
+            ssims = []
+            apsds = []
+            lpipss = []
+
             print(f"{n} SAMPLES")
             for i, data in enumerate(test_loader):
                 y, x, mask, mean, std, maps, _, _ = data
@@ -204,12 +204,7 @@ if __name__ == "__main__":
                 for j in range(y.size(0)):
                     single_samps = np.zeros((n, cfg.im_size, cfg.im_size))
 
-                    new_y_true = fft2c_new(model.reformat(y)[j] * std[j] + mean[j])
-                    maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=32,
-                                                 device=sp.Device(3), show_pbar=False, crop=0.70,
-                                                 kernel_width=6).run().get()
-
-                    S = sp.linop.Multiply((cfg.im_size, cfg.im_size), maps)
+                    S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
                     gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
                         (avg[j] * std[j] + mean[j]).cpu())
 
