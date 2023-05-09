@@ -348,9 +348,9 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                connection_path_1 = patches.ConnectionPatch([x_coord, y_coords[0]], [0, 0], coordsA=ax1.transData, coordsB=ax.transData, color='r')
+                connection_path_1 = patches.ConnectionPatch([zoom_start, y_coords[1]], [0, 0], coordsA=ax1.transData, coordsB=ax.transData, color='r')
                 fig.add_artist(connection_path_1)
-                connection_path_2 = patches.ConnectionPatch([x_coord, y_coords[1]], [0, zoom_length], coordsA=ax1.transData,
+                connection_path_2 = patches.ConnectionPatch([x_coord, y_coords[1]], [zoom_length, 0], coordsA=ax1.transData,
                                                             coordsB=ax.transData, color='r')
                 fig.add_artist(connection_path_2)
 
@@ -412,7 +412,7 @@ if __name__ == "__main__":
 
                 # TODO: top row: zoomed avg, next two rows samps.
                 nrow = 3
-                ncol = 7
+                ncol = 1
 
                 fig = plt.figure(figsize=(ncol + 1, nrow + 1))
 
@@ -436,7 +436,7 @@ if __name__ == "__main__":
                 # Add the patch to the Axes
                 ax.add_patch(rect)
 
-                ax = plt.subplot(gs[0, 1])
+                ax = plt.subplot(gs[1, 0])
                 ax.imshow(np_gt[zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
@@ -451,15 +451,36 @@ if __name__ == "__main__":
                                                             coordsB=ax.transData, color='r')
                 fig.add_artist(connection_path_2)
 
-                count = 2
+                ax = plt.subplot(gs[0, count])
+                ax.imshow(np_avgs['l1_ssim'][zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length],
+                          cmap='gray', vmin=0, vmax=np.max(np_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                plt.savefig('body_mri_fig_1.png')
+
+                nrow = 3
+                ncol = 4
+
+                fig = plt.figure(figsize=(ncol + 1, nrow + 1))
+
+                gs = gridspec.GridSpec(nrow, ncol,
+                                       wspace=0.0, hspace=0.0,
+                                       top=1. - 0.5 / (nrow + 1), bottom=0.5 / (nrow + 1),
+                                       left=0.5 / (ncol + 1), right=1 - 0.5 / (ncol + 1))
+
+                count = 0
                 for method in keys:
-                    ax = plt.subplot(gs[0, count])
-                    ax.imshow(np_avgs[method][zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
-                    ax.set_xticklabels([])
-                    ax.set_yticklabels([])
-                    ax.set_xticks([])
-                    ax.set_yticks([])
-                    count += 1
+                    if method != 'l1_ssim':
+                        ax = plt.subplot(gs[0, count])
+                        ax.imshow(np_avgs[method][zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(np_gt))
+                        ax.set_xticklabels([])
+                        ax.set_yticklabels([])
+                        ax.set_xticks([])
+                        ax.set_yticks([])
+                        count += 1
 
                 ax = plt.subplot(gs[0, count])
                 ax.imshow(langevin_avg[zoom_start:zoom_start+zoom_length, zoom_start:zoom_start+zoom_length], cmap='gray', vmin=0, vmax=np.max(langevin_gt))
@@ -469,7 +490,7 @@ if __name__ == "__main__":
                 ax.set_yticks([])
 
                 for samp in range(2):
-                    count = 3
+                    count = 0
                     for method in keys:
                         if method != 'l1_ssim':
                             ax = plt.subplot(gs[samp+1, count])
@@ -487,7 +508,7 @@ if __name__ == "__main__":
                     ax.set_xticks([])
                     ax.set_yticks([])
 
-                plt.savefig('test_phil.png', bbox_inches='tight', dpi=300)
+                plt.savefig('body_mri_fig_2.png', bbox_inches='tight', dpi=300)
 
                 # TODO: Rizwan Idea: zoomed, 1st row avg, 2nd error, 3rd std. dev, 4, 5, 6 samps
                 nrow = 6
@@ -553,7 +574,7 @@ if __name__ == "__main__":
                 count = 2
                 for method in keys:
                     ax = plt.subplot(gs[1, count])
-                    im = ax.imshow(2*np.abs(np_avgs[method] - np_gt), cmap='jet', vmin=0, vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
+                    im = ax.imshow(2*np.abs(np_avgs[method] - np_gt)[zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length], cmap='jet', vmin=0, vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
                     ax.set_xticklabels([])
                     ax.set_yticklabels([])
                     ax.set_xticks([])
@@ -581,7 +602,7 @@ if __name__ == "__main__":
                     count += 1
 
                 ax = plt.subplot(gs[1, count])
-                ax.imshow(3*np.abs(langevin_avg - langevin_gt), cmap='jet', vmin=0,
+                ax.imshow(3*np.abs(langevin_avg - langevin_gt)[zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length], cmap='jet', vmin=0,
                           vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
@@ -592,14 +613,14 @@ if __name__ == "__main__":
                 for method in keys:
                     if method != 'l1_ssim':
                         ax = plt.subplot(gs[2, count])
-                        ax.imshow(np_stds[method], cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
+                        ax.imshow(np_stds[method][zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length], cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
                         ax.set_xticklabels([])
                         ax.set_yticklabels([])
                         ax.set_xticks([])
                         ax.set_yticks([])
                     else:
                         ax = plt.subplot(gs[2, count])
-                        im = ax.imshow(np.zeros((384, 384)), cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
+                        im = ax.imshow(np.zeros((384, 384)[zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length]), cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
                         ax.set_xticklabels([])
                         ax.set_yticklabels([])
                         ax.set_xticks([])
@@ -629,7 +650,7 @@ if __name__ == "__main__":
                     count += 1
 
                 ax = plt.subplot(gs[2, count])
-                ax.imshow(langevin_std, cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
+                ax.imshow(langevin_std[zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length], cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
                 ax.set_xticks([])

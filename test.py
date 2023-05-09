@@ -165,124 +165,118 @@ if __name__ == "__main__":
         ssims = []
         apsds = []
 
-        for i, data in enumerate(test_loader):
-            y, x, mask, mean, std, maps, _, _ = data
-            y = y.cuda()
-            x = x.cuda()
-            mask = mask.cuda()
-            mean = mean.cuda()
-            std = std.cuda()
+        n_samps = [1, 2, 4, 8, 16, 32]
 
-            gens = torch.zeros(size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
-            for z in range(cfg.num_z_test):
-                gens[:, z, :, :, :, :] = model.reformat(model.forward(y, mask))
+        for n in n_samps:
+            print(f"{n} SAMPLES")
+            for i, data in enumerate(test_loader):
+                y, x, mask, mean, std, maps, _, _ = data
+                y = y.cuda()
+                x = x.cuda()
+                mask = mask.cuda()
+                mean = mean.cuda()
+                std = std.cuda()
 
-            avg = torch.mean(gens, dim=1)
+                gens = torch.zeros(size=(y.size(0), n, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
+                for z in range(n):
+                    gens[:, z, :, :, :, :] = model.reformat(model.forward(y, mask))
 
-            gt = model.reformat(x)
+                avg = torch.mean(gens, dim=1)
 
-            batch_psnrs = []
-            batchs_ssims = []
-            batch_apsds = []
+                gt = model.reformat(x)
 
-            for j in range(y.size(0)):
-                single_samps = np.zeros((cfg.num_z_test, cfg.im_size, cfg.im_size))
+                batch_psnrs = []
+                batchs_ssims = []
+                batch_apsds = []
 
-                S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
-                gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
-                    (avg[j] * std[j] + mean[j]).cpu())
+                for j in range(y.size(0)):
+                    single_samps = np.zeros((n, cfg.im_size, cfg.im_size))
 
-                avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
-                gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
+                    S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
+                    gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
+                        (avg[j] * std[j] + mean[j]).cpu())
 
-                if i == 0 and j == 0:
-                    fig = plt.figure()
+                    avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
+                    gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
 
-                    generate_image(fig, gt_np, avg_gen_np, f'Test Im', 1, 2, 1, disc_num=False)
-                    im, ax = generate_error_map(fig, gt_np, avg_gen_np, f'Test Im', 2, 2, 1)
+                    for z in range(n):
+                        np_samp = tensor_to_complex_np((gens[j, z, :, :, :, :] * std[j] + mean[j]).cpu())
+                        single_samps[z, :, :] = torch.tensor(S.H * np_samp).abs().numpy()
 
-                    plt.savefig(f'test_im.png')
-                    plt.close()
+                    apsds.append(np.mean(np.std(single_samps, axis=0), axis=(0, 1)))
+                    psnrs.append(psnr(gt_np, avg_gen_np))
+                    ssims.append(ssim(gt_np, avg_gen_np))
 
-
-                for z in range(cfg.num_z_test):
-                    np_samp = tensor_to_complex_np((gens[j, z, :, :, :, :] * std[j] + mean[j]).cpu())
-                    single_samps[z, :, :] = torch.tensor(S.H * np_samp).abs().numpy()
-
-                apsds.append(np.mean(np.std(single_samps, axis=0), axis=(0, 1)))
-                psnrs.append(psnr(gt_np, avg_gen_np))
-                ssims.append(ssim(gt_np, avg_gen_np))
-
-    print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
-    print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
-    print(f'APSD: {np.mean(apsds)}')
+            print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
+            print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
+            print(f'APSD: {np.mean(apsds)}')
 
     cfids = []
     m_comps = []
     c_comps = []
 
-    inception_embedding = VGG16Embedding(parallel=True)
-    # CFID_1
-    cfid_metric = CFIDMetric(gan=model,
-                             loader=test_loader,
-                             image_embedding=inception_embedding,
-                             condition_embedding=inception_embedding,
-                             cuda=True,
-                             args=cfg,
-                             ref_loader=False,
-                             num_samps=32)
-
-    cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
-    cfids.append(cfid)
-    m_comps.append(m_comp)
-    c_comps.append(c_comp)
-
-    inception_embedding = VGG16Embedding(parallel=True)
-    # CFID_2
-    cfid_metric = CFIDMetric(gan=model,
-                             loader=val_dataloader,
-                             image_embedding=inception_embedding,
-                             condition_embedding=inception_embedding,
-                             cuda=True,
-                             args=cfg,
-                             ref_loader=False,
-                             num_samps=8)
-
-    cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
-    cfids.append(cfid)
-    m_comps.append(m_comp)
-    c_comps.append(c_comp)
-
-    inception_embedding = VGG16Embedding(parallel=True)
-    # CFID_3
-    cfid_metric = CFIDMetric(gan=model,
-                             loader=val_dataloader,
-                             image_embedding=inception_embedding,
-                             condition_embedding=inception_embedding,
-                             cuda=True,
-                             args=cfg,
-                             ref_loader=train_dataloader,
-                             num_samps=1)
-
-    cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
-    cfids.append(cfid)
-    m_comps.append(m_comp)
-    c_comps.append(c_comp)
-
-    inception_embedding = VGG16Embedding(parallel=True)
-    fid_metric = FIDMetric(gan=model,
-                           ref_loader=train_dataloader,
-                           loader=test_loader,
-                           image_embedding=inception_embedding,
-                           condition_embedding=inception_embedding,
-                           cuda=True,
-                           args=cfg)
-    fid, _ = fid_metric.get_fid()
+    # inception_embedding = VGG16Embedding(parallel=True)
+    # # CFID_1
+    # cfid_metric = CFIDMetric(gan=model,
+    #                          loader=test_loader,
+    #                          image_embedding=inception_embedding,
+    #                          condition_embedding=inception_embedding,
+    #                          cuda=True,
+    #                          args=cfg,
+    #                          ref_loader=False,
+    #                          num_samps=32)
+    #
+    # cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
+    # cfids.append(cfid)
+    # m_comps.append(m_comp)
+    # c_comps.append(c_comp)
+    #
+    # inception_embedding = VGG16Embedding(parallel=True)
+    # # CFID_2
+    # cfid_metric = CFIDMetric(gan=model,
+    #                          loader=val_dataloader,
+    #                          image_embedding=inception_embedding,
+    #                          condition_embedding=inception_embedding,
+    #                          cuda=True,
+    #                          args=cfg,
+    #                          ref_loader=False,
+    #                          num_samps=8)
+    #
+    # cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
+    # cfids.append(cfid)
+    # m_comps.append(m_comp)
+    # c_comps.append(c_comp)
+    #
+    # inception_embedding = VGG16Embedding(parallel=True)
+    # # CFID_3
+    # cfid_metric = CFIDMetric(gan=model,
+    #                          loader=val_dataloader,
+    #                          image_embedding=inception_embedding,
+    #                          condition_embedding=inception_embedding,
+    #                          cuda=True,
+    #                          args=cfg,
+    #                          ref_loader=train_dataloader,
+    #                          num_samps=1)
+    #
+    # cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
+    # cfids.append(cfid)
+    # m_comps.append(m_comp)
+    # c_comps.append(c_comp)
+    #
+    # inception_embedding = VGG16Embedding(parallel=True)
+    # fid_metric = FIDMetric(gan=model,
+    #                        ref_loader=train_dataloader,
+    #                        loader=test_loader,
+    #                        image_embedding=inception_embedding,
+    #                        condition_embedding=inception_embedding,
+    #                        cuda=True,
+    #                        args=cfg)
+    # fid, _ = fid_metric.get_fid()
 
     print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
     print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
     print(f'APSD: {np.mean(apsds)}')
-    for l in range(3):
-        print(f'CFID_{l+1}: {cfids[l]:.2f}; M_COMP: {m_comps[l]:.4f}; C_COMP: {c_comps[l]:.4f}')
-
-    print(f'FID: {fid}')
+    # for l in range(3):
+    #     print(f'CFID_{l+1}: {cfids[l]:.2f}; M_COMP: {m_comps[l]:.4f}; C_COMP: {c_comps[l]:.4f}')
+    #
+    # print(f'FID: {fid}')
