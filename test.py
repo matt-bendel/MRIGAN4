@@ -103,8 +103,8 @@ def load_object(dct):
     return types.SimpleNamespace(**dct)
 
 def rgb(im):
-    embed_ims = torch.zeros(size=(3, 384, 384)).cuda()
-    tens_im = torch.tensor(im).cuda()
+    embed_ims = torch.zeros(size=(3, 384, 384))
+    tens_im = torch.tensor(im)
     embed_ims[0, :, :] = tens_im
     embed_ims[1, :, :] = tens_im
     embed_ims[2, :, :] = tens_im
@@ -218,7 +218,7 @@ if __name__ == "__main__":
                     apsds.append(np.mean(np.std(single_samps, axis=0), axis=(0, 1)))
                     psnrs.append(psnr(gt_np, avg_gen_np))
                     ssims.append(ssim(gt_np, avg_gen_np))
-                    lpipss.append(lpips_met(rgb(gt_np), rgb(avg_gen_np)).cpu().numpy())
+                    lpipss.append(lpips_met(rgb(gt_np), rgb(avg_gen_np)).numpy())
 
             print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
             print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
