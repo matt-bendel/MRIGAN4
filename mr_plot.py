@@ -459,7 +459,7 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                plt.savefig(f'mr_fig/body_mri_fig_left_{fig_count}.png', bbox_inches='tight', dpi=300)
+                plt.savefig(f'mr_figs/body_mri_fig_left_{fig_count}.png', bbox_inches='tight', dpi=300)
 
                 nrow = 3
                 ncol = 4
@@ -508,7 +508,7 @@ if __name__ == "__main__":
                     ax.set_xticks([])
                     ax.set_yticks([])
 
-                plt.savefig(f'mr_fig/body_mri_fig_right_{fig_count}.png', bbox_inches='tight', dpi=300)
+                plt.savefig(f'mr_figs/body_mri_fig_right_{fig_count}.png', bbox_inches='tight', dpi=300)
 
                 # TODO: Rizwan Idea: zoomed, 1st row avg, 2nd error, 3rd std. dev, 4, 5, 6 samps
                 nrow = 6
@@ -675,7 +675,7 @@ if __name__ == "__main__":
                     ax.set_xticks([])
                     ax.set_yticks([])
 
-                plt.savefig(f'mr_fig/app_mri_fig_{fig_count}.png', bbox_inches='tight', dpi=300)
+                plt.savefig(f'mr_figs/app_mri_fig_{fig_count}.png', bbox_inches='tight', dpi=300)
 
                 # TODO: Rizwan Idea (mine): zoomed, 1st row avg, 2nd error, 3rd std. dev, 4 grid of 4 samps
                 nrow = 4
