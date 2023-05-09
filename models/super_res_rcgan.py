@@ -13,8 +13,7 @@ from PIL import Image
 from torch.nn import functional as F
 from models.architectures.super_res_disc import UNetDiscriminatorSN
 from models.architectures.our_gen_unet_only_sr import UNetModel
-from models.architectures.super_res_gen_new import SRGen
-from models.comodgan.co_mod_gan_sr import Generator, Discriminator
+from models.architectures.super_res_gen import RRDBNet
 
 from evaluation_scripts.metrics import psnr
 from mail import send_mail
@@ -37,7 +36,7 @@ class SRrcGAN(pl.LightningModule):
         self.in_chans = args.in_chans + 3
         self.out_chans = args.out_chans
 
-        self.generator = UNetModel(self.in_chans, self.out_chans, scale=4) #SRGen(args.in_chans, upscale_factor) #
+        self.generator = RRDBNet(3, 3, 64, 23, gc=32)#UNetModel(self.in_chans, self.out_chans, scale=4) #SRGen(args.in_chans, upscale_factor) #
 
         self.discriminator = UNetDiscriminatorSN(3)
 
