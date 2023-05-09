@@ -136,12 +136,11 @@ if __name__ == "__main__":
                 np_avgs['l1_ssim'] = ndimage.rotate(torch.tensor(S.H * tensor_to_complex_np((avg_l1_ssim[j] * std[j] + mean[j]).cpu())).abs().numpy(), 180)
 
                 for z in range(cfg.num_z_test):
-                    np_samps['rcgan'].append(ndimage.rotate(torch.tensor(
-                        S.H * tensor_to_complex_np((gens_rcgan[j, z] * std[j] + mean[j]).cpu())).abs().numpy()), 180)
+                    np_samps['rcgan'].append(ndimage.rotate(torch.tensor(S.H * tensor_to_complex_np((gens_rcgan[j, z] * std[j] + mean[j]).cpu())).abs().numpy(), 180))
                     np_samps['ohayon'].append(ndimage.rotate(torch.tensor(
-                        S.H * tensor_to_complex_np((gens_ohayon[j, z] * std[j] + mean[j]).cpu())).abs().numpy()), 180)
+                        S.H * tensor_to_complex_np((gens_ohayon[j, z] * std[j] + mean[j]).cpu())).abs().numpy(), 180))
                     np_samps['adler'].append(ndimage.rotate(torch.tensor(
-                        S.H * tensor_to_complex_np((gens_adler[j, z] * std[j] + mean[j]).cpu())).abs().numpy()), 180)
+                        S.H * tensor_to_complex_np((gens_adler[j, z] * std[j] + mean[j]).cpu())).abs().numpy(), 180))
 
                 np_stds['rcgan'] = np.std(np.stack(np_samps['rcgan']), axis=0)
                 np_stds['ohayon'] = np.std(np.stack(np_samps['ohayon']), axis=0)
