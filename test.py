@@ -132,7 +132,7 @@ if __name__ == "__main__":
         dm.setup()
         test_loader = dm.test_dataloader()
         if args.rcgan:
-            model_alias = Ohayon
+            model_alias = Adler
         else:
             model_alias = L1SSIMMRI
     elif args.inpaint:
