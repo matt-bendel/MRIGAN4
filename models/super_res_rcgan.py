@@ -36,7 +36,7 @@ class SRrcGAN(pl.LightningModule):
         self.in_chans = args.in_chans + 3
         self.out_chans = args.out_chans
 
-        self.generator = RRDBNet(3, 3, 64, 23, gc=32)#UNetModel(self.in_chans, self.out_chans, scale=4) #SRGen(args.in_chans, upscale_factor) #
+        self.generator = RRDBNet(3*2, 3, 64, 23, gc=32)#UNetModel(self.in_chans, self.out_chans, scale=4) #SRGen(args.in_chans, upscale_factor) #
 
         self.discriminator = UNetDiscriminatorSN(3)
 
