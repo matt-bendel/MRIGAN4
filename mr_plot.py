@@ -620,7 +620,7 @@ if __name__ == "__main__":
                         ax.set_yticks([])
                     else:
                         ax = plt.subplot(gs[2, count])
-                        im = ax.imshow(np.zeros((384, 384)[zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length]), cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
+                        im = ax.imshow(np.zeros((384, 384))[zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length], cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
                         ax.set_xticklabels([])
                         ax.set_yticklabels([])
                         ax.set_xticks([])
