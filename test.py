@@ -205,7 +205,7 @@ if __name__ == "__main__":
                     single_samps = np.zeros((n, cfg.im_size, cfg.im_size))
 
                     new_y_true = fft2c_new(model.reformat(y)[j] * std[j] + mean[j])
-                    maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=16,
+                    maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=32,
                                                  device=sp.Device(3), show_pbar=False, crop=0.70,
                                                  kernel_width=6).run().get()
 
