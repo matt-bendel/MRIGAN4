@@ -102,30 +102,30 @@ if __name__ == "__main__":
 
             gt = rcGAN_model.reformat(x)
 
-            np_avgs = {
-                'l1_ssim': None,
-                'rcgan': None,
-                'ohayon': None,
-                'adler': None
-            }
-
-            np_samps = {
-                'rcgan': [],
-                'ohayon': [],
-                'adler': []
-            }
-
-            np_stds = {
-                'rcgan': None,
-                'ohayon': None,
-                'adler': None
-            }
-
-            np_gt = None
-
             # TODO: Add Langevin, L1+SSIM model
 
             for j in range(y.size(0)):
+                np_avgs = {
+                    'l1_ssim': None,
+                    'rcgan': None,
+                    'ohayon': None,
+                    'adler': None
+                }
+
+                np_samps = {
+                    'rcgan': [],
+                    'ohayon': [],
+                    'adler': []
+                }
+
+                np_stds = {
+                    'rcgan': None,
+                    'ohayon': None,
+                    'adler': None
+                }
+
+                np_gt = None
+
                 S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
 
                 np_gt = ndimage.rotate(torch.tensor(S.H * tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu())).abs().numpy(), 180)
