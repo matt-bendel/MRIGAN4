@@ -451,7 +451,7 @@ if __name__ == "__main__":
                                                             coordsB=ax.transData, color='r')
                 fig.add_artist(connection_path_2)
 
-                ax = plt.subplot(gs[0, count])
+                ax = plt.subplot(gs[2, 0])
                 ax.imshow(np_avgs['l1_ssim'][zoom_start:zoom_start + zoom_length, zoom_start:zoom_start + zoom_length],
                           cmap='gray', vmin=0, vmax=np.max(np_gt))
                 ax.set_xticklabels([])
