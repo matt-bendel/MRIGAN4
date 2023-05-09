@@ -4,6 +4,7 @@ import os
 import types
 import json
 import pathlib
+import lpips
 
 import numpy as np
 
@@ -101,6 +102,14 @@ def generate_error_map(fig, target, recon, method, image_ind, rows, cols, relati
 def load_object(dct):
     return types.SimpleNamespace(**dct)
 
+def rgb(im):
+    embed_ims = torch.zeros(size=(3, 384, 384)).cuda()
+    tens_im = torch.tensor(im)
+    embed_ims[0, :, :] = tens_im
+    embed_ims[1, :, :] = tens_im
+    embed_ims[2, :, :] = tens_im
+
+    return embed_ims.unsqueeze(0)
 
 if __name__ == "__main__":
     torch.set_float32_matmul_precision('medium')
@@ -147,6 +156,8 @@ if __name__ == "__main__":
     train_dataloader = dm.train_dataloader()
     val_dataloader = dm.val_dataloader()
 
+    lpips_met = lpips.LPIPS(net='vgg')
+
     with torch.no_grad():
         model = model_alias.load_from_checkpoint(
             checkpoint_path=cfg.checkpoint_dir + args.exp_name + '/checkpoint_best.ckpt')
@@ -164,6 +175,7 @@ if __name__ == "__main__":
         psnrs = []
         ssims = []
         apsds = []
+        lpipss = []
 
         n_samps = [1, 2, 4, 8, 16, 32]
 
@@ -206,10 +218,12 @@ if __name__ == "__main__":
                     apsds.append(np.mean(np.std(single_samps, axis=0), axis=(0, 1)))
                     psnrs.append(psnr(gt_np, avg_gen_np))
                     ssims.append(ssim(gt_np, avg_gen_np))
+                    lpipss.append(lpips_met(rgb(gt_np), rgb(avg_gen_np)))
 
             print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
             print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
-            print(f'APSD: {np.mean(apsds)}')
+            print(f'LPIPS: {np.mean(lpipss)} \pm {np.std(lpipss) / np.sqrt(len(lpipss))}')
+            # print(f'APSD: {np.mean(apsds)}')
 
     cfids = []
     m_comps = []
@@ -273,9 +287,9 @@ if __name__ == "__main__":
     #                        args=cfg)
     # fid, _ = fid_metric.get_fid()
 
-    print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
-    print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
-    print(f'APSD: {np.mean(apsds)}')
+    # print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
+    # print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
+    # print(f'APSD: {np.mean(apsds)}')
     # for l in range(3):
     #     print(f'CFID_{l+1}: {cfids[l]:.2f}; M_COMP: {m_comps[l]:.4f}; C_COMP: {c_comps[l]:.4f}')
     #
