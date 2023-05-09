@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 from matplotlib import gridspec
 import sigpy as sp
 from evaluation_scripts.metrics import psnr, ssim
+from scipy import ndimage
 
 # M_1: 2.15
 # C_1: 3.50
@@ -127,20 +128,20 @@ if __name__ == "__main__":
             for j in range(y.size(0)):
                 S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
 
-                np_gt = torch.tensor(S.H * tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu())).abs().numpy()
+                np_gt = ndimage.rotate(torch.tensor(S.H * tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu())).abs().numpy(), 180)
 
-                np_avgs['rcgan'] = torch.tensor(S.H * tensor_to_complex_np((avg_rcgan[j] * std[j] + mean[j]).cpu())).abs().numpy()
-                np_avgs['ohayon'] = torch.tensor(S.H * tensor_to_complex_np((avg_ohayon[j] * std[j] + mean[j]).cpu())).abs().numpy()
-                np_avgs['adler'] = torch.tensor(S.H * tensor_to_complex_np((avg_adler[j] * std[j] + mean[j]).cpu())).abs().numpy()
-                np_avgs['l1_ssim'] = torch.tensor(S.H * tensor_to_complex_np((avg_l1_ssim[j] * std[j] + mean[j]).cpu())).abs().numpy()
+                np_avgs['rcgan'] = ndimage.rotate(torch.tensor(S.H * tensor_to_complex_np((avg_rcgan[j] * std[j] + mean[j]).cpu())).abs().numpy(), 180)
+                np_avgs['ohayon'] = ndimage.rotate(torch.tensor(S.H * tensor_to_complex_np((avg_ohayon[j] * std[j] + mean[j]).cpu())).abs().numpy(), 180)
+                np_avgs['adler'] = ndimage.rotate(torch.tensor(S.H * tensor_to_complex_np((avg_adler[j] * std[j] + mean[j]).cpu())).abs().numpy(), 180)
+                np_avgs['l1_ssim'] = ndimage.rotate(torch.tensor(S.H * tensor_to_complex_np((avg_l1_ssim[j] * std[j] + mean[j]).cpu())).abs().numpy(), 180)
 
                 for z in range(cfg.num_z_test):
-                    np_samps['rcgan'].append(torch.tensor(
-                        S.H * tensor_to_complex_np((gens_rcgan[j, z] * std[j] + mean[j]).cpu())).abs().numpy())
-                    np_samps['ohayon'].append(torch.tensor(
-                        S.H * tensor_to_complex_np((gens_ohayon[j, z] * std[j] + mean[j]).cpu())).abs().numpy())
-                    np_samps['adler'].append(torch.tensor(
-                        S.H * tensor_to_complex_np((gens_adler[j, z] * std[j] + mean[j]).cpu())).abs().numpy())
+                    np_samps['rcgan'].append(ndimage.rotate(torch.tensor(
+                        S.H * tensor_to_complex_np((gens_rcgan[j, z] * std[j] + mean[j]).cpu())).abs().numpy()), 180)
+                    np_samps['ohayon'].append(ndimage.rotate(torch.tensor(
+                        S.H * tensor_to_complex_np((gens_ohayon[j, z] * std[j] + mean[j]).cpu())).abs().numpy()), 180)
+                    np_samps['adler'].append(ndimage.rotate(torch.tensor(
+                        S.H * tensor_to_complex_np((gens_adler[j, z] * std[j] + mean[j]).cpu())).abs().numpy()), 180)
 
                 np_stds['rcgan'] = np.std(np.stack(np_samps['rcgan']), axis=0)
                 np_stds['ohayon'] = np.std(np.stack(np_samps['ohayon']), axis=0)
@@ -161,13 +162,13 @@ if __name__ == "__main__":
                         break
                     # temp_recon = unnormalize(recon_object['mvue'], recon_object['zfr'])
 
-                    langevin_recons[l] = complex_abs(recon_object['mvue'][0].permute(1, 2, 0)).cpu().numpy()
+                    langevin_recons[l] = ndimage.rotate(complex_abs(recon_object['mvue'][0].permute(1, 2, 0)).cpu().numpy(), 180)
 
                 if exceptions:
                     exceptions = False
                     continue
 
-                langevin_gt = recon_object['gt'][0][0].abs().cpu().numpy()
+                langevin_gt = ndimage.rotate(recon_object['gt'][0][0].abs().cpu().numpy(), 180)
                 langevin_avg = np.mean(langevin_recons, axis=0)
                 langevin_std = np.std(langevin_recons, axis=0)
 
@@ -443,10 +444,10 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                connection_path_1 = patches.ConnectionPatch([x_coord, y_coords[0]], [0, 0], coordsA=ax1.transData,
+                connection_path_1 = patches.ConnectionPatch([zoom_start, y_coords[1]], [0, 0], coordsA=ax1.transData,
                                                             coordsB=ax.transData, color='r')
                 fig.add_artist(connection_path_1)
-                connection_path_2 = patches.ConnectionPatch([x_coord, y_coords[1]], [0, zoom_length],
+                connection_path_2 = patches.ConnectionPatch([x_coord, y_coords[1]], [zoom_length, 0],
                                                             coordsA=ax1.transData,
                                                             coordsB=ax.transData, color='r')
                 fig.add_artist(connection_path_2)
