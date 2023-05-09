@@ -209,7 +209,7 @@ if __name__ == "__main__":
                                                  device=sp.Device(3), show_pbar=False, crop=0.70,
                                                  kernel_width=6).run().get()
 
-                    S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps))
+                    S = sp.linop.Multiply((cfg.im_size, cfg.im_size), maps)
                     gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
                         (avg[j] * std[j] + mean[j]).cpu())
 
