@@ -460,7 +460,7 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                plt.savefig('body_mri_fig_1.png')
+                plt.savefig('body_mri_fig_1.png', bbox_inches='tight', dpi=300)
 
                 nrow = 3
                 ncol = 4
