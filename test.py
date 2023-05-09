@@ -156,7 +156,7 @@ if __name__ == "__main__":
     train_dataloader = dm.train_dataloader()
     val_dataloader = dm.val_dataloader()
 
-    lpips_met = lpips.LPIPS(net='vgg')
+    lpips_met = lpips.LPIPS(net='alex')
 
     with torch.no_grad():
         model = model_alias.load_from_checkpoint(
