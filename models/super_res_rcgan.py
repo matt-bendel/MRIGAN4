@@ -126,7 +126,7 @@ class SRrcGAN(pl.LightningModule):
                 loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
                 g_loss += loss / self.args.num_z_train
 
-            g_loss += 1e-2 * self.l1_std_p(avg_recon, gens, x)
+            g_loss += 1e-1 * self.l1_std_p(avg_recon, gens, x)
 
             if torch.isnan(g_loss):
                 print("G nan")
