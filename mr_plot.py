@@ -343,7 +343,7 @@ if __name__ == "__main__":
 
                 ax1 = ax
 
-                rect = patches.Rectangle((zoom_starty, zoom_startx), zoom_length, zoom_length, linewidth=1, edgecolor='r',
+                rect = patches.Rectangle((zoom_startx, zoom_starty), zoom_length, zoom_length, linewidth=1, edgecolor='r',
                                          facecolor='none')
 
                 # Add the patch to the Axes
