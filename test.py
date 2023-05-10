@@ -187,47 +187,49 @@ if __name__ == "__main__":
             apsds = []
             lpipss = []
             distss = []
+            num_trials = 10
 
             print(f"{n} SAMPLES")
-            for i, data in enumerate(test_loader):
-                y, x, mask, mean, std, maps, _, _ = data
-                y = y.cuda()
-                x = x.cuda()
-                mask = mask.cuda()
-                mean = mean.cuda()
-                std = std.cuda()
+            for trial in range(num_trials):
+                for i, data in enumerate(test_loader):
+                    y, x, mask, mean, std, maps, _, _ = data
+                    y = y.cuda()
+                    x = x.cuda()
+                    mask = mask.cuda()
+                    mean = mean.cuda()
+                    std = std.cuda()
 
-                gens = torch.zeros(size=(y.size(0), n, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
-                for z in range(n):
-                    gens[:, z, :, :, :, :] = model.reformat(model.forward(y, mask))
-
-                avg = torch.mean(gens, dim=1)
-
-                gt = model.reformat(x)
-
-                batch_psnrs = []
-                batchs_ssims = []
-                batch_apsds = []
-
-                for j in range(y.size(0)):
-                    single_samps = np.zeros((n, cfg.im_size, cfg.im_size))
-
-                    S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
-                    gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
-                        (avg[j] * std[j] + mean[j]).cpu())
-
-                    avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
-                    gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
-
+                    gens = torch.zeros(size=(y.size(0), n, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
                     for z in range(n):
-                        np_samp = tensor_to_complex_np((gens[j, z, :, :, :, :] * std[j] + mean[j]).cpu())
-                        single_samps[z, :, :] = torch.tensor(S.H * np_samp).abs().numpy()
+                        gens[:, z, :, :, :, :] = model.reformat(model.forward(y, mask))
 
-                    apsds.append(np.mean(np.std(single_samps, axis=0), axis=(0, 1)))
-                    psnrs.append(psnr(gt_np, avg_gen_np))
-                    ssims.append(ssim(gt_np, avg_gen_np))
-                    # lpipss.append(lpips_met(rgb(gt_np), rgb(avg_gen_np)).numpy())
-                    distss.append(dists_met(rgb(gt_np, unit_norm=True), rgb(avg_gen_np, unit_norm=True)))
+                    avg = torch.mean(gens, dim=1)
+
+                    gt = model.reformat(x)
+
+                    batch_psnrs = []
+                    batchs_ssims = []
+                    batch_apsds = []
+
+                    for j in range(y.size(0)):
+                        single_samps = np.zeros((n, cfg.im_size, cfg.im_size))
+
+                        S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
+                        gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
+                            (avg[j] * std[j] + mean[j]).cpu())
+
+                        avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
+                        gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
+
+                        for z in range(n):
+                            np_samp = tensor_to_complex_np((gens[j, z, :, :, :, :] * std[j] + mean[j]).cpu())
+                            single_samps[z, :, :] = torch.tensor(S.H * np_samp).abs().numpy()
+
+                        apsds.append(np.mean(np.std(single_samps, axis=0), axis=(0, 1)))
+                        psnrs.append(psnr(gt_np, avg_gen_np))
+                        ssims.append(ssim(gt_np, avg_gen_np))
+                        # lpipss.append(lpips_met(rgb(gt_np), rgb(avg_gen_np)).numpy())
+                        distss.append(dists_met(rgb(gt_np, unit_norm=True), rgb(avg_gen_np, unit_norm=True)))
 
             print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
             print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
