@@ -182,15 +182,16 @@ if __name__ == "__main__":
         n_samps = [1, 2, 4, 8, 16, 32]
 
         for n in n_samps:
-            psnrs = []
-            ssims = []
-            apsds = []
-            lpipss = []
-            distss = []
             num_trials = 10
+            trial_distss = []
 
             print(f"{n} SAMPLES")
             for trial in range(num_trials):
+                psnrs = []
+                ssims = []
+                apsds = []
+                lpipss = []
+                distss = []
                 for i, data in enumerate(test_loader):
                     y, x, mask, mean, std, maps, _, _ = data
                     y = y.cuda()
@@ -231,9 +232,12 @@ if __name__ == "__main__":
                         # lpipss.append(lpips_met(rgb(gt_np), rgb(avg_gen_np)).numpy())
                         distss.append(dists_met(rgb(gt_np, unit_norm=True), rgb(avg_gen_np, unit_norm=True)))
 
+                trial_distss.append(np.mean(distss))
+
             print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
             print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
             # print(f'LPIPS: {np.mean(lpipss)} \pm {np.std(lpipss) / np.sqrt(len(lpipss))}')
+            print(np.median(trial_distss))
             print(f'DISTS: {np.mean(distss)} \pm {np.std(distss) / np.sqrt(len(distss))}')
 
             # print(f'APSD: {np.mean(apsds)}')

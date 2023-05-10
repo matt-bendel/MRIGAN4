@@ -189,7 +189,7 @@ if __name__ == "__main__":
                                        left=0.5 / (ncol + 1), right=1 - 0.5 / (ncol + 1))
 
                 ax = plt.subplot(gs[0, 0])
-                ax.imshow(np_gt.clip(0, 0.9*np.max(gt)), cmap='gray', vmin=0, vmax=np.max(np_gt))
+                ax.imshow(np_gt.clip(0, 0.9*np.max(np_gt)), cmap='gray', vmin=0, vmax=np.max(np_gt))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
                 ax.set_xticks([])
@@ -198,7 +198,7 @@ if __name__ == "__main__":
                 count = 1
                 for method in keys:
                     ax = plt.subplot(gs[0, count])
-                    ax.imshow(np_avgs[method].clip(0, 0.9*np.max(gt)), cmap='gray', vmin=0, vmax=np.max(np_gt))
+                    ax.imshow(np_avgs[method].clip(0, 0.9*np.max(np_gt)), cmap='gray', vmin=0, vmax=np.max(np_gt))
                     ax.set_xticklabels([])
                     ax.set_yticklabels([])
                     ax.set_xticks([])
