@@ -177,7 +177,7 @@ class SRDataModule(pl.LightningDataModule):
     def val_dataloader(self):
         return DataLoader(
             dataset=self.validate,
-            batch_size=1,
+            batch_size=5,
             drop_last=False,
             num_workers=5,
             pin_memory=False,
