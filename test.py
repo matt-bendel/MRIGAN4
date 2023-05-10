@@ -226,12 +226,14 @@ if __name__ == "__main__":
                     apsds.append(np.mean(np.std(single_samps, axis=0), axis=(0, 1)))
                     psnrs.append(psnr(gt_np, avg_gen_np))
                     ssims.append(ssim(gt_np, avg_gen_np))
-                    lpipss.append(lpips_met(rgb(gt_np), rgb(avg_gen_np)).numpy())
+                    # lpipss.append(lpips_met(rgb(gt_np), rgb(avg_gen_np)).numpy())
                     distss.append(dists_met(rgb(gt_np, unit_norm=True), rgb(avg_gen_np, unit_norm=True)))
 
             print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
             print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
-            print(f'LPIPS: {np.mean(lpipss)} \pm {np.std(lpipss) / np.sqrt(len(lpipss))}')
+            # print(f'LPIPS: {np.mean(lpipss)} \pm {np.std(lpipss) / np.sqrt(len(lpipss))}')
+            print(f'DISTS: {np.mean(distss)} \pm {np.std(distss) / np.sqrt(len(distss))}')
+
             # print(f'APSD: {np.mean(apsds)}')
 
     cfids = []
