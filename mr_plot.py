@@ -312,7 +312,7 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                plt.savefig('test_og.png', bbox_inches='tight', dpi=300)
+                plt.savefig(f'mr_figs/body_mri_fig_avg_err_std_{fig_count}.png', bbox_inches='tight', dpi=300)
 
                 # TODO: Samp Grid (my idea): zoomed
                 nrow = 1
