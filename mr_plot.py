@@ -173,8 +173,8 @@ if __name__ == "__main__":
 
                 keys = ['l1_ssim', 'rcgan', 'ohayon', 'adler']
                 if j == 0:
-                    zoom_startx = 140
-                    zoom_starty = 60
+                    zoom_startx = 180
+                    zoom_starty = 40
                     zoom_length = 80
                 else:
                     zoom_startx = np.random.randint(120, 250)
