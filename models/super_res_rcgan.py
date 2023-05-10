@@ -90,7 +90,7 @@ class SRrcGAN(pl.LightningModule):
         for k in range(gens.shape[1]):
             adv_loss += torch.mean(self.discriminator(gens[:, k, :, :, :]), dim=0).sum() / self.args.num_z_train
 
-        adv_weight = 5e-4
+        adv_weight = 5e-3
 
         return - adv_weight * adv_loss / self.args.num_z_train
 
@@ -126,7 +126,7 @@ class SRrcGAN(pl.LightningModule):
                 loss, _ = self.perceptual_loss(gens[:, z, :, :, :], x)
                 g_loss += loss / self.args.num_z_train
 
-            g_loss += 1e-1 * self.l1_std_p(avg_recon, gens, x)
+            g_loss += 1e-2 * self.l1_std_p(avg_recon, gens, x)
 
             if torch.isnan(g_loss):
                 print("G nan")
