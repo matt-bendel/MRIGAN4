@@ -172,8 +172,12 @@ if __name__ == "__main__":
                 langevin_std = np.std(langevin_recons, axis=0)
 
                 keys = ['l1_ssim', 'rcgan', 'ohayon', 'adler']
-                zoom_start = 120
-                zoom_length = 80
+                if j == 0:
+                    zoom_start = 100
+                    zoom_length = 80
+                else:
+                    zoom_start = np.random.randint(120, 250)
+                    zoom_length = 80
 
                 # TODO: OG fig plot
                 # TODO: metrics
