@@ -30,7 +30,7 @@ import sigpy as sp
 import sigpy.mri as mr
 from data.transforms import to_tensor
 from models.architectures.old_gen import GeneratorModel
-
+from DISTS_pytorch import DISTS
 # M_1: 2.15
 # C_1: 3.50
 # CFID_1: 5.65
@@ -102,10 +102,15 @@ def generate_error_map(fig, target, recon, method, image_ind, rows, cols, relati
 def load_object(dct):
     return types.SimpleNamespace(**dct)
 
-def rgb(im):
+def rgb(im, unit_norm=False):
     embed_ims = torch.zeros(size=(3, 384, 384))
     tens_im = torch.tensor(im)
-    tens_im = 2 * (tens_im - torch.min(tens_im)) / (torch.max(tens_im) - torch.min(tens_im)) - 1
+
+    if unit_norm:
+        tens_im = (tens_im - torch.min(tens_im)) / (torch.max(tens_im) - torch.min(tens_im))
+    else:
+        tens_im = 2 * (tens_im - torch.min(tens_im)) / (torch.max(tens_im) - torch.min(tens_im)) - 1
+
     embed_ims[0, :, :] = tens_im
     embed_ims[1, :, :] = tens_im
     embed_ims[2, :, :] = tens_im
@@ -158,6 +163,7 @@ if __name__ == "__main__":
     val_dataloader = dm.val_dataloader()
 
     lpips_met = lpips.LPIPS(net='alex')
+    dists_met = DISTS()
 
     with torch.no_grad():
         model = model_alias.load_from_checkpoint(
@@ -180,6 +186,7 @@ if __name__ == "__main__":
             ssims = []
             apsds = []
             lpipss = []
+            distss = []
 
             print(f"{n} SAMPLES")
             for i, data in enumerate(test_loader):
@@ -220,6 +227,7 @@ if __name__ == "__main__":
                     psnrs.append(psnr(gt_np, avg_gen_np))
                     ssims.append(ssim(gt_np, avg_gen_np))
                     lpipss.append(lpips_met(rgb(gt_np), rgb(avg_gen_np)).numpy())
+                    distss.append(dists_met(rgb(gt_np, unit_norm=True), rgb(avg_gen_np, unit_norm=True)))
 
             print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
             print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
