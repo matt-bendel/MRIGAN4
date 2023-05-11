@@ -23,7 +23,7 @@ from utils.math import complex_abs, tensor_to_complex_np
 from evaluation_scripts.metrics import psnr, ssim
 from evaluation_scripts.fid.embeddings import VGG16Embedding
 from evaluation_scripts.cfid.cfid_metric import CFIDMetric
-from evaluation_scripts.fid.fid_metric import FIDMetric
+from evaluation_scripts.fid.fid_metric_avg import FIDMetric
 import matplotlib.pyplot as plt
 from utils.fftc import ifft2c_new, fft2c_new
 import sigpy as sp
