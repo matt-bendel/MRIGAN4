@@ -216,7 +216,7 @@ class FIDMetric:
                 for k in range(self.num_samps):
                     recons[:, k, :, :, :] = self.gan(condition, mask)
 
-                torch.mean(recons, dim=1)
+                recons = torch.mean(recons, dim=1)
                 image = self._get_embed_im(recons, mean, std, maps, False)
                 condition_im = self._get_embed_im(condition, mean, std, maps, False)
 
