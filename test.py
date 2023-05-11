@@ -182,6 +182,7 @@ if __name__ == "__main__":
         n_samps = [1, 2, 4, 8, 16, 32]
 
         for n in n_samps:
+            break
             num_trials = 10
             trial_distss = []
 
@@ -294,15 +295,20 @@ if __name__ == "__main__":
     # m_comps.append(m_comp)
     # c_comps.append(c_comp)
     #
-    # inception_embedding = VGG16Embedding(parallel=True)
-    # fid_metric = FIDMetric(gan=model,
-    #                        ref_loader=train_dataloader,
-    #                        loader=test_loader,
-    #                        image_embedding=inception_embedding,
-    #                        condition_embedding=inception_embedding,
-    #                        cuda=True,
-    #                        args=cfg)
-    # fid, _ = fid_metric.get_fid()
+
+    n_samps = [1, 2, 4, 8, 16, 32]
+    for n in n_samps:
+        print(f"{n} SAMPLES")
+        inception_embedding = VGG16Embedding(parallel=True)
+        fid_metric = FIDMetric(gan=model,
+                               ref_loader=train_dataloader,
+                               loader=test_loader,
+                               image_embedding=inception_embedding,
+                               condition_embedding=inception_embedding,
+                               cuda=True,
+                               args=cfg,
+                               num_samps=n)
+        fid, _ = fid_metric.get_fid()
 
     # print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
     # print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
