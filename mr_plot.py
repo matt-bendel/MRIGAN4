@@ -645,7 +645,7 @@ if __name__ == "__main__":
                             ax.set_yticks([])
                             count += 1
 
-                    ax = plt.subplot(gs[samp+2, count])
+                    ax = plt.subplot(gs[samp+4, count])
                     avg = np.zeros((384,384))
                     for l in range(2):
                         avg += langevin_recons[l, :, :]
