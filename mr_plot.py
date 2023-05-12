@@ -424,7 +424,7 @@ if __name__ == "__main__":
                 plt.savefig(f'mr_figs/body_mri_fig_right_{fig_count}.png', bbox_inches='tight', dpi=300)
 
                 # TODO: Rizwan Idea: zoomed, 1st row avg, 2nd error, 3rd std. dev, 4, 5, 6 samps
-                nrow = 6
+                nrow = 8
                 ncol = 6
 
                 fig = plt.figure(figsize=(ncol + 1, nrow + 1))
@@ -572,11 +572,68 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                for samp in range(3):
+                count = 1
+                for method in keys:
+                    ax = plt.subplot(gs[2, count])
+                    avg = np.zeros(384, 384)
+                    for l in range(4):
+                        avg += np_samps[method][l]
+
+                    avg = avg / 4
+
+                    ax.imshow(
+                        avg[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
+                        cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
+                    ax.set_xticklabels([])
+                    ax.set_yticklabels([])
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+                    count += 1
+
+                ax = plt.subplot(gs[2, count])
+                avg = np.zeros(384, 384)
+                for l in range(4):
+                    avg += langevin_recons[l, :, :]
+
+                avg = avg / 4
+
+                ax.imshow(langevin_avg[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
+                          cmap='gray', vmin=0, vmax=0.7 * np.max(langevin_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                count = 1
+                for method in keys:
+                    ax = plt.subplot(gs[3, count])
+                    avg = np.zeros(384, 384)
+                    for l in range(2):
+                        avg += np_samps[method][l]
+
+                    avg = avg / 2
+                    ax.imshow(
+                        avg[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
+                        cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
+                    ax.set_xticklabels([])
+                    ax.set_yticklabels([])
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+                    count += 1
+
+                ax = plt.subplot(gs[3, count])
+                ax.imshow(langevin_avg[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
+                          cmap='gray', vmin=0, vmax=0.7 * np.max(langevin_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                for samp in range(2):
                     count = 2
                     for method in keys:
                         if method != 'l1_ssim':
-                            ax = plt.subplot(gs[samp+2, count])
+                            ax = plt.subplot(gs[samp+4, count])
                             ax.imshow(np_samps[method][samp][zoom_starty:zoom_starty+zoom_length, zoom_startx:zoom_startx+zoom_length], cmap='gray', vmin=0, vmax=0.7*np.max(np_gt))
                             ax.set_xticklabels([])
                             ax.set_yticklabels([])
@@ -585,6 +642,11 @@ if __name__ == "__main__":
                             count += 1
 
                     ax = plt.subplot(gs[samp+2, count])
+                    avg = np.zeros(384, 384)
+                    for l in range(2):
+                        avg += langevin_recons[l, :, :]
+
+                    avg = avg / 2
                     ax.imshow(langevin_recons[samp, zoom_starty:zoom_starty+zoom_length, zoom_startx:zoom_startx+zoom_length], cmap='gray', vmin=0, vmax=0.7*np.max(langevin_gt))
                     ax.set_xticklabels([])
                     ax.set_yticklabels([])
