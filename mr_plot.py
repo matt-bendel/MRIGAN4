@@ -552,7 +552,7 @@ if __name__ == "__main__":
                                                             coordsB=ax.transData, color='r')
                 fig.add_artist(connection_path_2)
 
-                count = 2
+                count = 1
                 for method in keys:
                     ax = plt.subplot(gs[1, count])
                     ax.imshow(
