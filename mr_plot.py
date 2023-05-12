@@ -547,7 +547,7 @@ if __name__ == "__main__":
                 connection_path_1 = patches.ConnectionPatch([x_coord, y_coords[0]], [0, 0], coordsA=ax1.transData,
                                                             coordsB=ax.transData, color='r')
                 fig.add_artist(connection_path_1)
-                connection_path_2 = patches.ConnectionPatch([x_coord, y_coords[1]], [0, zoom_length],
+                connection_path_2 = patches.ConnectionPatch([zoom_startx, zoom_starty], [0, zoom_length],
                                                             coordsA=ax1.transData,
                                                             coordsB=ax.transData, color='r')
                 fig.add_artist(connection_path_2)
@@ -572,8 +572,10 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                count = 1
+                count = 2
                 for method in keys:
+                    if method == 'l1_ssim':
+                        continue
                     ax = plt.subplot(gs[2, count])
                     avg = np.zeros((384,384))
                     for l in range(4):
@@ -604,8 +606,10 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                count = 1
+                count = 2
                 for method in keys:
+                    if method == 'l1_ssim':
+                        continue
                     ax = plt.subplot(gs[3, count])
                     avg = np.zeros((384,384))
                     for l in range(2):
