@@ -425,7 +425,7 @@ if __name__ == "__main__":
 
                 # TODO: Rizwan Idea: zoomed, 1st row avg, 2nd error, 3rd std. dev, 4, 5, 6 samps
                 nrow = 6
-                ncol = 7
+                ncol = 6
 
                 fig = plt.figure(figsize=(ncol + 1, nrow + 1))
 
@@ -434,7 +434,7 @@ if __name__ == "__main__":
                                        top=1. - 0.5 / (nrow + 1), bottom=0.5 / (nrow + 1),
                                        left=0.5 / (ncol + 1), right=1 - 0.5 / (ncol + 1))
 
-                ax = plt.subplot(gs[0, 0])
+                ax = plt.subplot(gs[4, 0])
                 ax.imshow(np_gt, cmap='gray', vmin=0, vmax=0.7*np.max(np_gt))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
@@ -449,7 +449,7 @@ if __name__ == "__main__":
                 # Add the patch to the Axes
                 ax.add_patch(rect)
 
-                ax = plt.subplot(gs[0, 1])
+                ax = plt.subplot(gs[3, 0])
                 ax.imshow(np_gt[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length], cmap='gray',
                           vmin=0, vmax=0.7*np.max(np_gt))
                 ax.set_xticklabels([])
@@ -484,43 +484,43 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                count = 2
-                for method in keys:
-                    ax = plt.subplot(gs[1, count])
-                    im = ax.imshow(2*np.abs(np_avgs[method] - np_gt)[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0, vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
-                    ax.set_xticklabels([])
-                    ax.set_yticklabels([])
-                    ax.set_xticks([])
-                    ax.set_yticks([])
-
-                    if count == 2:
-                        [[x10, y10], [x11, y11]] = ax.get_position().get_points()
-
-                        # Appropriately rescale final axis so that colorbar does not effect formatting
-                        pad = 0.01
-                        width = 0.02
-                        cbar_ax = fig.add_axes([x10 - 2 * pad, y10, width, y11 - y10])
-                        cbar = fig.colorbar(im, cax=cbar_ax, format='%.0e',
-                                            orientation='vertical')  # Generate colorbar
-                        cbar.ax.locator_params(nbins=3)
-                        cbar.ax.yaxis.set_ticks_position("left")
-                        cbar.ax.tick_params(labelsize=6)
-                        cbar.ax.tick_params(rotation=0)
-                        tl = cbar.ax.get_yticklabels()
-
-                        # set the alignment for the first and the last
-                        tl[0].set_verticalalignment('bottom')
-                        tl[-1].set_verticalalignment('top')
-
-                    count += 1
-
-                ax = plt.subplot(gs[1, count])
-                ax.imshow(3*np.abs(langevin_avg - langevin_gt)[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0,
-                          vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
-                ax.set_xticklabels([])
-                ax.set_yticklabels([])
-                ax.set_xticks([])
-                ax.set_yticks([])
+                # count = 2
+                # for method in keys:
+                #     ax = plt.subplot(gs[1, count])
+                #     im = ax.imshow(2*np.abs(np_avgs[method] - np_gt)[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0, vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
+                #     ax.set_xticklabels([])
+                #     ax.set_yticklabels([])
+                #     ax.set_xticks([])
+                #     ax.set_yticks([])
+                #
+                #     if count == 2:
+                #         [[x10, y10], [x11, y11]] = ax.get_position().get_points()
+                #
+                #         # Appropriately rescale final axis so that colorbar does not effect formatting
+                #         pad = 0.01
+                #         width = 0.02
+                #         cbar_ax = fig.add_axes([x10 - 2 * pad, y10, width, y11 - y10])
+                #         cbar = fig.colorbar(im, cax=cbar_ax, format='%.0e',
+                #                             orientation='vertical')  # Generate colorbar
+                #         cbar.ax.locator_params(nbins=3)
+                #         cbar.ax.yaxis.set_ticks_position("left")
+                #         cbar.ax.tick_params(labelsize=6)
+                #         cbar.ax.tick_params(rotation=0)
+                #         tl = cbar.ax.get_yticklabels()
+                #
+                #         # set the alignment for the first and the last
+                #         tl[0].set_verticalalignment('bottom')
+                #         tl[-1].set_verticalalignment('top')
+                #
+                #     count += 1
+                #
+                # ax = plt.subplot(gs[1, count])
+                # ax.imshow(3*np.abs(langevin_avg - langevin_gt)[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0,
+                #           vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
+                # ax.set_xticklabels([])
+                # ax.set_yticklabels([])
+                # ax.set_xticks([])
+                # ax.set_yticks([])
 
                 count = 2
                 for method in keys:
@@ -589,8 +589,8 @@ if __name__ == "__main__":
                     ax.set_yticks([])
 
                 plt.savefig(f'mr_figs/app_mri_fig_{fig_count}.png', bbox_inches='tight', dpi=300)
-
-                if fig_count == 8:
+                exit()
+                if fig_count == 24:
                     exit()
                 fig_count += 1
 
