@@ -575,7 +575,7 @@ if __name__ == "__main__":
                 count = 1
                 for method in keys:
                     ax = plt.subplot(gs[2, count])
-                    avg = np.zeros(384, 384)
+                    avg = np.zeros((384,384))
                     for l in range(4):
                         avg += np_samps[method][l]
 
@@ -591,7 +591,7 @@ if __name__ == "__main__":
                     count += 1
 
                 ax = plt.subplot(gs[2, count])
-                avg = np.zeros(384, 384)
+                avg = np.zeros((384,384))
                 for l in range(4):
                     avg += langevin_recons[l, :, :]
 
@@ -607,7 +607,7 @@ if __name__ == "__main__":
                 count = 1
                 for method in keys:
                     ax = plt.subplot(gs[3, count])
-                    avg = np.zeros(384, 384)
+                    avg = np.zeros((384,384))
                     for l in range(2):
                         avg += np_samps[method][l]
 
@@ -642,7 +642,7 @@ if __name__ == "__main__":
                             count += 1
 
                     ax = plt.subplot(gs[samp+2, count])
-                    avg = np.zeros(384, 384)
+                    avg = np.zeros((384,384))
                     for l in range(2):
                         avg += langevin_recons[l, :, :]
 
