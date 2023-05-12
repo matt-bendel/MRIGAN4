@@ -178,7 +178,14 @@ if __name__ == "__main__":
                     zoom_length = 80
                 else:
                     zoom_startx = np.random.randint(120, 250)
-                    zoom_starty = np.random.randint(60, 240)
+                    zoom_starty1 = np.random.randint(30, 80)
+                    zoom_starty2 = np.random.randint(260, 300)
+
+                    p = np.random.rand()
+                    zoom_starty = zoom_starty1
+                    if p <= 0.5:
+                        zoom_starty = zoom_starty2
+
                     zoom_length = 80
 
                 x_coord = zoom_startx + zoom_length
@@ -658,7 +665,6 @@ if __name__ == "__main__":
                     ax.set_yticks([])
 
                 plt.savefig(f'mr_figs/app_mri_fig_{fig_count}.png', bbox_inches='tight', dpi=300)
-                exit()
                 if fig_count == 24:
                     exit()
                 fig_count += 1
