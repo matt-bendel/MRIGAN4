@@ -472,7 +472,7 @@ if __name__ == "__main__":
                 # ax.set_xticks([])
                 # ax.set_yticks([])
 
-                count = 2
+                count = 1
                 for method in keys:
                     if method != 'l1_ssim':
                         ax = plt.subplot(gs[0, count])
@@ -573,7 +573,7 @@ if __name__ == "__main__":
                 ax.set_yticks([])
 
                 for samp in range(3):
-                    count = 3
+                    count = 2
                     for method in keys:
                         if method != 'l1_ssim':
                             ax = plt.subplot(gs[samp+2, count])
