@@ -23,7 +23,7 @@ from utils.math import complex_abs, tensor_to_complex_np
 from evaluation_scripts.metrics import psnr, ssim
 from evaluation_scripts.fid.embeddings import VGG16Embedding
 from evaluation_scripts.cfid.cfid_metric import CFIDMetric
-from evaluation_scripts.fid.fid_metric_avg import FIDMetric
+from evaluation_scripts.fid.fid_metric import FIDMetric
 import matplotlib.pyplot as plt
 from utils.fftc import ifft2c_new, fft2c_new
 import sigpy as sp
@@ -138,7 +138,7 @@ if __name__ == "__main__":
         dm.setup()
         test_loader = dm.test_dataloader()
         if args.rcgan:
-            model_alias = Adler
+            model_alias = rcGAN
         else:
             model_alias = L1SSIMMRI
     elif args.inpaint:
@@ -296,19 +296,19 @@ if __name__ == "__main__":
     # c_comps.append(c_comp)
     #
 
-    n_samps = [1, 2, 4, 8, 16, 32]
-    for n in n_samps:
-        print(f"{n} SAMPLES")
-        inception_embedding = VGG16Embedding(parallel=True)
-        fid_metric = FIDMetric(gan=model,
-                               ref_loader=train_dataloader,
-                               loader=test_loader,
-                               image_embedding=inception_embedding,
-                               condition_embedding=inception_embedding,
-                               cuda=True,
-                               args=cfg,
-                               num_samps=n)
-        fid, _ = fid_metric.get_fid()
+    # n_samps = [1, 2, 4, 8, 16, 32]
+    # for n in n_samps:
+    #     print(f"{n} SAMPLES")
+    inception_embedding = VGG16Embedding(parallel=True)
+    fid_metric = FIDMetric(gan=model,
+                           ref_loader=train_dataloader,
+                           loader=val_dataloader,
+                           image_embedding=inception_embedding,
+                           condition_embedding=inception_embedding,
+                           cuda=True,
+                           args=cfg,
+                           num_samps=n)
+    fid, _ = fid_metric.get_fid()
 
     # print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
     # print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
