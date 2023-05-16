@@ -177,9 +177,9 @@ if __name__ == "__main__":
                     zoom_starty = 40
                     zoom_length = 80
                 else:
-                    zoom_startx = 90#np.random.randint(120, 250)
-                    zoom_starty1 = 175#np.random.randint(30, 80)
-                    zoom_starty2 = 175#np.random.randint(260, 300)
+                    zoom_startx = 85#np.random.randint(120, 250)
+                    zoom_starty1 = 185#np.random.randint(30, 80)
+                    zoom_starty2 = 185#np.random.randint(260, 300)
 
                     p = np.random.rand()
                     zoom_starty = zoom_starty1
