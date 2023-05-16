@@ -306,8 +306,7 @@ if __name__ == "__main__":
                            image_embedding=inception_embedding,
                            condition_embedding=inception_embedding,
                            cuda=True,
-                           args=cfg,
-                           num_samps=n)
+                           args=cfg)
     fid, _ = fid_metric.get_fid()
 
     # print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
