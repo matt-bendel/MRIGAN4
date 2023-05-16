@@ -3,7 +3,7 @@ checkpoint_dir: "/storage/matt_models/sr/"
 num_samps: 2
 num_z_test: 32
 num_z_valid: 8
-num_z_train: 2
+num_z_train: 1
 
 im_size: 128
 in_chans: 3
