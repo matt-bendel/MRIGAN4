@@ -267,6 +267,7 @@ class FIDMetric:
 
 
         self.mu_real, self.sigma_real, self.alpha = mu_real.to('cuda:3'), sigma_real.to('cuda:3'), alpha.to('cuda:3')
+        print(self.alpha)
 
         return mu_real, sigma_real, alpha
 
