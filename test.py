@@ -299,7 +299,7 @@ if __name__ == "__main__":
     # n_samps = [1, 2, 4, 8, 16, 32]
     # for n in n_samps:
     #     print(f"{n} SAMPLES")
-    inception_embedding = VGG16Embedding(parallel=True)
+    inception_embedding = VGG16Embedding()
     fid_metric = FIDMetric(gan=model,
                            ref_loader=train_dataloader,
                            loader=val_dataloader,
