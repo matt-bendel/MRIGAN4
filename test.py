@@ -23,7 +23,7 @@ from utils.math import complex_abs, tensor_to_complex_np
 from evaluation_scripts.metrics import psnr, ssim
 from evaluation_scripts.fid.embeddings import VGG16Embedding
 from evaluation_scripts.cfid.cfid_metric import CFIDMetric
-from evaluation_scripts.fid.fid_metric_avg import FIDMetric
+from evaluation_scripts.fid.fid_metric import FIDMetric
 import matplotlib.pyplot as plt
 from utils.fftc import ifft2c_new, fft2c_new
 import sigpy as sp
@@ -306,8 +306,7 @@ if __name__ == "__main__":
                            image_embedding=inception_embedding,
                            condition_embedding=inception_embedding,
                            cuda=True,
-                           args=cfg,
-                           num_samps=2)
+                           args=cfg)
     fid, _ = fid_metric.get_fid()
 
     # print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
