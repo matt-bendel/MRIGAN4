@@ -22,6 +22,7 @@ import sigpy as sp
 from evaluation_scripts.metrics import psnr, ssim
 from scipy import ndimage
 
+
 # M_1: 2.15
 # C_1: 3.50
 # CFID_1: 5.65
@@ -61,10 +62,14 @@ if __name__ == "__main__":
     test_loader = dm.test_dataloader()
 
     with torch.no_grad():
-        rcGAN_model = rcGAN.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + '/neurips/rcgan/checkpoint_best.ckpt')
-        ohayon_model = Ohayon.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + '/neurips/ohayon_2/checkpoint_best.ckpt')
-        adler_model = Adler.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + '/neurips/adler/checkpoint_best.ckpt')
-        l1_ssim_model = L1SSIMMRI.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + '/neurips/l1_ssim/checkpoint_best.ckpt')
+        rcGAN_model = rcGAN.load_from_checkpoint(
+            checkpoint_path=cfg.checkpoint_dir + '/neurips/rcgan/checkpoint_best.ckpt')
+        ohayon_model = Ohayon.load_from_checkpoint(
+            checkpoint_path=cfg.checkpoint_dir + '/neurips/ohayon_2/checkpoint_best.ckpt')
+        adler_model = Adler.load_from_checkpoint(
+            checkpoint_path=cfg.checkpoint_dir + '/neurips/adler/checkpoint_best.ckpt')
+        l1_ssim_model = L1SSIMMRI.load_from_checkpoint(
+            checkpoint_path=cfg.checkpoint_dir + '/neurips/l1_ssim/checkpoint_best.ckpt')
 
         rcGAN_model.cuda()
         ohayon_model.cuda()
@@ -84,10 +89,14 @@ if __name__ == "__main__":
             mean = mean.cuda()
             std = std.cuda()
 
-            gens_rcgan = torch.zeros(size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
-            gens_ohayon = torch.zeros(size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
-            gens_adler = torch.zeros(size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
-            gens_l1_ssim = torch.zeros(size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
+            gens_rcgan = torch.zeros(
+                size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
+            gens_ohayon = torch.zeros(
+                size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
+            gens_adler = torch.zeros(
+                size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
+            gens_l1_ssim = torch.zeros(
+                size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
 
             for z in range(cfg.num_z_test):
                 gens_rcgan[:, z, :, :, :, :] = rcGAN_model.reformat(rcGAN_model.forward(y, mask))
@@ -128,15 +137,27 @@ if __name__ == "__main__":
 
                 S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
 
-                np_gt = ndimage.rotate(torch.tensor(S.H * tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu())).abs().numpy(), 180)
+                np_gt = ndimage.rotate(
+                    torch.tensor(S.H * tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu())).abs().numpy(), 180)
+                np_zfr = ndimage.rotate(
+                    torch.tensor(S.H * tensor_to_complex_np((y[j] * std[j] + mean[j]).cpu())).abs().numpy(), 180)
 
-                np_avgs['rcgan'] = ndimage.rotate(torch.tensor(S.H * tensor_to_complex_np((avg_rcgan[j] * std[j] + mean[j]).cpu())).abs().numpy(), 180)
-                np_avgs['ohayon'] = ndimage.rotate(torch.tensor(S.H * tensor_to_complex_np((avg_ohayon[j] * std[j] + mean[j]).cpu())).abs().numpy(), 180)
-                np_avgs['adler'] = ndimage.rotate(torch.tensor(S.H * tensor_to_complex_np((avg_adler[j] * std[j] + mean[j]).cpu())).abs().numpy(), 180)
-                np_avgs['l1_ssim'] = ndimage.rotate(torch.tensor(S.H * tensor_to_complex_np((avg_l1_ssim[j] * std[j] + mean[j]).cpu())).abs().numpy(), 180)
+                np_avgs['rcgan'] = ndimage.rotate(
+                    torch.tensor(S.H * tensor_to_complex_np((avg_rcgan[j] * std[j] + mean[j]).cpu())).abs().numpy(),
+                    180)
+                np_avgs['ohayon'] = ndimage.rotate(
+                    torch.tensor(S.H * tensor_to_complex_np((avg_ohayon[j] * std[j] + mean[j]).cpu())).abs().numpy(),
+                    180)
+                np_avgs['adler'] = ndimage.rotate(
+                    torch.tensor(S.H * tensor_to_complex_np((avg_adler[j] * std[j] + mean[j]).cpu())).abs().numpy(),
+                    180)
+                np_avgs['l1_ssim'] = ndimage.rotate(
+                    torch.tensor(S.H * tensor_to_complex_np((avg_l1_ssim[j] * std[j] + mean[j]).cpu())).abs().numpy(),
+                    180)
 
                 for z in range(cfg.num_z_test):
-                    np_samps['rcgan'].append(ndimage.rotate(torch.tensor(S.H * tensor_to_complex_np((gens_rcgan[j, z] * std[j] + mean[j]).cpu())).abs().numpy(), 180))
+                    np_samps['rcgan'].append(ndimage.rotate(torch.tensor(
+                        S.H * tensor_to_complex_np((gens_rcgan[j, z] * std[j] + mean[j]).cpu())).abs().numpy(), 180))
                     np_samps['ohayon'].append(ndimage.rotate(torch.tensor(
                         S.H * tensor_to_complex_np((gens_ohayon[j, z] * std[j] + mean[j]).cpu())).abs().numpy(), 180))
                     np_samps['adler'].append(ndimage.rotate(torch.tensor(
@@ -153,7 +174,8 @@ if __name__ == "__main__":
 
                 for l in range(cfg.num_z_test):
                     try:
-                        new_filename = recon_directory + fname[j] + f'|langevin|slide_idx_{slice[j]}_R=8_sample={l}_outputs.pt'
+                        new_filename = recon_directory + fname[
+                            j] + f'|langevin|slide_idx_{slice[j]}_R=8_sample={l}_outputs.pt'
                         recon_object = torch.load(new_filename)
                     except Exception as e:
                         print(e)
@@ -161,7 +183,8 @@ if __name__ == "__main__":
                         break
                     # temp_recon = unnormalize(recon_object['mvue'], recon_object['zfr'])
 
-                    langevin_recons[l] = ndimage.rotate(complex_abs(recon_object['mvue'][0].permute(1, 2, 0)).cpu().numpy(), 180)
+                    langevin_recons[l] = ndimage.rotate(
+                        complex_abs(recon_object['mvue'][0].permute(1, 2, 0)).cpu().numpy(), 180)
 
                 if exceptions:
                     exceptions = False
@@ -177,9 +200,9 @@ if __name__ == "__main__":
                     zoom_starty = 40
                     zoom_length = 80
                 else:
-                    zoom_startx = 80#np.random.randint(120, 250)
-                    zoom_starty1 = 180#np.random.randint(30, 80)
-                    zoom_starty2 = 180#np.random.randint(260, 300)
+                    zoom_startx = 80  # np.random.randint(120, 250)
+                    zoom_starty1 = 180  # np.random.randint(30, 80)
+                    zoom_starty2 = 180  # np.random.randint(260, 300)
 
                     p = np.random.rand()
                     zoom_starty = zoom_starty1
@@ -190,6 +213,45 @@ if __name__ == "__main__":
 
                 x_coord = zoom_startx + zoom_length
                 y_coords = [zoom_starty, zoom_starty + zoom_length]
+
+                fig = plt.figure(figsize=(ncol + 1, nrow + 1))
+
+                ax = plt.subplot(1, 1, 1)
+                ax.imshow(np_gt, cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                plt.savefig(f'ismrm_gt.png', bbox_inches='tight', dpi=300)
+                plt.close(fig)
+
+                fig = plt.figure(figsize=(ncol + 1, nrow + 1))
+
+                ax = plt.subplot(1, 1, 1)
+                ax.imshow(np_zfr, cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                plt.savefig(f'ismrm_gt.png', bbox_inches='tight', dpi=300)
+                plt.close(fig)
+
+                fig = plt.figure(figsize=(ncol + 1, nrow + 1))
+                fig.subplots_adjust(wspace=0, hspace=0.05)
+
+                for z in range(5):
+                    ax = plt.subplot(1, 5, z+1)
+                    ax.imshow(np_zfr, cmap='gray', vmin=0, vmax=0.7 * np.max(np_samps['rcgan'][z]))
+                    ax.set_xticklabels([])
+                    ax.set_yticklabels([])
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+
+                plt.savefig(f'ismrm_samps.png', bbox_inches='tight', dpi=300)
+                plt.close(fig)
+                exit()
 
                 # TODO: OG fig plot
                 # TODO: metrics
@@ -205,7 +267,7 @@ if __name__ == "__main__":
                                        left=0.5 / (ncol + 1), right=1 - 0.5 / (ncol + 1))
 
                 ax = plt.subplot(gs[0, 0])
-                ax.imshow(np_gt, cmap='gray', vmin=0, vmax=0.7*np.max(np_gt))
+                ax.imshow(np_gt, cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
                 ax.set_xticks([])
@@ -214,7 +276,7 @@ if __name__ == "__main__":
                 count = 1
                 for method in keys:
                     ax = plt.subplot(gs[0, count])
-                    ax.imshow(np_avgs[method], cmap='gray', vmin=0, vmax=0.7*np.max(np_gt))
+                    ax.imshow(np_avgs[method], cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
                     ax.set_xticklabels([])
                     ax.set_yticklabels([])
                     ax.set_xticks([])
@@ -228,9 +290,8 @@ if __name__ == "__main__":
                     #         transform=ax.transAxes)
                     count += 1
 
-
                 ax = plt.subplot(gs[0, count])
-                ax.imshow(langevin_avg, cmap='gray', vmin=0, vmax=0.7*np.max(langevin_gt))
+                ax.imshow(langevin_avg, cmap='gray', vmin=0, vmax=0.7 * np.max(langevin_gt))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
                 ax.set_xticks([])
@@ -246,7 +307,8 @@ if __name__ == "__main__":
                 count = 1
                 for method in keys:
                     ax = plt.subplot(gs[1, count])
-                    im = ax.imshow(2*np.abs(np_avgs[method] - np_gt), cmap='jet', vmin=0, vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
+                    im = ax.imshow(2 * np.abs(np_avgs[method] - np_gt), cmap='jet', vmin=0,
+                                   vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
                     ax.set_xticklabels([])
                     ax.set_yticklabels([])
                     ax.set_xticks([])
@@ -274,7 +336,7 @@ if __name__ == "__main__":
                     count += 1
 
                 ax = plt.subplot(gs[1, count])
-                ax.imshow(3*np.abs(langevin_avg - langevin_gt), cmap='jet', vmin=0,
+                ax.imshow(3 * np.abs(langevin_avg - langevin_gt), cmap='jet', vmin=0,
                           vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
@@ -306,7 +368,7 @@ if __name__ == "__main__":
                         # Appropriately rescale final axis so that colorbar does not effect formatting
                         pad = 0.01
                         width = 0.02
-                        cbar_ax = fig.add_axes([x10 - 2*pad, y10, width, y11 - y10])
+                        cbar_ax = fig.add_axes([x10 - 2 * pad, y10, width, y11 - y10])
                         cbar = fig.colorbar(im, cax=cbar_ax, format='%.0e',
                                             orientation='vertical')  # Generate colorbar
                         cbar.ax.locator_params(nbins=3)
@@ -342,7 +404,7 @@ if __name__ == "__main__":
                                        left=0.5 / (ncol + 1), right=1 - 0.5 / (ncol + 1))
 
                 ax = plt.subplot(gs[0, 0])
-                ax.imshow(np_gt, cmap='gray', vmin=0, vmax=0.7*np.max(np_gt))
+                ax.imshow(np_gt, cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
                 ax.set_xticks([])
@@ -350,14 +412,16 @@ if __name__ == "__main__":
 
                 ax1 = ax
 
-                rect = patches.Rectangle((zoom_startx, zoom_starty), zoom_length, zoom_length, linewidth=1, edgecolor='r',
+                rect = patches.Rectangle((zoom_startx, zoom_starty), zoom_length, zoom_length, linewidth=1,
+                                         edgecolor='r',
                                          facecolor='none')
 
                 # Add the patch to the Axes
                 ax.add_patch(rect)
 
                 ax = plt.subplot(gs[1, 0])
-                ax.imshow(np_gt[zoom_starty:zoom_starty+zoom_length, zoom_startx:zoom_startx+zoom_length], cmap='gray', vmin=0, vmax=0.7*np.max(np_gt))
+                ax.imshow(np_gt[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
+                          cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
                 ax.set_xticks([])
@@ -372,8 +436,9 @@ if __name__ == "__main__":
                 fig.add_artist(connection_path_2)
 
                 ax = plt.subplot(gs[2, 0])
-                ax.imshow(np_avgs['l1_ssim'][zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
-                          cmap='gray', vmin=0, vmax=0.7*np.max(np_gt))
+                ax.imshow(
+                    np_avgs['l1_ssim'][zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
+                    cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
                 ax.set_xticks([])
@@ -395,7 +460,8 @@ if __name__ == "__main__":
                 for method in keys:
                     if method != 'l1_ssim':
                         ax = plt.subplot(gs[0, count])
-                        ax.imshow(np_avgs[method][zoom_starty:zoom_starty+zoom_length, zoom_startx:zoom_startx+zoom_length], cmap='gray', vmin=0, vmax=0.7*np.max(np_gt))
+                        ax.imshow(np_avgs[method][zoom_starty:zoom_starty + zoom_length,
+                                  zoom_startx:zoom_startx + zoom_length], cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
                         ax.set_xticklabels([])
                         ax.set_yticklabels([])
                         ax.set_xticks([])
@@ -403,7 +469,8 @@ if __name__ == "__main__":
                         count += 1
 
                 ax = plt.subplot(gs[0, count])
-                ax.imshow(langevin_avg[zoom_starty:zoom_starty+zoom_length, zoom_startx:zoom_startx+zoom_length], cmap='gray', vmin=0, vmax=0.7*np.max(langevin_gt))
+                ax.imshow(langevin_avg[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
+                          cmap='gray', vmin=0, vmax=0.7 * np.max(langevin_gt))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
                 ax.set_xticks([])
@@ -413,16 +480,20 @@ if __name__ == "__main__":
                     count = 0
                     for method in keys:
                         if method != 'l1_ssim':
-                            ax = plt.subplot(gs[samp+1, count])
-                            ax.imshow(np_samps[method][samp][zoom_starty:zoom_starty+zoom_length, zoom_startx:zoom_startx+zoom_length], cmap='gray', vmin=0, vmax=0.7*np.max(np_gt))
+                            ax = plt.subplot(gs[samp + 1, count])
+                            ax.imshow(np_samps[method][samp][zoom_starty:zoom_starty + zoom_length,
+                                      zoom_startx:zoom_startx + zoom_length], cmap='gray', vmin=0,
+                                      vmax=0.7 * np.max(np_gt))
                             ax.set_xticklabels([])
                             ax.set_yticklabels([])
                             ax.set_xticks([])
                             ax.set_yticks([])
                             count += 1
 
-                    ax = plt.subplot(gs[samp+1, count])
-                    ax.imshow(langevin_recons[samp, zoom_starty:zoom_starty+zoom_length, zoom_startx:zoom_startx+zoom_length], cmap='gray', vmin=0, vmax=0.7*np.max(langevin_gt))
+                    ax = plt.subplot(gs[samp + 1, count])
+                    ax.imshow(langevin_recons[samp, zoom_starty:zoom_starty + zoom_length,
+                              zoom_startx:zoom_startx + zoom_length], cmap='gray', vmin=0,
+                              vmax=0.7 * np.max(langevin_gt))
                     ax.set_xticklabels([])
                     ax.set_yticklabels([])
                     ax.set_xticks([])
@@ -483,14 +554,18 @@ if __name__ == "__main__":
                 for method in keys:
                     if method != 'l1_ssim':
                         ax = plt.subplot(gs[0, count])
-                        ax.imshow(np_stds[method][zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length], cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
+                        ax.imshow(np_stds[method][zoom_starty:zoom_starty + zoom_length,
+                                  zoom_startx:zoom_startx + zoom_length], cmap='viridis', vmin=0,
+                                  vmax=np.max(np_stds['rcgan']))
                         ax.set_xticklabels([])
                         ax.set_yticklabels([])
                         ax.set_xticks([])
                         ax.set_yticks([])
                     else:
                         ax = plt.subplot(gs[0, count])
-                        im = ax.imshow(np.zeros((384, 384))[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length], cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
+                        im = ax.imshow(np.zeros((384, 384))[zoom_starty:zoom_starty + zoom_length,
+                                       zoom_startx:zoom_startx + zoom_length], cmap='viridis', vmin=0,
+                                       vmax=np.max(np_stds['rcgan']))
                         ax.set_xticklabels([])
                         ax.set_yticklabels([])
                         ax.set_xticks([])
@@ -504,7 +579,7 @@ if __name__ == "__main__":
                         # Appropriately rescale final axis so that colorbar does not effect formatting
                         pad = 0.01
                         width = 0.02
-                        cbar_ax = fig.add_axes([x10 - 2*pad, y10, width, y11 - y10])
+                        cbar_ax = fig.add_axes([x10 - 2 * pad, y10, width, y11 - y10])
                         cbar = fig.colorbar(im, cax=cbar_ax, format='%.0e',
                                             orientation='vertical')  # Generate colorbar
                         cbar.ax.locator_params(nbins=3)
@@ -520,7 +595,8 @@ if __name__ == "__main__":
                     count += 1
 
                 ax = plt.subplot(gs[0, count])
-                ax.imshow(langevin_std[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length], cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
+                ax.imshow(langevin_std[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
+                          cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
                 ax.set_xticks([])
@@ -551,7 +627,8 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                connection_path_1 = patches.ConnectionPatch([zoom_startx+zoom_length, zoom_starty], [zoom_length, zoom_length], coordsA=ax1.transData,
+                connection_path_1 = patches.ConnectionPatch([zoom_startx + zoom_length, zoom_starty],
+                                                            [zoom_length, zoom_length], coordsA=ax1.transData,
                                                             coordsB=ax.transData, color='r')
                 fig.add_artist(connection_path_1)
                 connection_path_2 = patches.ConnectionPatch([zoom_startx, zoom_starty], [0, zoom_length],
@@ -584,7 +661,7 @@ if __name__ == "__main__":
                     if method == 'l1_ssim':
                         continue
                     ax = plt.subplot(gs[2, count])
-                    avg = np.zeros((384,384))
+                    avg = np.zeros((384, 384))
                     for l in range(4):
                         avg += np_samps[method][l]
 
@@ -600,7 +677,7 @@ if __name__ == "__main__":
                     count += 1
 
                 ax = plt.subplot(gs[2, count])
-                avg = np.zeros((384,384))
+                avg = np.zeros((384, 384))
                 for l in range(4):
                     avg += langevin_recons[l, :, :]
 
@@ -618,7 +695,7 @@ if __name__ == "__main__":
                     if method == 'l1_ssim':
                         continue
                     ax = plt.subplot(gs[3, count])
-                    avg = np.zeros((384,384))
+                    avg = np.zeros((384, 384))
                     for l in range(2):
                         avg += np_samps[method][l]
 
@@ -644,21 +721,25 @@ if __name__ == "__main__":
                     count = 2
                     for method in keys:
                         if method != 'l1_ssim':
-                            ax = plt.subplot(gs[samp+4, count])
-                            ax.imshow(np_samps[method][samp][zoom_starty:zoom_starty+zoom_length, zoom_startx:zoom_startx+zoom_length], cmap='gray', vmin=0, vmax=0.7*np.max(np_gt))
+                            ax = plt.subplot(gs[samp + 4, count])
+                            ax.imshow(np_samps[method][samp][zoom_starty:zoom_starty + zoom_length,
+                                      zoom_startx:zoom_startx + zoom_length], cmap='gray', vmin=0,
+                                      vmax=0.7 * np.max(np_gt))
                             ax.set_xticklabels([])
                             ax.set_yticklabels([])
                             ax.set_xticks([])
                             ax.set_yticks([])
                             count += 1
 
-                    ax = plt.subplot(gs[samp+4, count])
-                    avg = np.zeros((384,384))
+                    ax = plt.subplot(gs[samp + 4, count])
+                    avg = np.zeros((384, 384))
                     for l in range(2):
                         avg += langevin_recons[l, :, :]
 
                     avg = avg / 2
-                    ax.imshow(langevin_recons[samp, zoom_starty:zoom_starty+zoom_length, zoom_startx:zoom_startx+zoom_length], cmap='gray', vmin=0, vmax=0.7*np.max(langevin_gt))
+                    ax.imshow(langevin_recons[samp, zoom_starty:zoom_starty + zoom_length,
+                              zoom_startx:zoom_startx + zoom_length], cmap='gray', vmin=0,
+                              vmax=0.7 * np.max(langevin_gt))
                     ax.set_xticklabels([])
                     ax.set_yticklabels([])
                     ax.set_xticks([])
@@ -668,4 +749,3 @@ if __name__ == "__main__":
                 if fig_count == 24:
                     exit()
                 fig_count += 1
-
