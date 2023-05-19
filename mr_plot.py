@@ -244,7 +244,7 @@ if __name__ == "__main__":
 
                 for z in range(5):
                     ax = plt.subplot(1, 5, z+1)
-                    ax.imshow(np_samps['rcgan'][z]), cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
+                    ax.imshow(np_samps['rcgan'][z], cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
                     ax.set_xticklabels([])
                     ax.set_yticklabels([])
                     ax.set_xticks([])
