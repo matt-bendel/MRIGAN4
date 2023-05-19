@@ -236,7 +236,7 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                plt.savefig(f'ismrm_gt.png', bbox_inches='tight', dpi=300)
+                plt.savefig(f'ismrm_zfr.png', bbox_inches='tight', dpi=300)
                 plt.close(fig)
 
                 fig = plt.figure()
