@@ -215,7 +215,7 @@ if __name__ == "__main__":
                 x_coord = zoom_startx + zoom_length
                 y_coords = [zoom_starty, zoom_starty + zoom_length]
 
-                fig = plt.figure(figsize=(ncol + 1, nrow + 1))
+                fig = plt.figure()
 
                 ax = plt.subplot(1, 1, 1)
                 ax.imshow(np_gt, cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
@@ -227,7 +227,7 @@ if __name__ == "__main__":
                 plt.savefig(f'ismrm_gt.png', bbox_inches='tight', dpi=300)
                 plt.close(fig)
 
-                fig = plt.figure(figsize=(ncol + 1, nrow + 1))
+                fig = plt.figure()
 
                 ax = plt.subplot(1, 1, 1)
                 ax.imshow(np_zfr, cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
@@ -239,7 +239,7 @@ if __name__ == "__main__":
                 plt.savefig(f'ismrm_gt.png', bbox_inches='tight', dpi=300)
                 plt.close(fig)
 
-                fig = plt.figure(figsize=(ncol + 1, nrow + 1))
+                fig = plt.figure()
                 fig.subplots_adjust(wspace=0, hspace=0.05)
 
                 for z in range(5):
