@@ -110,6 +110,7 @@ if __name__ == "__main__":
             avg_l1_ssim = torch.mean(gens_l1_ssim, dim=1)
 
             gt = rcGAN_model.reformat(x)
+            zfr = rcGAN_model.reformat(y)
 
             # TODO: Add Langevin, L1+SSIM model
 
@@ -140,7 +141,7 @@ if __name__ == "__main__":
                 np_gt = ndimage.rotate(
                     torch.tensor(S.H * tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu())).abs().numpy(), 180)
                 np_zfr = ndimage.rotate(
-                    torch.tensor(S.H * tensor_to_complex_np((y[j] * std[j] + mean[j]).cpu())).abs().numpy(), 180)
+                    torch.tensor(S.H * tensor_to_complex_np((zfr[j] * std[j] + mean[j]).cpu())).abs().numpy(), 180)
 
                 np_avgs['rcgan'] = ndimage.rotate(
                     torch.tensor(S.H * tensor_to_complex_np((avg_rcgan[j] * std[j] + mean[j]).cpu())).abs().numpy(),
@@ -243,7 +244,7 @@ if __name__ == "__main__":
 
                 for z in range(5):
                     ax = plt.subplot(1, 5, z+1)
-                    ax.imshow(np_zfr, cmap='gray', vmin=0, vmax=0.7 * np.max(np_samps['rcgan'][z]))
+                    ax.imshow(np_samps['rcgan'][z]), cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
                     ax.set_xticklabels([])
                     ax.set_yticklabels([])
                     ax.set_xticks([])
