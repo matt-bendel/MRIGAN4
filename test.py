@@ -203,7 +203,7 @@ if __name__ == "__main__":
                     gens[:, z, :, :, :, :] = model.reformat(model.forward(y, mask))
 
                 avg = torch.mean(gens, dim=1)
-                med = torch.median(gens, dim=1)['values']
+                med = torch.median(gens, dim=1).values
                 print(gens.shape)
                 print(med.shape)
                 print(avg.shape)
