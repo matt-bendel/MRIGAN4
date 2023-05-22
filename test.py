@@ -204,6 +204,9 @@ if __name__ == "__main__":
 
                 avg = torch.mean(gens, dim=1)
                 med = torch.median(gens, dim=1)
+                print(gens.shape)
+                print(med.shape)
+                print(avg.shape)
 
                 gt = model.reformat(x)
 
