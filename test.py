@@ -210,7 +210,7 @@ def get_com_fig(np_gt, np_avg, np_med, n, fig_num):
     ax.set_yticks([])
 
     ax = plt.subplot(gs[1, 3])
-    ax.imshow(2 * np.abs(gt_np - gt_np)[zoom_starty:zoom_starty + zoom_length,
+    ax.imshow(2 * np.abs(med_np - gt_np)[zoom_starty:zoom_starty + zoom_length,
               zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0,
                    vmax=np.max(np.abs(np_avg - gt_np)))
     ax.set_xticklabels([])
@@ -346,7 +346,7 @@ if __name__ == "__main__":
                     med_lpipss.append(lpips_met(rgb(gt_np), rgb(med_np)).numpy())
                     med_distss.append(dists_met(rgb(gt_np, unit_norm=True), rgb(med_np, unit_norm=True)).numpy())
 
-                    if j == 2 and i <= 4:
+                    if j == 2 and i == 0:
                         get_com_fig(gt_np, avg_gen_np, med_np, n, i)
                         exit()
 
