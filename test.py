@@ -210,7 +210,6 @@ if __name__ == "__main__":
                     gens[:, z, :, :, :, :] = model.reformat(model.forward(y, mask))
 
                 avg = torch.mean(gens, dim=1)
-                med = torch.median(gens, dim=1).values
 
                 gt = model.reformat(x)
 
@@ -224,11 +223,9 @@ if __name__ == "__main__":
                     S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
                     gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
                         (avg[j] * std[j] + mean[j]).cpu())
-                    med_ksp = tensor_to_complex_np((med[j] * std[j] + mean[j]).cpu())
 
                     avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
                     gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
-                    med_np = torch.tensor(S.H * med_ksp).abs().numpy()
 
                     for z in range(n):
                         np_samp = tensor_to_complex_np((gens[j, z, :, :, :, :] * std[j] + mean[j]).cpu())
@@ -274,14 +271,6 @@ if __name__ == "__main__":
                         ax.set_yticks([])
                         ax.set_title('Avg')
 
-                        ax = plt.subplot(gs[1, 1])
-                        im = ax.imshow(2 * np.abs(avg_gen_np - gt_np), cmap='jet', vmin=0,
-                                       vmax=np.max(np.abs(avg_gen_np - gt_np)))
-                        ax.set_xticklabels([])
-                        ax.set_yticklabels([])
-                        ax.set_xticks([])
-                        ax.set_yticks([])
-
                         ax = plt.subplot(gs[0, 2])
                         ax.imshow(med_np, cmap='gray', vmin=0, vmax=0.7 * np.max(gt_np))
                         ax.set_xticklabels([])
@@ -289,6 +278,14 @@ if __name__ == "__main__":
                         ax.set_xticks([])
                         ax.set_yticks([])
                         ax.set_title('Median')
+
+                        ax = plt.subplot(gs[1, 1])
+                        im = ax.imshow(2 * np.abs(avg_gen_np - gt_np), cmap='jet', vmin=0,
+                                       vmax=np.max(np.abs(avg_gen_np - gt_np)))
+                        ax.set_xticklabels([])
+                        ax.set_yticklabels([])
+                        ax.set_xticks([])
+                        ax.set_yticks([])
 
                         ax = plt.subplot(gs[1, 2])
                         im = ax.imshow(2 * np.abs(med_np - gt_np), cmap='jet', vmin=0,
