@@ -153,6 +153,7 @@ def get_com_fig(np_gt, np_avg, np_med, n, fig_num):
     ax.set_yticklabels([])
     ax.set_xticks([])
     ax.set_yticks([])
+    ax.set_title('Truth')
 
     ax1 = ax
 
@@ -170,6 +171,7 @@ def get_com_fig(np_gt, np_avg, np_med, n, fig_num):
     ax.set_yticklabels([])
     ax.set_xticks([])
     ax.set_yticks([])
+    ax.set_title('Truth')
 
     connection_path_1 = patches.ConnectionPatch([zoom_startx, y_coords[1]], [0, 0], coordsA=ax1.transData,
                                                 coordsB=ax.transData, color='r')
@@ -187,6 +189,7 @@ def get_com_fig(np_gt, np_avg, np_med, n, fig_num):
     ax.set_yticklabels([])
     ax.set_xticks([])
     ax.set_yticks([])
+    ax.set_title('Avg')
 
     ax = plt.subplot(gs[0, 3])
     ax.imshow(np_med[zoom_starty:zoom_starty + zoom_length,
@@ -195,8 +198,9 @@ def get_com_fig(np_gt, np_avg, np_med, n, fig_num):
     ax.set_yticklabels([])
     ax.set_xticks([])
     ax.set_yticks([])
+    ax.set_title('Median')
 
-    ax = plt.subplot(gs[1, 1])
+    ax = plt.subplot(gs[1, 2])
     im = ax.imshow(2 * np.abs(np_avg - gt_np)[zoom_starty:zoom_starty + zoom_length,
               zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0,
                    vmax=np.max(np.abs(np_avg - gt_np)))
@@ -205,7 +209,7 @@ def get_com_fig(np_gt, np_avg, np_med, n, fig_num):
     ax.set_xticks([])
     ax.set_yticks([])
 
-    ax = plt.subplot(gs[1, 1])
+    ax = plt.subplot(gs[1, 3])
     im = ax.imshow(2 * np.abs(np_med - gt_np)[zoom_starty:zoom_starty + zoom_length,
               zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0,
                    vmax=np.max(np.abs(np_avg - gt_np)))
