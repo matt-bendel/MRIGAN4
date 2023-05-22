@@ -348,7 +348,6 @@ if __name__ == "__main__":
 
                     if j == 2 and i == 0:
                         get_com_fig(gt_np, avg_gen_np, med_np, n, i)
-                        exit()
 
             print('AVG Recon')
             print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
