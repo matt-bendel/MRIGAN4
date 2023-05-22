@@ -32,6 +32,7 @@ import sigpy.mri as mr
 from data.transforms import to_tensor
 from models.architectures.old_gen import GeneratorModel
 from DISTS_pytorch import DISTS
+import matplotlib.patches as patches
 
 
 # M_1: 2.15
@@ -121,6 +122,99 @@ def rgb(im, unit_norm=False):
 
     return embed_ims.unsqueeze(0)
 
+def get_com_fig(np_gt, np_avg, np_med, n, fig_num):
+    zoom_startx = 80  # np.random.randint(120, 250)
+    zoom_starty1 = 180  # np.random.randint(30, 80)
+    zoom_starty2 = 180  # np.random.randint(260, 300)
+
+    p = np.random.rand()
+    zoom_starty = zoom_starty1
+    if p <= 0.5:
+        zoom_starty = zoom_starty2
+
+    zoom_length = 80
+
+    x_coord = zoom_startx + zoom_length
+    y_coords = [zoom_starty, zoom_starty + zoom_length]
+
+    nrow = 2
+    ncol = 4
+
+    fig = plt.figure(figsize=(ncol + 1, nrow + 1))
+
+    gs = gridspec.GridSpec(nrow, ncol,
+                           wspace=0.0, hspace=0.0,
+                           top=1. - 0.5 / (nrow + 1), bottom=0.5 / (nrow + 1),
+                           left=0.5 / (ncol + 1), right=1 - 0.5 / (ncol + 1))
+
+    ax = plt.subplot(gs[0, 0])
+    ax.imshow(np_gt, cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    ax1 = ax
+
+    rect = patches.Rectangle((zoom_startx, zoom_starty), zoom_length, zoom_length, linewidth=1,
+                             edgecolor='r',
+                             facecolor='none')
+
+    # Add the patch to the Axes
+    ax.add_patch(rect)
+
+    ax = plt.subplot(gs[0, 1])
+    ax.imshow(np_gt[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
+              cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    connection_path_1 = patches.ConnectionPatch([zoom_startx, y_coords[1]], [0, 0], coordsA=ax1.transData,
+                                                coordsB=ax.transData, color='r')
+    fig.add_artist(connection_path_1)
+    connection_path_2 = patches.ConnectionPatch([x_coord, y_coords[1]], [zoom_length, 0],
+                                                coordsA=ax1.transData,
+                                                coordsB=ax.transData, color='r')
+    fig.add_artist(connection_path_2)
+
+
+    ax = plt.subplot(gs[0, 2])
+    ax.imshow(np_avg[zoom_starty:zoom_starty + zoom_length,
+              zoom_startx:zoom_startx + zoom_length], cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    ax = plt.subplot(gs[0, 3])
+    ax.imshow(np_med[zoom_starty:zoom_starty + zoom_length,
+              zoom_startx:zoom_startx + zoom_length], cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    ax = plt.subplot(gs[1, 1])
+    im = ax.imshow(2 * np.abs(np_avg - gt_np)[zoom_starty:zoom_starty + zoom_length,
+              zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0,
+                   vmax=np.max(np.abs(np_avg - gt_np)))
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    ax = plt.subplot(gs[1, 1])
+    im = ax.imshow(2 * np.abs(np_med - gt_np)[zoom_starty:zoom_starty + zoom_length,
+              zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0,
+                   vmax=np.max(np.abs(np_avg - gt_np)))
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    plt.savefig(f'med_tests_{n}_samps_{fig_num}.png', bbox_inches='tight', dpi=300)
 
 if __name__ == "__main__":
     torch.set_float32_matmul_precision('medium')
@@ -248,59 +342,8 @@ if __name__ == "__main__":
                     med_lpipss.append(lpips_met(rgb(gt_np), rgb(med_np)).numpy())
                     med_distss.append(dists_met(rgb(gt_np, unit_norm=True), rgb(med_np, unit_norm=True)).numpy())
 
-                    if j == 2 and (i == 0 or i == 1 or i == 2):
-                        nrow = 2
-                        ncol = 3
-
-                        fig = plt.figure(figsize=(ncol + 1, nrow + 1))
-
-                        gs = gridspec.GridSpec(nrow, ncol,
-                                               wspace=0.0, hspace=0.0,
-                                               top=1. - 0.5 / (nrow + 1), bottom=0.5 / (nrow + 1),
-                                               left=0.5 / (ncol + 1), right=1 - 0.5 / (ncol + 1))
-
-                        ax = plt.subplot(gs[0, 0])
-                        ax.imshow(gt_np, cmap='gray', vmin=0, vmax=0.7 * np.max(gt_np))
-                        ax.set_xticklabels([])
-                        ax.set_yticklabels([])
-                        ax.set_xticks([])
-                        ax.set_yticks([])
-                        ax.set_title('GT')
-
-                        ax = plt.subplot(gs[0, 1])
-                        ax.imshow(avg_gen_np, cmap='gray', vmin=0, vmax=0.7 * np.max(gt_np))
-                        ax.set_xticklabels([])
-                        ax.set_yticklabels([])
-                        ax.set_xticks([])
-                        ax.set_yticks([])
-                        ax.set_title('Avg')
-
-                        ax = plt.subplot(gs[0, 2])
-                        ax.imshow(med_np, cmap='gray', vmin=0, vmax=0.7 * np.max(gt_np))
-                        ax.set_xticklabels([])
-                        ax.set_yticklabels([])
-                        ax.set_xticks([])
-                        ax.set_yticks([])
-                        ax.set_title('Median')
-
-                        ax = plt.subplot(gs[1, 1])
-                        im = ax.imshow(2 * np.abs(avg_gen_np - gt_np), cmap='jet', vmin=0,
-                                       vmax=np.max(np.abs(avg_gen_np - gt_np)))
-                        ax.set_xticklabels([])
-                        ax.set_yticklabels([])
-                        ax.set_xticks([])
-                        ax.set_yticks([])
-
-                        ax = plt.subplot(gs[1, 2])
-                        im = ax.imshow(2 * np.abs(med_np - gt_np), cmap='jet', vmin=0,
-                                       vmax=np.max(np.abs(avg_gen_np - gt_np)))
-                        ax.set_xticklabels([])
-                        ax.set_yticklabels([])
-                        ax.set_xticks([])
-                        ax.set_yticks([])
-
-                        plt.savefig(f'median_fig_{i}.png', bbox_inches='tight', dpi=300)
-                        plt.close(fig)
+                    if j == 2 and i <= 4:
+                        get_com_fig(gt_np, avg_gen_np, med_np, n, i)
 
             print('AVG Recon')
             print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
