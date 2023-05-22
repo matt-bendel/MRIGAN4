@@ -179,66 +179,61 @@ if __name__ == "__main__":
         model.cuda()
         model.eval()
 
-        n_samps = [1, 2, 4, 8, 16, 32]
+        n_samps = [31]
 
         for n in n_samps:
-            break
-            num_trials = 10
             trial_distss = []
 
             print(f"{n} SAMPLES")
-            for trial in range(num_trials):
-                psnrs = []
-                ssims = []
-                apsds = []
-                lpipss = []
-                distss = []
-                for i, data in enumerate(test_loader):
-                    y, x, mask, mean, std, maps, _, _ = data
-                    y = y.cuda()
-                    x = x.cuda()
-                    mask = mask.cuda()
-                    mean = mean.cuda()
-                    std = std.cuda()
+            psnrs = []
+            ssims = []
+            apsds = []
+            lpipss = []
+            distss = []
+            for i, data in enumerate(test_loader):
+                y, x, mask, mean, std, maps, _, _ = data
+                y = y.cuda()
+                x = x.cuda()
+                mask = mask.cuda()
+                mean = mean.cuda()
+                std = std.cuda()
 
-                    gens = torch.zeros(size=(y.size(0), n, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
+                gens = torch.zeros(size=(y.size(0), n, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
+                for z in range(n):
+                    gens[:, z, :, :, :, :] = model.reformat(model.forward(y, mask))
+
+                avg = torch.mean(gens, dim=1)
+                med = torch.median(gens, dim=1)
+
+                gt = model.reformat(x)
+
+                batch_psnrs = []
+                batchs_ssims = []
+                batch_apsds = []
+
+                for j in range(y.size(0)):
+                    single_samps = np.zeros((n, cfg.im_size, cfg.im_size))
+
+                    S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
+                    gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
+                        (med[j] * std[j] + mean[j]).cpu())
+
+                    avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
+                    gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
+
                     for z in range(n):
-                        gens[:, z, :, :, :, :] = model.reformat(model.forward(y, mask))
+                        np_samp = tensor_to_complex_np((gens[j, z, :, :, :, :] * std[j] + mean[j]).cpu())
+                        single_samps[z, :, :] = torch.tensor(S.H * np_samp).abs().numpy()
 
-                    avg = torch.mean(gens, dim=1)
-
-                    gt = model.reformat(x)
-
-                    batch_psnrs = []
-                    batchs_ssims = []
-                    batch_apsds = []
-
-                    for j in range(y.size(0)):
-                        single_samps = np.zeros((n, cfg.im_size, cfg.im_size))
-
-                        S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
-                        gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
-                            (avg[j] * std[j] + mean[j]).cpu())
-
-                        avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
-                        gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
-
-                        for z in range(n):
-                            np_samp = tensor_to_complex_np((gens[j, z, :, :, :, :] * std[j] + mean[j]).cpu())
-                            single_samps[z, :, :] = torch.tensor(S.H * np_samp).abs().numpy()
-
-                        apsds.append(np.mean(np.std(single_samps, axis=0), axis=(0, 1)))
-                        psnrs.append(psnr(gt_np, avg_gen_np))
-                        ssims.append(ssim(gt_np, avg_gen_np))
-                        # lpipss.append(lpips_met(rgb(gt_np), rgb(avg_gen_np)).numpy())
-                        distss.append(dists_met(rgb(gt_np, unit_norm=True), rgb(avg_gen_np, unit_norm=True)))
-
-                trial_distss.append(np.mean(distss))
+                    apsds.append(np.mean(np.std(single_samps, axis=0), axis=(0, 1)))
+                    psnrs.append(psnr(gt_np, avg_gen_np))
+                    ssims.append(ssim(gt_np, avg_gen_np))
+                    lpipss.append(lpips_met(rgb(gt_np), rgb(avg_gen_np)).numpy())
+                    distss.append(dists_met(rgb(gt_np, unit_norm=True), rgb(avg_gen_np, unit_norm=True)).numpy())
 
             print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
             print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
-            # print(f'LPIPS: {np.mean(lpipss)} \pm {np.std(lpipss) / np.sqrt(len(lpipss))}')
-            print(np.median(trial_distss))
+            print(f'LPIPS: {np.mean(lpipss)} \pm {np.std(lpipss) / np.sqrt(len(lpipss))}')
             print(f'DISTS: {np.mean(distss)} \pm {np.std(distss) / np.sqrt(len(distss))}')
 
             # print(f'APSD: {np.mean(apsds)}')
@@ -298,16 +293,16 @@ if __name__ == "__main__":
 
     # n_samps = [1, 2, 4, 8, 16, 32]
     # for n in n_samps:
-    #     print(f"{n} SAMPLES")
-    inception_embedding = VGG16Embedding()
-    fid_metric = FIDMetric(gan=model,
-                           ref_loader=train_dataloader,
-                           loader=val_dataloader,
-                           image_embedding=inception_embedding,
-                           condition_embedding=inception_embedding,
-                           cuda=True,
-                           args=cfg)
-    fid, _ = fid_metric.get_fid()
+    # #     print(f"{n} SAMPLES")
+    # inception_embedding = VGG16Embedding()
+    # fid_metric = FIDMetric(gan=model,
+    #                        ref_loader=train_dataloader,
+    #                        loader=val_dataloader,
+    #                        image_embedding=inception_embedding,
+    #                        condition_embedding=inception_embedding,
+    #                        cuda=True,
+    #                        args=cfg)
+    # fid, _ = fid_metric.get_fid()
 
     # print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
     # print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
