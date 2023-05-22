@@ -310,7 +310,7 @@ if __name__ == "__main__":
             print(f'PSNR: {np.mean(med_psnrs)} \pm {np.std(med_psnrs) / np.sqrt(len(med_psnrs))}')
             print(f'SSIM: {np.mean(med_ssims)} \pm {np.std(med_ssims) / np.sqrt(len(med_ssims))}')
             print(f'LPIPS: {np.mean(med_lpipss)} \pm {np.std(med_lpipss) / np.sqrt(len(med_lpipss))}')
-            print(f'DISTS: {np.mean(med_lpipss)} \pm {np.std(med_lpipss) / np.sqrt(len(med_lpipss))}')
+            print(f'DISTS: {np.mean(med_distss)} \pm {np.std(med_distss) / np.sqrt(len(med_distss))}')
 
             # print(f'APSD: {np.mean(apsds)}')
 
