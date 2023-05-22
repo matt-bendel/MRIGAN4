@@ -7,6 +7,7 @@ import pathlib
 import lpips
 
 import numpy as np
+from matplotlib import gridspec
 
 from data_loaders.MRIDataModule import MRIDataModule
 from datasets.fastmri_multicoil_general import FastMRIDataModule
@@ -190,6 +191,12 @@ if __name__ == "__main__":
             apsds = []
             lpipss = []
             distss = []
+
+            med_psnrs = []
+            med_ssims = []
+            med_lpipss = []
+            med_distss = []
+
             for i, data in enumerate(test_loader):
                 y, x, mask, mean, std, maps, _, _ = data
                 y = y.cuda()
@@ -204,9 +211,6 @@ if __name__ == "__main__":
 
                 avg = torch.mean(gens, dim=1)
                 med = torch.median(gens, dim=1).values
-                print(gens.shape)
-                print(med.shape)
-                print(avg.shape)
 
                 gt = model.reformat(x)
 
@@ -219,10 +223,12 @@ if __name__ == "__main__":
 
                     S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
                     gt_ksp, avg_ksp = tensor_to_complex_np((gt[j] * std[j] + mean[j]).cpu()), tensor_to_complex_np(
-                        (med[j] * std[j] + mean[j]).cpu())
+                        (avg[j] * std[j] + mean[j]).cpu())
+                    med_ksp = tensor_to_complex_np((med[j] * std[j] + mean[j]).cpu())
 
                     avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
                     gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
+                    med_np = torch.tensor(S.H * med_ksp).abs().numpy()
 
                     for z in range(n):
                         np_samp = tensor_to_complex_np((gens[j, z, :, :, :, :] * std[j] + mean[j]).cpu())
@@ -234,10 +240,77 @@ if __name__ == "__main__":
                     lpipss.append(lpips_met(rgb(gt_np), rgb(avg_gen_np)).numpy())
                     distss.append(dists_met(rgb(gt_np, unit_norm=True), rgb(avg_gen_np, unit_norm=True)).numpy())
 
+                    med_psnrs.append(psnr(gt_np, med_np))
+                    med_ssims.append(ssim(gt_np, med_np))
+                    med_lpipss.append(lpips_met(rgb(gt_np), rgb(med_np)).numpy())
+                    med_distss.append(dists_met(rgb(gt_np, unit_norm=True), rgb(med_np, unit_norm=True)).numpy())
+
+                    if j == 0 and i == 0:
+                        nrow = 2
+                        ncol = 3
+
+                        fig = plt.figure(figsize=(ncol + 1, nrow + 1))
+
+                        gs = gridspec.GridSpec(nrow, ncol,
+                                               wspace=0.0, hspace=0.0,
+                                               top=1. - 0.5 / (nrow + 1), bottom=0.5 / (nrow + 1),
+                                               left=0.5 / (ncol + 1), right=1 - 0.5 / (ncol + 1))
+
+                        ax = plt.subplot(gs[0, 0])
+                        ax.imshow(gt_np, cmap='gray', vmin=0, vmax=0.7 * np.max(gt_np))
+                        ax.set_xticklabels([])
+                        ax.set_yticklabels([])
+                        ax.set_xticks([])
+                        ax.set_yticks([])
+                        ax.set_title('GT')
+
+                        ax = plt.subplot(gs[0, 1])
+                        ax.imshow(avg_gen_np, cmap='gray', vmin=0, vmax=0.7 * np.max(gt_np))
+                        ax.set_xticklabels([])
+                        ax.set_yticklabels([])
+                        ax.set_xticks([])
+                        ax.set_yticks([])
+                        ax.set_title('Avg')
+
+                        ax = plt.subplot(gs[1, 1])
+                        im = ax.imshow(2 * np.abs(avg_gen_np - gt_np), cmap='jet', vmin=0,
+                                       vmax=np.max(np.abs(avg_gen_np - gt_np)))
+                        ax.set_xticklabels([])
+                        ax.set_yticklabels([])
+                        ax.set_xticks([])
+                        ax.set_yticks([])
+
+                        ax = plt.subplot(gs[0, 2])
+                        ax.imshow(med_np, cmap='gray', vmin=0, vmax=0.7 * np.max(gt_np))
+                        ax.set_xticklabels([])
+                        ax.set_yticklabels([])
+                        ax.set_xticks([])
+                        ax.set_yticks([])
+                        ax.set_title('Median')
+
+                        ax = plt.subplot(gs[1, 2])
+                        im = ax.imshow(2 * np.abs(med_np - gt_np), cmap='jet', vmin=0,
+                                       vmax=np.max(np.abs(avg_gen_np - gt_np)))
+                        ax.set_xticklabels([])
+                        ax.set_yticklabels([])
+                        ax.set_xticks([])
+                        ax.set_yticks([])
+
+                        plt.savefig(f'median_fig.png', bbox_inches='tight', dpi=300)
+                        plt.close(fig)
+
+
+            print('AVG Recon')
             print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
             print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
             print(f'LPIPS: {np.mean(lpipss)} \pm {np.std(lpipss) / np.sqrt(len(lpipss))}')
             print(f'DISTS: {np.mean(distss)} \pm {np.std(distss) / np.sqrt(len(distss))}')
+
+            print('Median Recon')
+            print(f'PSNR: {np.mean(med_psnrs)} \pm {np.std(med_psnrs) / np.sqrt(len(med_psnrs))}')
+            print(f'SSIM: {np.mean(med_ssims)} \pm {np.std(med_ssims) / np.sqrt(len(med_ssims))}')
+            print(f'LPIPS: {np.mean(med_lpipss)} \pm {np.std(med_lpipss) / np.sqrt(len(med_lpipss))}')
+            print(f'DISTS: {np.mean(med_lpipss)} \pm {np.std(med_lpipss) / np.sqrt(len(med_lpipss))}')
 
             # print(f'APSD: {np.mean(apsds)}')
 
