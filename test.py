@@ -184,7 +184,7 @@ if __name__ == "__main__":
         model.cuda()
         model.eval()
 
-        n_samps = [3]
+        n_samps = [1,3,5,9,17,33]
 
         for n in n_samps:
             trial_distss = []
