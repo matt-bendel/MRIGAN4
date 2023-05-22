@@ -173,10 +173,10 @@ def get_com_fig(np_gt, np_avg, np_med, n, fig_num):
     ax.set_yticks([])
     ax.set_title('Truth')
 
-    connection_path_1 = patches.ConnectionPatch([zoom_startx, y_coords[1]], [0, 0], coordsA=ax1.transData,
+    connection_path_1 = patches.ConnectionPatch([x_coord, y_coords[0]], [0, 0], coordsA=ax1.transData,
                                                 coordsB=ax.transData, color='r')
     fig.add_artist(connection_path_1)
-    connection_path_2 = patches.ConnectionPatch([x_coord, y_coords[1]], [zoom_length, 0],
+    connection_path_2 = patches.ConnectionPatch([x_coord, y_coords[1]], [0, zoom_length],
                                                 coordsA=ax1.transData,
                                                 coordsB=ax.transData, color='r')
     fig.add_artist(connection_path_2)
@@ -203,7 +203,7 @@ def get_com_fig(np_gt, np_avg, np_med, n, fig_num):
     ax = plt.subplot(gs[1, 2])
     im = ax.imshow(2 * np.abs(np_avg - gt_np)[zoom_starty:zoom_starty + zoom_length,
               zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0,
-                   vmax=np.max(np.abs(np_avg - gt_np)))
+                   vmax=1e-3)
     ax.set_xticklabels([])
     ax.set_yticklabels([])
     ax.set_xticks([])
@@ -212,7 +212,7 @@ def get_com_fig(np_gt, np_avg, np_med, n, fig_num):
     ax = plt.subplot(gs[1, 3])
     im = ax.imshow(2 * np.abs(np_med - gt_np)[zoom_starty:zoom_starty + zoom_length,
               zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0,
-                   vmax=np.max(np.abs(np_avg - gt_np)))
+                   vmax=1e-3)
     ax.set_xticklabels([])
     ax.set_yticklabels([])
     ax.set_xticks([])
@@ -348,6 +348,7 @@ if __name__ == "__main__":
 
                     if j == 2 and i <= 4:
                         get_com_fig(gt_np, avg_gen_np, med_np, n, i)
+                        exit()
 
             print('AVG Recon')
             print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
