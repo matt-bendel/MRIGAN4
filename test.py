@@ -32,6 +32,8 @@ import sigpy.mri as mr
 from data.transforms import to_tensor
 from models.architectures.old_gen import GeneratorModel
 from DISTS_pytorch import DISTS
+
+
 # M_1: 2.15
 # C_1: 3.50
 # CFID_1: 5.65
@@ -103,6 +105,7 @@ def generate_error_map(fig, target, recon, method, image_ind, rows, cols, relati
 def load_object(dct):
     return types.SimpleNamespace(**dct)
 
+
 def rgb(im, unit_norm=False):
     embed_ims = torch.zeros(size=(3, 384, 384))
     tens_im = torch.tensor(im)
@@ -117,6 +120,7 @@ def rgb(im, unit_norm=False):
     embed_ims[2, :, :] = tens_im
 
     return embed_ims.unsqueeze(0)
+
 
 if __name__ == "__main__":
     torch.set_float32_matmul_precision('medium')
@@ -244,7 +248,7 @@ if __name__ == "__main__":
                     med_lpipss.append(lpips_met(rgb(gt_np), rgb(med_np)).numpy())
                     med_distss.append(dists_met(rgb(gt_np, unit_norm=True), rgb(med_np, unit_norm=True)).numpy())
 
-                    if j == 2 and i == 0:
+                    if j == 2 and (i == 0 or i == 1 or i == 2):
                         nrow = 2
                         ncol = 3
 
@@ -295,9 +299,8 @@ if __name__ == "__main__":
                         ax.set_xticks([])
                         ax.set_yticks([])
 
-                        plt.savefig(f'median_fig.png', bbox_inches='tight', dpi=300)
+                        plt.savefig(f'median_fig_{i}.png', bbox_inches='tight', dpi=300)
                         plt.close(fig)
-
 
             print('AVG Recon')
             print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
