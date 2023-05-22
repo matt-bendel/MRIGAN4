@@ -234,7 +234,7 @@ if __name__ == "__main__":
                         np_samp = tensor_to_complex_np((gens[j, z, :, :, :, :] * std[j] + mean[j]).cpu())
                         single_samps[z, :, :] = torch.tensor(S.H * np_samp).abs().numpy()
 
-                    med_np = np.media(single_samps, axis=0)
+                    med_np = np.median(single_samps, axis=0)
 
                     apsds.append(np.mean(np.std(single_samps, axis=0), axis=(0, 1)))
                     psnrs.append(psnr(gt_np, avg_gen_np))
