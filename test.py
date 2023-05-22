@@ -234,6 +234,8 @@ if __name__ == "__main__":
                         np_samp = tensor_to_complex_np((gens[j, z, :, :, :, :] * std[j] + mean[j]).cpu())
                         single_samps[z, :, :] = torch.tensor(S.H * np_samp).abs().numpy()
 
+                    med_np = np.media(single_samps, axis=0)
+
                     apsds.append(np.mean(np.std(single_samps, axis=0), axis=(0, 1)))
                     psnrs.append(psnr(gt_np, avg_gen_np))
                     ssims.append(ssim(gt_np, avg_gen_np))
@@ -245,7 +247,7 @@ if __name__ == "__main__":
                     med_lpipss.append(lpips_met(rgb(gt_np), rgb(med_np)).numpy())
                     med_distss.append(dists_met(rgb(gt_np, unit_norm=True), rgb(med_np, unit_norm=True)).numpy())
 
-                    if j == 0 and i == 0:
+                    if j == 2 and i == 0:
                         nrow = 2
                         ncol = 3
 
