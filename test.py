@@ -367,7 +367,7 @@ if __name__ == "__main__":
     m_comps = []
     c_comps = []
 
-    # inception_embedding = VGG16Embedding(parallel=True)
+    inception_embedding = VGG16Embedding(parallel=True)
     # # CFID_1
     # cfid_metric = CFIDMetric(gan=model,
     #                          loader=test_loader,
