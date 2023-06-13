@@ -191,9 +191,6 @@ if __name__ == "__main__":
         print(f"{n} SAMPLES")
 
         for i, data in enumerate(test_loader):
-            if current_count >= count:
-                exit()
-
             y, x, mask, mean, std, maps, _, _ = data
             y = y.cuda()
             x = x.cuda()
@@ -214,6 +211,8 @@ if __name__ == "__main__":
             batch_apsds = []
 
             for j in range(y.size(0)):
+                if current_count >= count:
+                    exit()
                 single_samps = np.zeros((n, cfg.im_size, cfg.im_size))
 
                 S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
@@ -236,10 +235,15 @@ if __name__ == "__main__":
 
                 u, s, vh = np.linalg.svd(cov_mat, full_matrices=False)
 
+                print(u.shape)
+                print(vh.shape)
+
                 plt.figure()
                 plt.scatter(range(len(s)), sklearn.preprocessing.normalize(s.reshape((1,-1))))
                 plt.savefig(f'test_sv_{current_count}.png')
                 plt.close()
+
+
 
                 current_count += 1
 
