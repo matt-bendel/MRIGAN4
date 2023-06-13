@@ -237,7 +237,7 @@ if __name__ == "__main__":
 
                 plt.figure()
                 plt.scatter(range(len(s)), sklearn.preprocessing.normalize(s.reshape((1,-1))))
-                plt.savefig(f'test_sv_{current_count}.png')
+                plt.savefig(f'sv_test/test_sv_{current_count}.png')
                 plt.close()
 
                 for l in range(5):
