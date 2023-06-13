@@ -241,8 +241,10 @@ if __name__ == "__main__":
                 plt.close()
 
                 for l in range(5):
+                    v_re = vh[l].reshape((384, 384))
+                    v_re = (v_re - np.min(v_re)) / (np.max(v_re) - np.min(v_re))
                     plt.figure()
-                    plt.imshow(np.abs(vh[l].reshape((384, 384))), cmap='viridis')
+                    plt.imshow(v_re, cmap='viridis')
                     plt.colorbar()
                     plt.savefig(f'sv_test/test_sv_v_{current_count}_{l}.png')
                     plt.close()
