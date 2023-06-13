@@ -237,7 +237,7 @@ if __name__ == "__main__":
                 u, s, vh = np.linalg.svd(cov_mat, full_matrices=False)
 
                 plt.figure()
-                plt.scatter(s)
+                plt.scatter(range(len(s)), s)
                 plt.savefig(f'test_sv_{current_count}.png')
                 plt.close()
 
