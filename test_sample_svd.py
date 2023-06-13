@@ -243,7 +243,7 @@ if __name__ == "__main__":
                 for l in range(5):
                     plt.figure()
                     plt.imshow(vh[l].reshape((384, 384)))
-                    plt.savefig(f'test_sv_v_{current_count}_l.png')
+                    plt.savefig(f'test_sv_v_{current_count}_{l}.png')
                     plt.close()
 
                 exit()
