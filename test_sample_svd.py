@@ -8,7 +8,7 @@ import lpips
 
 import numpy as np
 from matplotlib import gridspec
-
+import sklearn.preprocessing
 from data_loaders.MRIDataModule import MRIDataModule
 from datasets.fastmri_multicoil_general import FastMRIDataModule
 from data_loaders.CelebAHQDataModule import CelebAHQDataModule
@@ -237,7 +237,7 @@ if __name__ == "__main__":
                 u, s, vh = np.linalg.svd(cov_mat, full_matrices=False)
 
                 plt.figure()
-                plt.scatter(range(len(s)), s)
+                plt.scatter(range(len(s)), sklearn.preprocessing.normalize(s))
                 plt.savefig(f'test_sv_{current_count}.png')
                 plt.close()
 
