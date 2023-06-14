@@ -226,6 +226,7 @@ if __name__ == "__main__":
                     np_samp = tensor_to_complex_np((gens[j, z, :, :, :, :] * std[j] + mean[j]).cpu())
                     single_samps[z, :, :] = torch.tensor(S.H * np_samp).abs().numpy()
 
+                avg_gen_np = np.mean(single_samps, axis=0)
                 single_samps = single_samps - avg_gen_np[None, :, :]
 
                 cov_mat = np.zeros((n, avg_gen_np.shape[-1] * avg_gen_np.shape[-2]))
