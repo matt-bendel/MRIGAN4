@@ -294,7 +294,6 @@ if __name__ == "__main__":
 
                 plt.savefig(f'ismrm_samps.png', bbox_inches='tight', dpi=300)
                 plt.close(fig)
-                exit()
 
                 # TODO: OG fig plot
                 # TODO: metrics
