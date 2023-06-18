@@ -816,5 +816,6 @@ if __name__ == "__main__":
 
                 plt.savefig(f'mr_figs/app_mri_fig_pca_{fig_count}.png', bbox_inches='tight', dpi=300)
                 if fig_count == 24:
+                    print(fig_count)
                     exit()
                 fig_count += 1
