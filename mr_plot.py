@@ -188,7 +188,7 @@ if __name__ == "__main__":
                     u, s, vh = np.linalg.svd(cov_mat, full_matrices=False)
 
                     for z in range(5):
-                        v_re = vh[l].reshape((384, 384))
+                        v_re = vh[z].reshape((384, 384))
                         v_re = (v_re - np.min(v_re)) / (np.max(v_re) - np.min(v_re))
                         principle_components[z, :, :] = v_re
 
@@ -232,7 +232,7 @@ if __name__ == "__main__":
                 u, s, vh = np.linalg.svd(cov_mat, full_matrices=False)
 
                 for z in range(5):
-                    v_re = vh[l].reshape((384, 384))
+                    v_re = vh[z].reshape((384, 384))
                     v_re = (v_re - np.min(v_re)) / (np.max(v_re) - np.min(v_re))
                     langevin_principle_components[z, :, :] = v_re
 
