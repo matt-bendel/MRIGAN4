@@ -795,8 +795,7 @@ if __name__ == "__main__":
                         if method != 'l1_ssim':
                             ax = plt.subplot(gs[row + pc, count])
                             ax.imshow(np_principle_components[method][pc, zoom_starty:zoom_starty + zoom_length,
-                                      zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0,
-                                      vmax=1)
+                                      zoom_startx:zoom_startx + zoom_length], cmap='viridis')
                             ax.set_xticklabels([])
                             ax.set_yticklabels([])
                             ax.set_xticks([])
@@ -807,13 +806,14 @@ if __name__ == "__main__":
                     ax = plt.subplot(gs[row+pc, count])
                     ax.imshow(
                         langevin_principle_components[pc, zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
-                        cmap='jet', vmin=0, vmax=1)
+                        cmap='viridis')
                     ax.set_xticklabels([])
                     ax.set_yticklabels([])
                     ax.set_xticks([])
                     ax.set_yticks([])
 
                 plt.savefig(f'mr_figs/app_mri_fig_pca_{fig_count}.png', bbox_inches='tight', dpi=300)
+                plt.close(fig)
                 if fig_count == 24:
                     print(fig_count)
                     exit()
