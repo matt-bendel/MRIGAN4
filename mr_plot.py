@@ -220,7 +220,7 @@ if __name__ == "__main__":
                 langevin_gt = ndimage.rotate(recon_object['gt'][0][0].abs().cpu().numpy(), 180)
                 langevin_avg = np.mean(langevin_recons, axis=0)
                 langevin_std = np.std(langevin_recons, axis=0)
-                langevin_principle_components = np.zeros(5, 384, 384)
+                langevin_principle_components = np.zeros((5, 384, 384))
 
                 cov_mat = np.zeros((32, np_gt.shape[-1] * np_gt.shape[-2]))
                 single_samps = langevin_recons
