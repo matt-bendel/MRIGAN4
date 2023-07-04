@@ -63,7 +63,7 @@ if __name__ == '__main__':
 
         if args.rcgan:
             noise_structure = {"AWGN": args.awgn, "structure": args.noise_structure}
-            model = Ohayon(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure, args.num_gpus)
+            model = rcGAN(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure, args.num_gpus)
         else:
             noise_structure = {"AWGN": args.awgn, "structure": args.noise_structure}
             model = L1SSIMMRI(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure, args.num_gpus)
@@ -126,23 +126,23 @@ if __name__ == '__main__':
         log_model="all",
         save_dir=cfg.checkpoint_dir + 'wandb'
     )
-    # checkpoint_callback_epoch = ModelCheckpoint(
-    #     monitor='epoch',
-    #     mode='max',
-    #     dirpath=cfg.checkpoint_dir + args.exp_name + '/',
-    #     filename='checkpoint-{epoch}',
-    #     save_top_k=50
-    # )
-    checkpoint_callback = ModelCheckpoint(
-        monitor='val_psnr',
+    checkpoint_callback_epoch = ModelCheckpoint(
+        monitor='epoch',
         mode='max',
         dirpath=cfg.checkpoint_dir + args.exp_name + '/',
-        filename='best_model',
-        save_top_k=1
+        filename='checkpoint-{epoch}',
+        save_top_k=50
     )
+    # checkpoint_callback = ModelCheckpoint(
+    #     monitor='val_psnr',
+    #     mode='max',
+    #     dirpath=cfg.checkpoint_dir + args.exp_name + '/',
+    #     filename='best_model',
+    #     save_top_k=1
+    # )
 
     trainer = pl.Trainer(accelerator="gpu", devices=args.num_gpus, strategy='ddp' if not args.dp else 'dp',
-                         max_epochs=cfg.num_epochs, callbacks=[checkpoint_callback],
+                         max_epochs=cfg.num_epochs, callbacks=[checkpoint_callback_epoch],
                          num_sanity_val_steps=2, profiler="simple", logger=wandb_logger, benchmark=False, log_every_n_steps=10)
 
     if args.resume:

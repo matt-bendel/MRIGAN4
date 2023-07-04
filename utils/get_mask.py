@@ -10,16 +10,16 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type
     a = None
 
     # RANDOM MASK GENERATION
-    # if mask_type == 2:
-    #     midway = resolution // 2
-    #     s = midway - args.calib_width // 2
-    #     e = s + args.calib_width
-    #     m[:, s:e] = True
-    #     a = np.random.choice(resolution - args.calib_width, total_lines, replace=False)
-    #     a = np.where(a < s, a, a + args.calib_width)
+    if mask_type == 2:
+        midway = resolution // 2
+        s = midway - args.calib_width // 2
+        e = s + args.calib_width
+        m[:, s:e] = True
+        a = np.random.choice(resolution - args.calib_width, resolution // R, replace=False)
+        a = np.where(a < s, a, a + args.calib_width)
 
     # LOW DIM GRO:
-    # if mask_type == 1:
+    if mask_type == 1:
         # a = np.array(
         #     [
         #         1, 10, 18, 25, 31, 37, 42, 46, 50, 54, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 72, 76, 80, 84, 88,
@@ -27,10 +27,10 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type
         #     ]
         # )
         # HIGH DIM R=8 GRO
-    a = np.array(
-        [1, 23, 42, 60, 77, 92, 105, 117, 128, 138, 147, 155, 162, 169, 176, 182, 184, 185, 186, 187, 188, 189, 190,
-         191, 192, 193, 194, 195,
-         196, 197, 198, 199, 200, 204, 210, 217, 224, 231, 239, 248, 258, 269, 281, 294, 309, 326, 344, 363])
+        a = np.array(
+            [1, 23, 42, 60, 77, 92, 105, 117, 128, 138, 147, 155, 162, 169, 176, 182, 184, 185, 186, 187, 188, 189, 190,
+             191, 192, 193, 194, 195,
+             196, 197, 198, 199, 200, 204, 210, 217, 224, 231, 239, 248, 258, 269, 281, 294, 309, 326, 344, 363])
 
     # LOW DIM RANDOM R=4 MASK:
     # if mask_type == 3:

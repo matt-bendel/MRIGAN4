@@ -54,8 +54,13 @@ class rcGAN(pl.LightningModule):
         self.save_hyperparameters()  # Save passed values
 
     def get_noise(self, num_vectors, mask):
-        z = torch.randn(num_vectors, 2, self.resolution, self.resolution, device=self.device)
-        return z
+        z = torch.randn(num_vectors, self.resolution, self.resolution, 2, device=self.device)
+
+        if self.noise_type["structure"] > 0:
+            noise_fft = fft2c_new(z)
+            z = ifft2c_new(mask[:, 0, :, :, :] * noise_fft)
+
+        return z.permute(0, 3, 1, 2)
 
     def reformat(self, samples):
         reformatted_tensor = torch.zeros(size=(samples.size(0), 8, self.resolution, self.resolution, 2),

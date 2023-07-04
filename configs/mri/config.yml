@@ -14,6 +14,7 @@ num_coils: 8
 data_path: "/storage/fastMRI_brain/data"
 im_size: 384
 R: 8
+mask_type: 2
 
 #optimizer:
 lr: 0.001
