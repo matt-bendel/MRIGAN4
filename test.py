@@ -266,6 +266,8 @@ if __name__ == "__main__":
     with torch.no_grad():
         model = model_alias.load_from_checkpoint(
             checkpoint_path=cfg.checkpoint_dir + args.exp_name + '/checkpoint_best.ckpt')
+        print(model.noise_type)
+        exit()
         # checkpoint_file_gen = pathlib.Path(
         #     f'/home/bendel.8/Git_Repos/full_scale_mrigan/MRIGAN3/trained_models/generator_best_model.pt')
         # checkpoint_gen = torch.load(checkpoint_file_gen, map_location=torch.device('cuda'))
