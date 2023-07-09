@@ -10,7 +10,7 @@ num_z_train: 2
 
 in_chans: 16
 out_chans: 16
-num_coils: 8
+num_coils: 7
 data_path: "/storage/fastMRI_brain/data"
 im_size: 384
 R: 8
