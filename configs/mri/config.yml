@@ -23,5 +23,5 @@ beta_2: 0.99
 gp_weight: 10
 
 var_weight: 0.012
-batch_size: 9
+batch_size: 8
 num_epochs: 100
