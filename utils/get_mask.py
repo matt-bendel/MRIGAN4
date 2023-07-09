@@ -15,7 +15,7 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type
         s = midway - args.calib_width // 2
         e = s + args.calib_width
         m[:, s:e] = True
-        a = np.random.choice(resolution - args.calib_width, resolution // R, replace=False)
+        a = np.random.choice(resolution - args.calib_width, resolution // R - args.calib_width, replace=False)
         a = np.where(a < s, a, a + args.calib_width)
 
     # LOW DIM GRO:
