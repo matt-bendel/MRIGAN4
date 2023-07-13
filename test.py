@@ -281,6 +281,11 @@ if __name__ == "__main__":
 
         n_samps = [1,2,4,8,16,32]
 
+        n_psnrs = []
+        n_ssims = []
+        n_lpipss = []
+        n_distss = []
+
         for n in n_samps:
             trial_distss = []
 
@@ -357,6 +362,27 @@ if __name__ == "__main__":
             print(f'SSIM: {np.mean(med_ssims)} \pm {np.std(med_ssims) / np.sqrt(len(med_ssims))}')
             print(f'LPIPS: {np.mean(med_lpipss)} \pm {np.std(med_lpipss) / np.sqrt(len(med_lpipss))}')
             print(f'DISTS: {np.mean(med_distss)} \pm {np.std(med_distss) / np.sqrt(len(med_distss))}')
+
+            n_psnrs.append(np.mean(psnrs))
+            n_ssims.append(np.mean(ssims))
+            n_lpipss.append(np.mean(lpipss))
+            n_distss.append(np.mean(distss))
+
+        psnr_str = ''
+        ssim_str = ''
+        lpips_str = ''
+        dists_str = ''
+
+        for i in range(len(n_psnrs)):
+            psnr_str = f'{psnr_str} {n_psnrs[i]} \pm'
+            ssim_str = f'{ssim_str} {n_ssims[i]} \pm'
+            lpips_str = f'{lpips_str} {n_lpipss[i]} \pm'
+            dists_strß = f'{dists_str} {n_distss[i]} \pm'
+
+        print(f'PSNR:\n{psnr_str}')
+        print(f'SSIM:\n{psnr_str}')
+        print(f'LPIPS:\n{psnr_str}')
+        print(f'DISTS:\n{psnr_str}')
 
             # print(f'APSD: {np.mean(apsds)}')
 
