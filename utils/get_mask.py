@@ -9,6 +9,15 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type
     m = np.zeros((resolution, resolution))
     a = None
 
+    if mask_type == 3:
+        a = np.array(
+            [
+                28, 34, 40, 41, 55, 72, 80, 84, 92, 107, 152, 164, 177, 184, 185, 186, 187, 188, 189, 190, 191, 192,
+                193, 194, 195, 196, 197, 198, 199, 200, 205, 241, 249, 258, 274, 284, 292, 295, 302, 321, 327, 331, 341,
+                348, 354, 369, 372, 381
+            ]
+        )
+
     # RANDOM MASK GENERATION
     if mask_type == 2:
         midway = resolution // 2
