@@ -351,17 +351,17 @@ if __name__ == "__main__":
                     if j == 2 and i == 0:
                         get_com_fig(gt_np, avg_gen_np, med_np, n, i)
 
-            print('AVG Recon')
-            print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
-            print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
-            print(f'LPIPS: {np.mean(lpipss)} \pm {np.std(lpipss) / np.sqrt(len(lpipss))}')
-            print(f'DISTS: {np.mean(distss)} \pm {np.std(distss) / np.sqrt(len(distss))}')
-
-            print('Median Recon')
-            print(f'PSNR: {np.mean(med_psnrs)} \pm {np.std(med_psnrs) / np.sqrt(len(med_psnrs))}')
-            print(f'SSIM: {np.mean(med_ssims)} \pm {np.std(med_ssims) / np.sqrt(len(med_ssims))}')
-            print(f'LPIPS: {np.mean(med_lpipss)} \pm {np.std(med_lpipss) / np.sqrt(len(med_lpipss))}')
-            print(f'DISTS: {np.mean(med_distss)} \pm {np.std(med_distss) / np.sqrt(len(med_distss))}')
+            # print('AVG Recon')
+            # print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
+            # print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
+            # print(f'LPIPS: {np.mean(lpipss)} \pm {np.std(lpipss) / np.sqrt(len(lpipss))}')
+            # print(f'DISTS: {np.mean(distss)} \pm {np.std(distss) / np.sqrt(len(distss))}')
+            #
+            # print('Median Recon')
+            # print(f'PSNR: {np.mean(med_psnrs)} \pm {np.std(med_psnrs) / np.sqrt(len(med_psnrs))}')
+            # print(f'SSIM: {np.mean(med_ssims)} \pm {np.std(med_ssims) / np.sqrt(len(med_ssims))}')
+            # print(f'LPIPS: {np.mean(med_lpipss)} \pm {np.std(med_lpipss) / np.sqrt(len(med_lpipss))}')
+            # print(f'DISTS: {np.mean(med_distss)} \pm {np.std(med_distss) / np.sqrt(len(med_distss))}')
 
             n_psnrs.append(np.mean(psnrs))
             n_ssims.append(np.mean(ssims))
@@ -386,6 +386,7 @@ if __name__ == "__main__":
 
             # print(f'APSD: {np.mean(apsds)}')
 
+    exit()
     cfids = []
     m_comps = []
     c_comps = []
