@@ -377,16 +377,15 @@ if __name__ == "__main__":
             psnr_str = f'{psnr_str} {n_psnrs[i]} \pm'
             ssim_str = f'{ssim_str} {n_ssims[i]} \pm'
             lpips_str = f'{lpips_str} {n_lpipss[i]} \pm'
-            dists_strß = f'{dists_str} {n_distss[i]} \pm'
+            dists_str = f'{dists_str} {n_distss[i]} \pm'
 
         print(f'PSNR:\n{psnr_str}')
-        print(f'SSIM:\n{psnr_str}')
-        print(f'LPIPS:\n{psnr_str}')
-        print(f'DISTS:\n{psnr_str}')
+        print(f'SSIM:\n{ssim_str}')
+        print(f'LPIPS:\n{lpips_str}')
+        print(f'DISTS:\n{dists_str}')
 
             # print(f'APSD: {np.mean(apsds)}')
 
-    exit()
     cfids = []
     m_comps = []
     c_comps = []
