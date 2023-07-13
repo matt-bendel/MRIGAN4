@@ -372,10 +372,10 @@ if __name__ == "__main__":
         dists_str = ''
 
         for i in range(len(n_psnrs)):
-            psnr_str = f'{psnr_str} {n_psnrs[i]} \pm'
-            ssim_str = f'{ssim_str} {n_ssims[i]} \pm'
-            lpips_str = f'{lpips_str} {n_lpipss[i]} \pm'
-            dists_str = f'{dists_str} {n_distss[i]} \pm'
+            psnr_str = f'{psnr_str} {n_psnrs[i]:.2f} \pm'
+            ssim_str = f'{ssim_str} {n_ssims[i]:.4f} \pm'
+            lpips_str = f'{lpips_str} {n_lpipss[i]:.4f} \pm'
+            dists_str = f'{dists_str} {n_distss[i]:.4f} \pm'
 
         print(f'PSNR:\n{psnr_str}')
         print(f'SSIM:\n{ssim_str}')
