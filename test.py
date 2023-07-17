@@ -277,7 +277,7 @@ if __name__ == "__main__":
         model.cuda()
         model.eval()
 
-        n_samps = [1,2,4,8,16,32]
+        n_samps = [32]
 
         n_psnrs = []
         n_ssims = []
@@ -360,6 +360,9 @@ if __name__ == "__main__":
             # print(f'SSIM: {np.mean(med_ssims)} \pm {np.std(med_ssims) / np.sqrt(len(med_ssims))}')
             # print(f'LPIPS: {np.mean(med_lpipss)} \pm {np.std(med_lpipss) / np.sqrt(len(med_lpipss))}')
             # print(f'DISTS: {np.mean(med_distss)} \pm {np.std(med_distss) / np.sqrt(len(med_distss))}')
+
+
+            # TODO: PSNR HISTOGRAM
 
             n_psnrs.append(np.mean(psnrs))
             n_ssims.append(np.mean(ssims))
