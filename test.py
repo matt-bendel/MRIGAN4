@@ -277,7 +277,7 @@ if __name__ == "__main__":
         model.cuda()
         model.eval()
 
-        n_samps = [32]
+        n_samps = [1,2,4,8,16,32]
 
         n_psnrs = []
         n_ssims = []
@@ -363,6 +363,12 @@ if __name__ == "__main__":
 
 
             # TODO: PSNR HISTOGRAM
+            if n == 32:
+                plt.hist(psnrs, 30)
+                plt.title(f'{args.exp_name}')
+                plt.ylabel('PSNR')
+                plt.savefig(f'{args.exp_name}_psnr_hist.png')
+                plt.close()
 
             n_psnrs.append(np.mean(psnrs))
             n_ssims.append(np.mean(ssims))
