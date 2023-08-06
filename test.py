@@ -312,7 +312,6 @@ if __name__ == "__main__":
             med_distss = []
 
             for i, data in enumerate(test_loader):
-                print(i)
                 y, x, mask, mean, std, maps, _, _ = data
                 y = y.cuda()
                 x = x.cuda()
