@@ -166,6 +166,7 @@ if __name__ == "__main__":
             times = []
 
             for i, data in enumerate(test_loader):
+                break
                 print(f"Batch: {i}/{len(test_loader)}")
                 y, x, mask, maps, num_low_freqs = data
                 y = y.cuda()
@@ -281,7 +282,7 @@ if __name__ == "__main__":
     inception_embedding = VGG16Embedding()
     fid_metric = FIDMetric(gan=model,
                            ref_loader=train_dataloader,
-                           loader=val_dataloader,
+                           loader=test_loader,
                            image_embedding=inception_embedding,
                            condition_embedding=inception_embedding,
                            cuda=True,
