@@ -50,13 +50,13 @@ import matplotlib.patches as patches
 # FID: 7.51
 
 # GRO TEST
-# python test.py --mri --rcgan --exp-name rcgan_big --mask-type 1 && python test.py --mri --rcgan --exp-name random_blind --mask-type 1 && python test.py --mri --rcgan --exp-name random_proposed --mask-type 1 && python test.py --mri --rcgan --exp-name rcgan_statis --mask-type 1
+# python test.py --mri --rcgan --exp-name neurips/rcgan_big --mask-type 1 && python test.py --mri --rcgan --exp-name neurips/random_blind --mask-type 1 && python test.py --mri --rcgan --exp-name neurips/random_proposed --mask-type 1 && python test.py --mri --rcgan --exp-name neurips/rcgan_statis --mask-type 1
 
 # DYNAMIC RANDOM MASK TEST
-# python test.py --mri --rcgan --exp-name rcgan_big --mask-type 2 && python test.py --mri --rcgan --exp-name random_blind --mask-type 2 && python test.py --mri --rcgan --exp-name random_proposed --mask-type 2 && python test.py --mri --rcgan --exp-name rcgan_statis --mask-type 2
+# python test.py --mri --rcgan --exp-name neurips/rcgan_big --mask-type 2 && python test.py --mri --rcgan --exp-name neurips/random_blind --mask-type 2 && python test.py --mri --rcgan --exp-name neurips/random_proposed --mask-type 2 && python test.py --mri --rcgan --exp-name neurips/rcgan_statis --mask-type 2
 
 # STATIC RANDOM MASK TEST
-# python test.py --mri --rcgan --exp-name rcgan_big --mask-type 3 && python test.py --mri --rcgan --exp-name random_blind --mask-type 3 && python test.py --mri --rcgan --exp-name random_proposed --mask-type 3 && python test.py --mri --rcgan --exp-name rcgan_statis --mask-type 3
+# python test.py --mri --rcgan --exp-name neurips/rcgan_big --mask-type 3 && python test.py --mri --rcgan --exp-name neurips/random_blind --mask-type 3 && python test.py --mri --rcgan --exp-name neurips/random_proposed --mask-type 3 && python test.py --mri --rcgan --exp-name neurips/rcgan_statis --mask-type 3
 
 
 def generate_image(fig, target, image, method, image_ind, rows, cols, kspace=False, disc_num=False):
@@ -352,14 +352,6 @@ if __name__ == "__main__":
                     ssims.append(ssim(gt_np, avg_gen_np))
                     lpipss.append(lpips_met(rgb(gt_np), rgb(avg_gen_np)).numpy())
                     distss.append(dists_met(rgb(gt_np, unit_norm=True), rgb(avg_gen_np, unit_norm=True)).numpy())
-
-                    med_psnrs.append(psnr(gt_np, med_np))
-                    med_ssims.append(ssim(gt_np, med_np))
-                    med_lpipss.append(lpips_met(rgb(gt_np), rgb(med_np)).numpy())
-                    med_distss.append(dists_met(rgb(gt_np, unit_norm=True), rgb(med_np, unit_norm=True)).numpy())
-
-                    if j == 2 and i == 0:
-                        get_com_fig(gt_np, avg_gen_np, med_np, n, i)
 
             # print('AVG Recon')
             # print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
