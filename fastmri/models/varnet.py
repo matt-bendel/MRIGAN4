@@ -198,7 +198,7 @@ class SensitivityModel(nn.Module):
 
         pad = (mask.shape[-2] - num_low_frequencies_tensor + 1) // 2
 
-        return pad, num_low_frequencies_tensor
+        return pad.type(torch.long), num_low_frequencies_tensor.type(torch.long)
 
     def forward(
         self,
@@ -276,7 +276,7 @@ class VarNet(nn.Module):
         for cascade in self.cascades:
             kspace_pred = cascade(kspace_pred, masked_kspace, mask, sens_maps)
 
-        return fastmri.rss(fastmri.complex_abs(fastmri.ifft2c(kspace_pred)), dim=1)
+        return fastmri.ifft2c(kspace_pred)
 
 
 class VarNetBlock(nn.Module):

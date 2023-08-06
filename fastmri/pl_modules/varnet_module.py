@@ -12,9 +12,12 @@ import torch
 import fastmri
 from fastmri.data import transforms
 from fastmri.models import VarNet
-
+from torch.nn import functional as F
 from .mri_module import MriModule
-
+import pytorch_ssim
+import pytorch_lightning as pl
+import numpy as np
+import matplotlib.pyplot as plt
 
 class VarNetModule(MriModule):
     """
@@ -90,7 +93,7 @@ class VarNetModule(MriModule):
             pools=self.pools,
         )
 
-        self.loss = fastmri.SSIMLoss()
+        self.loss = pytorch_ssim.SSIM()
 
     def forward(self, masked_kspace, mask, num_low_frequencies):
         return self.varnet(masked_kspace, mask, num_low_frequencies)
@@ -98,9 +101,10 @@ class VarNetModule(MriModule):
     def training_step(self, batch, batch_idx):
         output = self(batch.masked_kspace, batch.mask, batch.num_low_frequencies)
 
-        target, output = transforms.center_crop_to_smallest(batch.target, output)
-        loss = self.loss(
-            output.unsqueeze(1), target.unsqueeze(1), data_range=batch.max_value
+        target = batch.target
+
+        loss = - self.loss(
+            target.view(target.shape[0], -1, target.shape[2], target.shape[3]), output.view(output.shape[0], -1, output.shape[2], output.shape[3]),
         )
 
         self.log("train_loss", loss)
@@ -111,19 +115,33 @@ class VarNetModule(MriModule):
         output = self.forward(
             batch.masked_kspace, batch.mask, batch.num_low_frequencies
         )
-        target, output = transforms.center_crop_to_smallest(batch.target, output)
+        target = batch.target
 
-        return {
-            "batch_idx": batch_idx,
-            "fname": batch.fname,
-            "slice_num": batch.slice_num,
-            "max_value": batch.max_value,
-            "output": output,
-            "target": target,
-            "val_loss": self.loss(
-                output.unsqueeze(1), target.unsqueeze(1), data_range=batch.max_value
-            ),
-        }
+        if self.global_rank == 0 and batch_idx == 0:
+            np_gt = fastmri.rss(fastmri.complex_abs(target), 1)[0].cpu().numpy()
+            np_recon = fastmri.rss(fastmri.complex_abs(output), 1)[0].cpu().numpy()
+
+            plt.figure()
+            plt.imshow(np_recon, cmap='gray')
+            plt.savefig('recon_rss.png')
+            plt.close()
+
+            plt.figure()
+            plt.imshow(np_gt, cmap='gray')
+            plt.savefig('gt_rss.png')
+            plt.close()
+
+        # return {
+        #     "batch_idx": batch_idx,
+        #     "fname": batch.fname,
+        #     "slice_num": batch.slice_num,
+        #     "max_value": batch.max_value,
+        #     "output": output,
+        #     "target": target,
+        #     "val_ssim": self.loss(
+        #         target.view(target.shape[0], -1, target.shape[2], target.shape[3]), output.view(output.shape[0], -1, output.shape[2], output.shape[3]),
+        #     ),
+        # }
 
     def test_step(self, batch, batch_idx):
         output = self(batch.masked_kspace, batch.mask, batch.num_low_frequencies)
