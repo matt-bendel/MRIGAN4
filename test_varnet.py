@@ -163,6 +163,7 @@ if __name__ == "__main__":
             med_distss = []
 
             for i, data in enumerate(test_loader):
+                print(f"Batch: {i}/{len(test_loader)}")
                 y, x, mask, maps, num_low_freqs = data
                 y = y.cuda()
                 x = x.cuda()
