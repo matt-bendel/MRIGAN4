@@ -119,7 +119,7 @@ def load_object(dct):
 
 def rgb(im, unit_norm=False):
     embed_ims = torch.zeros(size=(3, 384, 384))
-    tens_im = torch.tensor(im)
+    tens_im = torch.tensor(im).cuda()
 
     if unit_norm:
         tens_im = (tens_im - torch.min(tens_im)) / (torch.max(tens_im) - torch.min(tens_im))
@@ -273,6 +273,9 @@ if __name__ == "__main__":
     lpips_met = lpips.LPIPS(net='alex')
     dists_met = DISTS()
 
+    dists_met = dists_met.cuda()
+    lpips_met = lpips_met.cuda()
+
     with torch.no_grad():
         model = model_alias.load_from_checkpoint(
             checkpoint_path=cfg.checkpoint_dir + args.exp_name + '/checkpoint_best.ckpt')
@@ -350,8 +353,8 @@ if __name__ == "__main__":
                     apsds.append(np.mean(np.std(single_samps, axis=0), axis=(0, 1)))
                     psnrs.append(psnr(gt_np, avg_gen_np))
                     ssims.append(ssim(gt_np, avg_gen_np))
-                    lpipss.append(lpips_met(rgb(gt_np), rgb(avg_gen_np)).numpy())
-                    distss.append(dists_met(rgb(gt_np, unit_norm=True), rgb(avg_gen_np, unit_norm=True)).numpy())
+                    lpipss.append(lpips_met(rgb(gt_np), rgb(avg_gen_np)).cpu().numpy())
+                    distss.append(dists_met(rgb(gt_np, unit_norm=True), rgb(avg_gen_np, unit_norm=True)).cpu().numpy())
 
             # print('AVG Recon')
             # print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
@@ -367,7 +370,7 @@ if __name__ == "__main__":
 
 
             # TODO: PSNR HISTOGRAM
-            if n == 32:
+            if n == 32 and args.mask_type == 2:
                 plt.hist(psnrs, 30)
                 plt.title(f'{args.exp_name}')
                 plt.ylabel('PSNR')

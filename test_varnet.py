@@ -28,19 +28,14 @@ from DISTS_pytorch import DISTS
 import matplotlib.patches as patches
 
 
-# M_1: 2.15
-# C_1: 3.50
-# CFID_1: 5.65
+# M_1:
+# C_1:
 
-# M_2: 1.76
-# C_2: 1.18
-# CFID_2: 2.94
+# M_2:
+# C_2:
 
-# M_3: 1.69
-# C_3: 0.77
-# CFID_3: 2.46
-
-# FID: 7.51
+# M_3:
+# C_3:
 
 def generate_image(fig, target, image, method, image_ind, rows, cols, kspace=False, disc_num=False):
     # rows and cols are both previously defined ints
@@ -268,6 +263,9 @@ if __name__ == "__main__":
     cfids.append(cfid)
     m_comps.append(m_comp)
     c_comps.append(c_comp)
+
+    for l in range(3):
+        print(f'CFID_{l+1}: {cfids[l]:.2f}; M_COMP: {m_comps[l]:.4f}; C_COMP: {c_comps[l]:.4f}')
     #
 
     # n_samps = [1, 2, 4, 8, 16, 32]

@@ -185,7 +185,7 @@ class FIDMetric:
 
             unnormal_im = reformatted
 
-            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), maps[i])
+            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), tensor_to_complex_np(maps[i].cpu()))
 
             im = torch.tensor(S.H * tensor_to_complex_np(unnormal_im.cpu())).abs().cuda()
             im = (im - torch.min(im)) / (torch.max(im) - torch.min(im))
@@ -208,8 +208,6 @@ class FIDMetric:
             x = x.cuda()
             mask = mask.cuda()
             num_low_freqs = num_low_freqs.cuda()
-
-            maps = []
 
             with torch.no_grad():
                 for k in range(self.num_samps):
