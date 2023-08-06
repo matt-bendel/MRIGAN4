@@ -112,104 +112,6 @@ def rgb(im, unit_norm=False):
 
     return embed_ims.unsqueeze(0)
 
-def get_com_fig(np_gt, np_avg, np_med, n, fig_num):
-    zoom_startx = 80  # np.random.randint(120, 250)
-    zoom_starty1 = 180  # np.random.randint(30, 80)
-    zoom_starty2 = 180  # np.random.randint(260, 300)
-
-    p = np.random.rand()
-    zoom_starty = zoom_starty1
-    if p <= 0.5:
-        zoom_starty = zoom_starty2
-
-    zoom_length = 80
-
-    x_coord = zoom_startx + zoom_length
-    y_coords = [zoom_starty, zoom_starty + zoom_length]
-
-    nrow = 2
-    ncol = 4
-
-    fig = plt.figure(figsize=(ncol + 1, nrow + 1))
-
-    gs = gridspec.GridSpec(nrow, ncol,
-                           wspace=0.0, hspace=0.0,
-                           top=1. - 0.5 / (nrow + 1), bottom=0.5 / (nrow + 1),
-                           left=0.5 / (ncol + 1), right=1 - 0.5 / (ncol + 1))
-
-    ax = plt.subplot(gs[0, 0])
-    ax.imshow(np_gt, cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
-    ax.set_xticklabels([])
-    ax.set_yticklabels([])
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.set_title('Truth')
-
-    ax1 = ax
-
-    rect = patches.Rectangle((zoom_startx, zoom_starty), zoom_length, zoom_length, linewidth=1,
-                             edgecolor='r',
-                             facecolor='none')
-
-    # Add the patch to the Axes
-    ax.add_patch(rect)
-
-    ax = plt.subplot(gs[0, 1])
-    ax.imshow(np_gt[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
-              cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
-    ax.set_xticklabels([])
-    ax.set_yticklabels([])
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.set_title('Truth')
-
-    connection_path_1 = patches.ConnectionPatch([x_coord, y_coords[0]], [0, 0], coordsA=ax1.transData,
-                                                coordsB=ax.transData, color='r')
-    fig.add_artist(connection_path_1)
-    connection_path_2 = patches.ConnectionPatch([x_coord, y_coords[1]], [0, zoom_length],
-                                                coordsA=ax1.transData,
-                                                coordsB=ax.transData, color='r')
-    fig.add_artist(connection_path_2)
-
-
-    ax = plt.subplot(gs[0, 2])
-    ax.imshow(np_avg[zoom_starty:zoom_starty + zoom_length,
-              zoom_startx:zoom_startx + zoom_length], cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
-    ax.set_xticklabels([])
-    ax.set_yticklabels([])
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.set_title('Avg')
-
-    ax = plt.subplot(gs[0, 3])
-    ax.imshow(np_med[zoom_starty:zoom_starty + zoom_length,
-              zoom_startx:zoom_startx + zoom_length], cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
-    ax.set_xticklabels([])
-    ax.set_yticklabels([])
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.set_title('Median')
-
-    ax = plt.subplot(gs[1, 2])
-    ax.imshow(2 * np.abs(np_avg - gt_np)[zoom_starty:zoom_starty + zoom_length,
-              zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0,
-                   vmax=np.max(np.abs(np_avg - gt_np)))
-    ax.set_xticklabels([])
-    ax.set_yticklabels([])
-    ax.set_xticks([])
-    ax.set_yticks([])
-
-    ax = plt.subplot(gs[1, 3])
-    ax.imshow(2 * np.abs(med_np - gt_np)[zoom_starty:zoom_starty + zoom_length,
-              zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0,
-                   vmax=np.max(np.abs(np_avg - gt_np)))
-    ax.set_xticklabels([])
-    ax.set_yticklabels([])
-    ax.set_xticks([])
-    ax.set_yticks([])
-
-    plt.savefig(f'med_tests_{n}_samps_{fig_num}.png', bbox_inches='tight', dpi=300)
-
 if __name__ == "__main__":
     torch.set_float32_matmul_precision('medium')
     args = create_arg_parser().parse_args()
@@ -219,7 +121,7 @@ if __name__ == "__main__":
         cfg = yaml.load(f, Loader=yaml.FullLoader)
         cfg = json.loads(json.dumps(cfg), object_hook=load_object)
 
-    cfg.batch_size = cfg.batch_size * 4
+    cfg.batch_size = 1
     dm = MRIDataModule(cfg, args.mask_type, big_test=True)
 
     dm.setup()
