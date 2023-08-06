@@ -17,6 +17,9 @@ from models.mri_unet import MRIUnet
 from models.rcGAN import rcGAN
 from models.l1_ssim_module import L1SSIMMRI
 from utils.math import complex_abs, tensor_to_complex_np
+from evaluation_scripts.fid.embeddings import VGG16Embedding
+from evaluation_scripts.cfid.cfid_metric_varnet import CFIDMetric
+from evaluation_scripts.fid.fid_metric_varnet import FIDMetric
 from evaluation_scripts.metrics import psnr, ssim
 import matplotlib.pyplot as plt
 from utils.fftc import ifft2c_new, fft2c_new
@@ -148,6 +151,7 @@ if __name__ == "__main__":
         n_distss = []
 
         for n in n_samps:
+            break
             trial_distss = []
 
             print(f"{n} SAMPLES")
@@ -196,25 +200,23 @@ if __name__ == "__main__":
             n_lpipss.append(np.mean(lpipss))
             n_distss.append(np.mean(distss))
 
-        psnr_str = ''
-        ssim_str = ''
-        lpips_str = ''
-        dists_str = ''
-
-        for i in range(len(n_psnrs)):
-            psnr_str = f'{psnr_str} {n_psnrs[i]:.2f} \pm'
-            ssim_str = f'{ssim_str} {n_ssims[i]:.4f} \pm'
-            lpips_str = f'{lpips_str} {n_lpipss[i]:.4f} \pm'
-            dists_str = f'{dists_str} {n_distss[i]:.4f} \pm'
-
-        print(f'PSNR:\n{psnr_str}')
-        print(f'SSIM:\n{ssim_str}')
-        print(f'LPIPS:\n{lpips_str}')
-        print(f'DISTS:\n{dists_str}')
+        # psnr_str = ''
+        # ssim_str = ''
+        # lpips_str = ''
+        # dists_str = ''
+        #
+        # for i in range(len(n_psnrs)):
+        #     psnr_str = f'{psnr_str} {n_psnrs[i]:.2f} \pm'
+        #     ssim_str = f'{ssim_str} {n_ssims[i]:.4f} \pm'
+        #     lpips_str = f'{lpips_str} {n_lpipss[i]:.4f} \pm'
+        #     dists_str = f'{dists_str} {n_distss[i]:.4f} \pm'
+        #
+        # print(f'PSNR:\n{psnr_str}')
+        # print(f'SSIM:\n{ssim_str}')
+        # print(f'LPIPS:\n{lpips_str}')
+        # print(f'DISTS:\n{dists_str}')
 
             # print(f'APSD: {np.mean(apsds)}')
-    exit()
-    # TODO: CFID, FID for varnet
     cfids = []
     m_comps = []
     c_comps = []
@@ -235,54 +237,56 @@ if __name__ == "__main__":
     m_comps.append(m_comp)
     c_comps.append(c_comp)
     #
-    # inception_embedding = VGG16Embedding(parallel=True)
-    # # CFID_2
-    # cfid_metric = CFIDMetric(gan=model,
-    #                          loader=val_dataloader,
-    #                          image_embedding=inception_embedding,
-    #                          condition_embedding=inception_embedding,
-    #                          cuda=True,
-    #                          args=cfg,
-    #                          ref_loader=False,
-    #                          num_samps=8)
-    #
-    # cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
-    # cfids.append(cfid)
-    # m_comps.append(m_comp)
-    # c_comps.append(c_comp)
-    #
-    # inception_embedding = VGG16Embedding(parallel=True)
-    # # CFID_3
-    # cfid_metric = CFIDMetric(gan=model,
-    #                          loader=val_dataloader,
-    #                          image_embedding=inception_embedding,
-    #                          condition_embedding=inception_embedding,
-    #                          cuda=True,
-    #                          args=cfg,
-    #                          ref_loader=train_dataloader,
-    #                          num_samps=1)
-    #
-    # cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
-    # cfids.append(cfid)
-    # m_comps.append(m_comp)
-    # c_comps.append(c_comp)
+    inception_embedding = VGG16Embedding(parallel=True)
+    # CFID_2
+    cfid_metric = CFIDMetric(gan=model,
+                             loader=val_dataloader,
+                             image_embedding=inception_embedding,
+                             condition_embedding=inception_embedding,
+                             cuda=True,
+                             args=cfg,
+                             ref_loader=False,
+                             num_samps=8)
+
+    cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
+    cfids.append(cfid)
+    m_comps.append(m_comp)
+    c_comps.append(c_comp)
+
+    inception_embedding = VGG16Embedding(parallel=True)
+    # CFID_3
+    cfid_metric = CFIDMetric(gan=model,
+                             loader=val_dataloader,
+                             image_embedding=inception_embedding,
+                             condition_embedding=inception_embedding,
+                             cuda=True,
+                             args=cfg,
+                             ref_loader=train_dataloader,
+                             num_samps=1)
+
+    cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
+    cfids.append(cfid)
+    m_comps.append(m_comp)
+    c_comps.append(c_comp)
     #
 
     # n_samps = [1, 2, 4, 8, 16, 32]
     # for n in n_samps:
     # #     print(f"{n} SAMPLES")
-    # inception_embedding = VGG16Embedding()
-    # fid_metric = FIDMetric(gan=model,
-    #                        ref_loader=train_dataloader,
-    #                        loader=val_dataloader,
-    #                        image_embedding=inception_embedding,
-    #                        condition_embedding=inception_embedding,
-    #                        cuda=True,
-    #                        args=cfg)
-    # fid, _ = fid_metric.get_fid()
+    inception_embedding = VGG16Embedding()
+    fid_metric = FIDMetric(gan=model,
+                           ref_loader=train_dataloader,
+                           loader=val_dataloader,
+                           image_embedding=inception_embedding,
+                           condition_embedding=inception_embedding,
+                           cuda=True,
+                           args=cfg)
+    fid, fjd = fid_metric.get_fid()
+
+    print(f'FID: {fid}; FJD: {fjd}')
 
     # print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
     # print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
     # print(f'APSD: {np.mean(apsds)}')
-    for l in range(1):
+    for l in range(3):
         print(f'CFID_{l+1}: {cfids[l]:.2f}; M_COMP: {m_comps[l]:.4f}; C_COMP: {c_comps[l]:.4f}')
