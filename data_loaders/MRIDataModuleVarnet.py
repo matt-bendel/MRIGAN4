@@ -70,7 +70,7 @@ class DataTransform:
         kspace = fft2c_new(im_tensor)
         masked_kspace = kspace * mask
 
-        return masked_kspace.float(), im_tensor.float(), mask, transforms.to_tensor(sense_maps), 16
+        return masked_kspace.float(), im_tensor.float(), mask.to(torch.bool), transforms.to_tensor(sense_maps), 16
 
 
 
