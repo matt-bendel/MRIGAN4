@@ -9,7 +9,7 @@ import lpips
 import numpy as np
 from matplotlib import gridspec
 
-from data_loaders.MRIDataModule import MRIDataModule
+from data_loaders.MRIDataModuleVarnet import MRIDataModule
 from utils.parse_args import create_arg_parser
 from pytorch_lightning import seed_everything
 from fastmri.pl_modules.varnet_module import VarNetModule
@@ -311,6 +311,7 @@ if __name__ == "__main__":
 
             # print(f'APSD: {np.mean(apsds)}')
     exit()
+    # TODO: CFID, FID for varnet
     cfids = []
     m_comps = []
     c_comps = []
