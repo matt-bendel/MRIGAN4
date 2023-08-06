@@ -34,8 +34,8 @@ import matplotlib.patches as patches
 # M_2:
 # C_2:
 
-# M_3:
-# C_3:
+# M_3: 6.24
+# C_3: 1.27
 
 def generate_image(fig, target, image, method, image_ind, rows, cols, kspace=False, disc_num=False):
     # rows and cols are both previously defined ints
@@ -225,7 +225,7 @@ if __name__ == "__main__":
                              cuda=True,
                              args=cfg,
                              ref_loader=False,
-                             num_samps=32)
+                             num_samps=1)
 
     cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
     cfids.append(cfid)
@@ -241,7 +241,7 @@ if __name__ == "__main__":
                              cuda=True,
                              args=cfg,
                              ref_loader=False,
-                             num_samps=8)
+                             num_samps=1)
 
     cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
     cfids.append(cfid)
