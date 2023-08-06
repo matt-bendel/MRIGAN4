@@ -238,44 +238,44 @@ if __name__ == "__main__":
                 x_coord = zoom_startx + zoom_length
                 y_coords = [zoom_starty, zoom_starty + zoom_length]
 
-                fig = plt.figure()
-
-                ax = plt.subplot(1, 1, 1)
-                ax.imshow(np_gt, cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
-                ax.set_xticklabels([])
-                ax.set_yticklabels([])
-                ax.set_xticks([])
-                ax.set_yticks([])
-
-                plt.savefig(f'ismrm_gt.png', bbox_inches='tight', dpi=300)
-                plt.close(fig)
-
-                fig = plt.figure()
-
-                ax = plt.subplot(1, 1, 1)
-                ax.imshow(np_zfr, cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
-                ax.set_xticklabels([])
-                ax.set_yticklabels([])
-                ax.set_xticks([])
-                ax.set_yticks([])
-
-                plt.savefig(f'ismrm_zfr.png', bbox_inches='tight', dpi=300)
-                plt.close(fig)
-
-                fig = plt.figure()
-                fig.subplots_adjust(wspace=0, hspace=0.05)
-
-                for z in range(5):
-                    ax = plt.subplot(1, 5, z+1)
-                    ax.imshow(np_samps['rcgan'][z], cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
-                    ax.set_xticklabels([])
-                    ax.set_yticklabels([])
-                    ax.set_xticks([])
-                    ax.set_yticks([])
-
-                plt.savefig(f'ismrm_samps.png', bbox_inches='tight', dpi=300)
-                plt.close(fig)
-                exit()
+                # fig = plt.figure()
+                #
+                # ax = plt.subplot(1, 1, 1)
+                # ax.imshow(np_gt, cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
+                # ax.set_xticklabels([])
+                # ax.set_yticklabels([])
+                # ax.set_xticks([])
+                # ax.set_yticks([])
+                #
+                # plt.savefig(f'ismrm_gt.png', bbox_inches='tight', dpi=300)
+                # plt.close(fig)
+                #
+                # fig = plt.figure()
+                #
+                # ax = plt.subplot(1, 1, 1)
+                # ax.imshow(np_zfr, cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
+                # ax.set_xticklabels([])
+                # ax.set_yticklabels([])
+                # ax.set_xticks([])
+                # ax.set_yticks([])
+                #
+                # plt.savefig(f'ismrm_zfr.png', bbox_inches='tight', dpi=300)
+                # plt.close(fig)
+                #
+                # fig = plt.figure()
+                # fig.subplots_adjust(wspace=0, hspace=0.05)
+                #
+                # for z in range(5):
+                #     ax = plt.subplot(1, 5, z+1)
+                #     ax.imshow(np_samps['rcgan'][z], cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
+                #     ax.set_xticklabels([])
+                #     ax.set_yticklabels([])
+                #     ax.set_xticks([])
+                #     ax.set_yticks([])
+                #
+                # plt.savefig(f'ismrm_samps.png', bbox_inches='tight', dpi=300)
+                # plt.close(fig)
+                # exit()
 
                 # TODO: OG fig plot
                 # TODO: metrics
