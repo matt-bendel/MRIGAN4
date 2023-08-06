@@ -234,7 +234,7 @@ if __name__ == "__main__":
 
     with torch.no_grad():
         model = model_alias.load_from_checkpoint(
-            checkpoint_path='/storage/matt_models/mri/e2e_varnet/varnet/varnet_demo/checkpoints/epoch=13-step=128688.ckpt')
+            checkpoint_path='/storage/matt_models/mri/e2e_varnet/varnet/varnet_demo/checkpoints/epoch=14-step=137880.ckpt')
         model.cuda()
         model.eval()
 
