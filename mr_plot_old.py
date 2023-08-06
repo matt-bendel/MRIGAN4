@@ -7,7 +7,6 @@ import pathlib
 
 import numpy as np
 import matplotlib.patches as patches
-from utils.fftc import ifft2c_new, fft2c_new
 
 from data_loaders.MRIDataModule import MRIDataModule
 from utils.parse_args import create_arg_parser
@@ -191,25 +190,6 @@ if __name__ == "__main__":
                 np_stds['ohayon'] = np.std(np.stack(np_samps['ohayon']), axis=0)
                 np_stds['adler'] = np.std(np.stack(np_samps['adler']), axis=0)
 
-                methods = ['rcgan', 'ohayon', 'adler']
-                for method in methods:
-                    principle_components = np.zeros((5, 384, 384))
-                    cov_mat = np.zeros((32, np_gt.shape[-1] * np_gt.shape[-2]))
-                    single_samps = np.stack(np_samps[method])
-                    single_samps = single_samps - np.mean(single_samps, axis=0)[None, :, :]
-
-                    for z in range(32):
-                        cov_mat[z, :] = single_samps[z].flatten()
-
-                    u, s, vh = np.linalg.svd(cov_mat, full_matrices=False)
-
-                    for z in range(5):
-                        v_re = vh[z].reshape((384, 384))
-                        v_re = (v_re - np.min(v_re)) / (np.max(v_re) - np.min(v_re))
-                        principle_components[z, :, :] = v_re
-
-                    np_principle_components[method] = principle_components
-
                 recon_directory = f'/storage/fastMRI_brain/Langevin_Recons_R=8/'
                 langevin_recons = np.zeros((32, 384, 384))
                 recon_object = None
@@ -236,22 +216,6 @@ if __name__ == "__main__":
                 langevin_gt = ndimage.rotate(recon_object['gt'][0][0].abs().cpu().numpy(), 180)
                 langevin_avg = np.mean(langevin_recons, axis=0)
                 langevin_std = np.std(langevin_recons, axis=0)
-                langevin_principle_components = np.zeros((5, 384, 384))
-
-                cov_mat = np.zeros((32, np_gt.shape[-1] * np_gt.shape[-2]))
-                single_samps = langevin_recons
-                single_samps = single_samps - np.mean(single_samps, axis=0)[None, :, :]
-
-                for z in range(32):
-                    cov_mat[z, :] = single_samps[z].flatten()
-
-                u, s, vh = np.linalg.svd(cov_mat, full_matrices=False)
-
-                for z in range(5):
-                    v_re = vh[z].reshape((384, 384))
-                    v_re = (v_re - np.min(v_re)) / (np.max(v_re) - np.min(v_re))
-                    langevin_principle_components[z, :, :] = v_re
-
 
                 keys = ['l1_ssim', 'varnet', 'rcgan', 'ohayon', 'adler']
                 if j == 0:
@@ -310,6 +274,7 @@ if __name__ == "__main__":
 
                 plt.savefig(f'ismrm_samps.png', bbox_inches='tight', dpi=300)
                 plt.close(fig)
+                exit()
 
                 # TODO: OG fig plot
                 # TODO: metrics
@@ -403,7 +368,7 @@ if __name__ == "__main__":
 
                 count = 1
                 for method in keys:
-                    if method != 'l1_ssim':
+                    if method != 'l1_ssim' and method != 'varnet':
                         ax = plt.subplot(gs[2, count])
                         ax.imshow(np_stds[method], cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
                         ax.set_xticklabels([])
@@ -516,7 +481,7 @@ if __name__ == "__main__":
 
                 count = 0
                 for method in keys:
-                    if method != 'l1_ssim':
+                    if method != 'l1_ssim' and method != 'varnet':
                         ax = plt.subplot(gs[0, count])
                         ax.imshow(np_avgs[method][zoom_starty:zoom_starty + zoom_length,
                                   zoom_startx:zoom_startx + zoom_length], cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
@@ -537,7 +502,7 @@ if __name__ == "__main__":
                 for samp in range(2):
                     count = 0
                     for method in keys:
-                        if method != 'l1_ssim':
+                        if method != 'l1_ssim' and method != 'varnet':
                             ax = plt.subplot(gs[samp + 1, count])
                             ax.imshow(np_samps[method][samp][zoom_starty:zoom_starty + zoom_length,
                                       zoom_startx:zoom_startx + zoom_length], cmap='gray', vmin=0,
@@ -560,7 +525,7 @@ if __name__ == "__main__":
                 plt.savefig(f'mr_figs/body_mri_fig_right_{fig_count}.png', bbox_inches='tight', dpi=300)
 
                 # TODO: Rizwan Idea: zoomed, 1st row avg, 2nd error, 3rd std. dev, 4, 5, 6 samps
-                nrow = 13
+                nrow = 9
                 ncol = 6
 
                 fig = plt.figure(figsize=(ncol + 1, nrow + 1))
@@ -610,7 +575,7 @@ if __name__ == "__main__":
 
                 count = 1
                 for method in keys:
-                    if method != 'l1_ssim':
+                    if method != 'l1_ssim' and method != 'varnet':
                         ax = plt.subplot(gs[0, count])
                         ax.imshow(np_stds[method][zoom_starty:zoom_starty + zoom_length,
                                   zoom_startx:zoom_startx + zoom_length], cmap='viridis', vmin=0,
@@ -716,7 +681,7 @@ if __name__ == "__main__":
 
                 count = 2
                 for method in keys:
-                    if method == 'l1_ssim':
+                    if method == 'l1_ssim' or method == 'varnet':
                         continue
                     ax = plt.subplot(gs[2, count])
                     avg = np.zeros((384, 384))
@@ -750,7 +715,7 @@ if __name__ == "__main__":
 
                 count = 2
                 for method in keys:
-                    if method == 'l1_ssim':
+                    if method == 'l1_ssim' or method == 'varnet':
                         continue
                     ax = plt.subplot(gs[3, count])
                     avg = np.zeros((384, 384))
@@ -778,7 +743,7 @@ if __name__ == "__main__":
                 for samp in range(2):
                     count = 2
                     for method in keys:
-                        if method != 'l1_ssim':
+                        if method != 'l1_ssim' and method != 'varnet':
                             ax = plt.subplot(gs[samp + 4, count])
                             ax.imshow(np_samps[method][samp][zoom_starty:zoom_starty + zoom_length,
                                       zoom_startx:zoom_startx + zoom_length], cmap='gray', vmin=0,
@@ -803,34 +768,7 @@ if __name__ == "__main__":
                     ax.set_xticks([])
                     ax.set_yticks([])
 
-                # TODO: PCA
-                # row = 6
-                # for pc in range(5):
-                #     count = 1
-                #     for method in keys:
-                #         if method != 'l1_ssim':
-                #             ax = plt.subplot(gs[row + pc, count])
-                #             ax.imshow(np_principle_components[method][pc, zoom_starty:zoom_starty + zoom_length,
-                #                       zoom_startx:zoom_startx + zoom_length], cmap='viridis')
-                #             ax.set_xticklabels([])
-                #             ax.set_yticklabels([])
-                #             ax.set_xticks([])
-                #             ax.set_yticks([])
-                #
-                #         count += 1
-                #
-                #     ax = plt.subplot(gs[row+pc, count])
-                #     ax.imshow(
-                #         langevin_principle_components[pc, zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
-                #         cmap='viridis')
-                #     ax.set_xticklabels([])
-                #     ax.set_yticklabels([])
-                #     ax.set_xticks([])
-                #     ax.set_yticks([])
-
-                plt.savefig(f'mr_figs/app_mri_fig_pca_{fig_count}.png', bbox_inches='tight', dpi=300)
-                plt.close(fig)
+                plt.savefig(f'mr_figs/app_mri_fig_{fig_count}.png', bbox_inches='tight', dpi=300)
                 if fig_count == 24:
-                    print(fig_count)
                     exit()
                 fig_count += 1

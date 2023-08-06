@@ -82,7 +82,7 @@ class DataTransform:
         final_gt[0:8, :, :] = normalized_gt[:, :, :, 0]
         final_gt[8:16, :, :] = normalized_gt[:, :, :, 1]
 
-        return final_input.float(), final_gt.float(), mask, mean, std, transforms.to_tensor(sense_maps), fname, slice
+        return final_input.float(), final_gt.float(), mask, mean, std, transforms.to_tensor(sense_maps), fname, slice, 16
 
 
 
@@ -210,7 +210,7 @@ class MRIDataModule(pl.LightningDataModule):
     def test_dataloader(self):
         return DataLoader(
             dataset=self.test,
-            batch_size=4,
+            batch_size=1,
             num_workers=4,
             pin_memory=False,
             drop_last=False
