@@ -118,7 +118,7 @@ def load_object(dct):
 
 
 def rgb(im, unit_norm=False):
-    embed_ims = torch.zeros(size=(3, 384, 384))
+    embed_ims = torch.zeros(size=(3, 384, 384)).cuda()
     tens_im = torch.tensor(im).cuda()
 
     if unit_norm:
