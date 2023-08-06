@@ -50,13 +50,13 @@ import matplotlib.patches as patches
 # FID: 7.51
 
 # GRO TEST
-# python test.py --mri --exp-name rcgan_big --mask-type 1 && python test.py --mri --exp-name random_blind --mask-type 1 && python test.py --mri --exp-name random_proposed --mask-type 1 && python test.py --mri --exp-name rcgan_statis --mask-type 1
+# python test.py --mri --rcgan --exp-name rcgan_big --mask-type 1 && python test.py --mri --rcgan --exp-name random_blind --mask-type 1 && python test.py --mri --rcgan --exp-name random_proposed --mask-type 1 && python test.py --mri --rcgan --exp-name rcgan_statis --mask-type 1
 
 # DYNAMIC RANDOM MASK TEST
-# python test.py --mri --exp-name rcgan_big --mask-type 2 && python test.py --mri --exp-name random_blind --mask-type 2 && python test.py --mri --exp-name random_proposed --mask-type 2 && python test.py --mri --exp-name rcgan_statis --mask-type 2
+# python test.py --mri --rcgan --exp-name rcgan_big --mask-type 2 && python test.py --mri --rcgan --exp-name random_blind --mask-type 2 && python test.py --mri --rcgan --exp-name random_proposed --mask-type 2 && python test.py --mri --rcgan --exp-name rcgan_statis --mask-type 2
 
 # STATIC RANDOM MASK TEST
-# python test.py --mri --exp-name rcgan_big --mask-type 3 && python test.py --mri --exp-name random_blind --mask-type 3 && python test.py --mri --exp-name random_proposed --mask-type 3 && python test.py --mri --exp-name rcgan_statis --mask-type 3
+# python test.py --mri --rcgan --exp-name rcgan_big --mask-type 3 && python test.py --mri --rcgan --exp-name random_blind --mask-type 3 && python test.py --mri --rcgan --exp-name random_proposed --mask-type 3 && python test.py --mri --rcgan --exp-name rcgan_statis --mask-type 3
 
 
 def generate_image(fig, target, image, method, image_ind, rows, cols, kspace=False, disc_num=False):
