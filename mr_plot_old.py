@@ -595,26 +595,27 @@ if __name__ == "__main__":
                         ax.set_xticks([])
                         ax.set_yticks([])
 
-                        # fig.subplots_adjust(right=0.85)  # Make room for colorbar
+                        if method == 'l1_ssim':
+                            # fig.subplots_adjust(right=0.85)  # Make room for colorbar
 
-                        # Get position of final error map axis
-                        [[x10, y10], [x11, y11]] = ax.get_position().get_points()
+                            # Get position of final error map axis
+                            [[x10, y10], [x11, y11]] = ax.get_position().get_points()
 
-                        # Appropriately rescale final axis so that colorbar does not effect formatting
-                        pad = 0.01
-                        width = 0.02
-                        cbar_ax = fig.add_axes([x10 - 2 * pad, y10, width, y11 - y10])
-                        cbar = fig.colorbar(im, cax=cbar_ax, format='%.0e',
-                                            orientation='vertical')  # Generate colorbar
-                        cbar.ax.locator_params(nbins=3)
-                        cbar.ax.yaxis.set_ticks_position("left")
-                        cbar.ax.tick_params(labelsize=6)
-                        cbar.ax.tick_params(rotation=0)
-                        tl = cbar.ax.get_yticklabels()
+                            # Appropriately rescale final axis so that colorbar does not effect formatting
+                            pad = 0.01
+                            width = 0.02
+                            cbar_ax = fig.add_axes([x10 - 2 * pad, y10, width, y11 - y10])
+                            cbar = fig.colorbar(im, cax=cbar_ax, format='%.0e',
+                                                orientation='vertical')  # Generate colorbar
+                            cbar.ax.locator_params(nbins=3)
+                            cbar.ax.yaxis.set_ticks_position("left")
+                            cbar.ax.tick_params(labelsize=6)
+                            cbar.ax.tick_params(rotation=0)
+                            tl = cbar.ax.get_yticklabels()
 
-                        # set the alignment for the first and the last
-                        tl[0].set_verticalalignment('bottom')
-                        tl[-1].set_verticalalignment('top')
+                            # set the alignment for the first and the last
+                            tl[0].set_verticalalignment('bottom')
+                            tl[-1].set_verticalalignment('top')
 
                     count += 1
 
@@ -680,7 +681,7 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                count = 2
+                count = 3
                 for method in keys:
                     if method == 'l1_ssim' or method == 'varnet':
                         continue
@@ -714,7 +715,7 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                count = 2
+                count = 3
                 for method in keys:
                     if method == 'l1_ssim' or method == 'varnet':
                         continue
@@ -742,7 +743,7 @@ if __name__ == "__main__":
                 ax.set_yticks([])
 
                 for samp in range(2):
-                    count = 2
+                    count = 3
                     for method in keys:
                         if method != 'l1_ssim' and method != 'varnet':
                             ax = plt.subplot(gs[samp + 4, count])
