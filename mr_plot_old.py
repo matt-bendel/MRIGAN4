@@ -112,7 +112,7 @@ if __name__ == "__main__":
                 gens_ohayon[:, z, :, :, :, :] = ohayon_model.reformat(ohayon_model.forward(y, mask))
                 gens_adler[:, z, :, :, :, :] = adler_model.reformat(adler_model.forward(y, mask))
                 gens_l1_ssim[:, z, :, :, :, :] = l1_ssim_model.reformat(l1_ssim_model.forward(y, mask))
-                gens_varnet[:, z, :, :, :, :] = varnet_model(varnet_y, mask, num_low_freqs)
+                gens_varnet[:, z, :, :, :, :] = varnet_model(varnet_y.float(), mask.to(torch.bool), num_low_freqs.float())
 
             avg_rcgan = torch.mean(gens_rcgan, dim=1)
             avg_ohayon = torch.mean(gens_ohayon, dim=1)
