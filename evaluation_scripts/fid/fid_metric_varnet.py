@@ -128,7 +128,7 @@ class FIDMetric:
                  truncation=None,
                  truncation_latent=None,
                  load_stats=False,
-                 num_samps=8,
+                 num_samps=1,
                  use_train=False):
 
         self.gan = gan
