@@ -166,7 +166,6 @@ if __name__ == "__main__":
             times = []
 
             for i, data in enumerate(test_loader):
-                break
                 print(f"Batch: {i}/{len(test_loader)}")
                 y, x, mask, maps, num_low_freqs = data
                 y = y.cuda()
@@ -194,7 +193,6 @@ if __name__ == "__main__":
                     distss.append(dists_met(rgb(gt_np, unit_norm=True), rgb(avg_gen_np, unit_norm=True)).numpy())
 
             print(f'TIME: {np.mean(times)}')
-            break
             n_psnrs.append(np.mean(psnrs))
             n_ssims.append(np.mean(ssims))
             n_lpipss.append(np.mean(lpipss))
