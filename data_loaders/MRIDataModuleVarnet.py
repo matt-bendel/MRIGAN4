@@ -60,14 +60,10 @@ class DataTransform:
         kspace = kspace.transpose(1, 2, 0)
         x = ifft(kspace, (0, 1))  # (768, 396, 16)
 
-        sense_path = f'/storage/fastMRI_brain/sense_maps/test_full_res/{fname}_{slice}.pkl'
-        with open(sense_path, 'rb') as inp:
-            maps = pickle.load(inp)
-
         # TODO: Save SVD matrix offline
         coil_compressed_x = ImageCropandKspaceCompression(x, None)  # (384, 384, 8)
 
-        S = sp.linop.Multiply((384, 384), maps)
+        S = sp.linop.Multiply((384, 384), sense_maps)
         target = torch.tensor(S.H * coil_compressed_x.transpose(2, 0, 1)).abs()
 
         im_tensor = transforms.to_tensor(coil_compressed_x).permute(2, 0, 1, 3)
