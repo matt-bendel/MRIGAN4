@@ -192,7 +192,7 @@ class CFIDMetric:
         for i, data in tqdm(enumerate(self.loader),
                             desc='Computing generated distribution',
                             total=len(self.loader)):
-            y, x, mask, maps, num_low_freqs, cond = data
+            y, x, mask, maps, num_low_freqs = data
             y = y.cuda()
             x = x.cuda()
             mask = mask.cuda()
