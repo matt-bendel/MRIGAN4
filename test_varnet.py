@@ -123,7 +123,7 @@ if __name__ == "__main__":
         cfg = json.loads(json.dumps(cfg), object_hook=load_object)
 
     cfg.batch_size = 1
-    dm = MRIDataModule(cfg, args.mask_type, big_test=True)
+    dm = MRIDataModule(cfg, 1, big_test=True)
 
     dm.setup()
     test_loader = dm.test_dataloader()
