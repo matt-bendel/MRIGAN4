@@ -167,6 +167,22 @@ class CFIDMetric:
 
         return embed_ims
 
+    def _get_embed_im_no_maps(self, multi_coil_inp):
+        embed_ims = torch.zeros(size=(multi_coil_inp.size(0), 3, self.args.im_size, self.args.im_size)).cuda()
+        for i in range(multi_coil_inp.size(0)):
+            reformatted = multi_coil_inp[i, :, :]
+
+            unnormal_im = reformatted
+
+            im = unnormal_im
+            im = (im - torch.min(im)) / (torch.max(im) - torch.min(im))
+
+            embed_ims[i, 0, :, :] = im
+            embed_ims[i, 1, :, :] = im
+            embed_ims[i, 2, :, :] = im
+
+        return embed_ims
+
     def _get_generated_distribution(self):
         image_embed = []
         cond_embed = []
@@ -196,7 +212,7 @@ class CFIDMetric:
                 for l in range(self.num_samps):
                     recon = self.gan(y, mask, num_low_freqs)
 
-                    image = self._get_embed_im(recon, maps)
+                    image = self._get_embed_im_no_maps(recon)
                     condition_im = self._get_embed_im(y, maps)
                     true_im = self._get_embed_im(x, maps)
 
@@ -238,7 +254,7 @@ class CFIDMetric:
                         for l in range(self.num_samps):
                             recon = self.gan(y, mask, num_low_freqs)
 
-                            image = self._get_embed_im(recon, maps)
+                            image = self._get_embed_im_no_maps(recon)
                             condition_im = self._get_embed_im(y, maps)
                             true_im = self._get_embed_im(x, maps)
 

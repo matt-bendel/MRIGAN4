@@ -174,9 +174,7 @@ if __name__ == "__main__":
                 mask = mask.cuda()
                 num_low_freqs = num_low_freqs.cuda()
 
-                start = time.time()
                 recon = model(y, mask, num_low_freqs)
-                times.append(time.time() - start)
                 gt = x
 
                 batch_psnrs = []
@@ -188,7 +186,7 @@ if __name__ == "__main__":
                     gt_ksp, avg_ksp = tensor_to_complex_np((gt[j]).cpu()), tensor_to_complex_np(
                         (recon[j]).cpu())
 
-                    avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
+                    avg_gen_np = avg_ksp
                     gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
 
                     psnrs.append(psnr(gt_np, avg_gen_np))
@@ -224,56 +222,56 @@ if __name__ == "__main__":
     m_comps = []
     c_comps = []
 
-    # inception_embedding = VGG16Embedding(parallel=True)
-    # # CFID_1
-    # cfid_metric = CFIDMetric(gan=model,
-    #                          loader=test_loader,
-    #                          image_embedding=inception_embedding,
-    #                          condition_embedding=inception_embedding,
-    #                          cuda=True,
-    #                          args=cfg,
-    #                          ref_loader=False,
-    #                          num_samps=1)
-    #
-    # cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
-    # cfids.append(cfid)
-    # m_comps.append(m_comp)
-    # c_comps.append(c_comp)
-    # #
-    # inception_embedding = VGG16Embedding(parallel=True)
-    # # CFID_2
-    # cfid_metric = CFIDMetric(gan=model,
-    #                          loader=val_dataloader,
-    #                          image_embedding=inception_embedding,
-    #                          condition_embedding=inception_embedding,
-    #                          cuda=True,
-    #                          args=cfg,
-    #                          ref_loader=False,
-    #                          num_samps=1)
-    #
-    # cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
-    # cfids.append(cfid)
-    # m_comps.append(m_comp)
-    # c_comps.append(c_comp)
+    inception_embedding = VGG16Embedding(parallel=True)
+    # CFID_1
+    cfid_metric = CFIDMetric(gan=model,
+                             loader=test_loader,
+                             image_embedding=inception_embedding,
+                             condition_embedding=inception_embedding,
+                             cuda=True,
+                             args=cfg,
+                             ref_loader=False,
+                             num_samps=1)
 
-    # inception_embedding = VGG16Embedding(parallel=True)
-    # # CFID_3
-    # cfid_metric = CFIDMetric(gan=model,
-    #                          loader=val_dataloader,
-    #                          image_embedding=inception_embedding,
-    #                          condition_embedding=inception_embedding,
-    #                          cuda=True,
-    #                          args=cfg,
-    #                          ref_loader=train_dataloader,
-    #                          num_samps=1)
+    cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
+    cfids.append(cfid)
+    m_comps.append(m_comp)
+    c_comps.append(c_comp)
     #
-    # cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
-    # cfids.append(cfid)
-    # m_comps.append(m_comp)
-    # c_comps.append(c_comp)
+    inception_embedding = VGG16Embedding(parallel=True)
+    # CFID_2
+    cfid_metric = CFIDMetric(gan=model,
+                             loader=val_dataloader,
+                             image_embedding=inception_embedding,
+                             condition_embedding=inception_embedding,
+                             cuda=True,
+                             args=cfg,
+                             ref_loader=False,
+                             num_samps=1)
 
-    # for l in range(2):
-    #     print(f'CFID_{l+1}: {cfids[l]:.2f}; M_COMP: {m_comps[l]:.4f}; C_COMP: {c_comps[l]:.4f}')
+    cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
+    cfids.append(cfid)
+    m_comps.append(m_comp)
+    c_comps.append(c_comp)
+
+    inception_embedding = VGG16Embedding(parallel=True)
+    # CFID_3
+    cfid_metric = CFIDMetric(gan=model,
+                             loader=val_dataloader,
+                             image_embedding=inception_embedding,
+                             condition_embedding=inception_embedding,
+                             cuda=True,
+                             args=cfg,
+                             ref_loader=train_dataloader,
+                             num_samps=1)
+
+    cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
+    cfids.append(cfid)
+    m_comps.append(m_comp)
+    c_comps.append(c_comp)
+
+    for l in range(3):
+        print(f'CFID_{l+1}: {cfids[l]:.2f}; M_COMP: {m_comps[l]:.4f}; C_COMP: {c_comps[l]:.4f}')
     #
 
     # n_samps = [1, 2, 4, 8, 16, 32]

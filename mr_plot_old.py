@@ -105,14 +105,14 @@ if __name__ == "__main__":
             gens_l1_ssim = torch.zeros(
                 size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
             gens_varnet = torch.zeros(
-                size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
+                size=(y.size(0), cfg.num_z_test, cfg.im_size, cfg.im_size)).cuda()
 
             for z in range(cfg.num_z_test):
                 gens_rcgan[:, z, :, :, :, :] = rcGAN_model.reformat(rcGAN_model.forward(y, mask))
                 gens_ohayon[:, z, :, :, :, :] = ohayon_model.reformat(ohayon_model.forward(y, mask))
                 gens_adler[:, z, :, :, :, :] = adler_model.reformat(adler_model.forward(y, mask))
                 gens_l1_ssim[:, z, :, :, :, :] = l1_ssim_model.reformat(l1_ssim_model.forward(y, mask))
-                gens_varnet[:, z, :, :, :, :] = varnet_model(varnet_y.float(), mask.to(torch.bool), num_low_freqs.float())
+                gens_varnet[:, z, :, :] = varnet_model(varnet_y.float(), mask.to(torch.bool), num_low_freqs.float())
 
             avg_rcgan = torch.mean(gens_rcgan, dim=1)
             avg_ohayon = torch.mean(gens_ohayon, dim=1)
