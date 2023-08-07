@@ -99,8 +99,8 @@ def load_object(dct):
 
 
 def rgb(im, unit_norm=False):
-    embed_ims = torch.zeros(size=(3, 384, 384))
-    tens_im = torch.tensor(im)
+    embed_ims = torch.zeros(size=(3, 384, 384)).cuda()
+    tens_im = torch.tensor(im).cuda()
 
     if unit_norm:
         tens_im = (tens_im - torch.min(tens_im)) / (torch.max(tens_im) - torch.min(tens_im))
@@ -133,7 +133,10 @@ if __name__ == "__main__":
     val_dataloader = dm.val_dataloader()
 
     lpips_met = lpips.LPIPS(net='alex')
+    lpips_met = lpips_met.cuda()
+
     dists_met = DISTS()
+    dists_met = dists_met.cuda()
 
     with torch.no_grad():
         model = model_alias.load_from_checkpoint(
@@ -182,7 +185,7 @@ if __name__ == "__main__":
 
                 for j in range(y.size(0)):
                     S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
-                    gt_ksp, avg_ksp = gt[j].cpu().numpy(), recon[j].cpu().numpu()
+                    gt_ksp, avg_ksp = gt[j].cpu().numpy(), recon[j].cpu().numpy()
 
                     avg_gen_np = avg_ksp
                     gt_np = gt_ksp
