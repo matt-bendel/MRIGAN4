@@ -416,10 +416,11 @@ if __name__ == "__main__":
                 # ax.set_yticks([])
 
                 plt.savefig(f'mr_figs/body_mri_fig_avg_err_std_{fig_count}.png', bbox_inches='tight', dpi=300)
+                plt.close(fig)
 
                 # TODO: NIPS rebuttal
                 nrow = 1
-                ncol = 5
+                ncol = 6
 
                 fig = plt.figure(figsize=(ncol + 1, nrow + 1))
 
@@ -497,6 +498,7 @@ if __name__ == "__main__":
                 ax.set_yticks([])
 
                 plt.savefig(f'mr_figs/nips_rebuttal_{fig_count}.png', bbox_inches='tight', dpi=300)
+                plt.close(fig)
 
                 # TODO: top row: zoomed avg, next two rows samps.
                 nrow = 3
@@ -606,6 +608,7 @@ if __name__ == "__main__":
                     ax.set_yticks([])
 
                 plt.savefig(f'mr_figs/body_mri_fig_right_{fig_count}.png', bbox_inches='tight', dpi=300)
+                plt.close(fig)
 
                 # TODO: Rizwan Idea: zoomed, 1st row avg, 2nd error, 3rd std. dev, 4, 5, 6 samps
                 nrow = 6
