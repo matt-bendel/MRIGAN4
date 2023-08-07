@@ -175,7 +175,7 @@ class UNetModel(nn.Module):
         # self.preprocess_unet = UNET()
         self.in_chans = in_chans
         self.out_chans = out_chans
-        self.chans = 256
+        self.chans = 128
         self.num_pool_layers = 4
 
         num_pool_layers = self.num_pool_layers
