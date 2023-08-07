@@ -7,6 +7,8 @@ import pathlib
 import cv2
 import torch
 import numpy as np
+import pickle
+import sigpy as sp
 
 from utils.espirit import ifft, fft
 from data import transforms
@@ -58,8 +60,15 @@ class DataTransform:
         kspace = kspace.transpose(1, 2, 0)
         x = ifft(kspace, (0, 1))  # (768, 396, 16)
 
+        sense_path = f'/storage/fastMRI_brain/sense_maps/test_full_res/{fname}_{slice}.pkl'
+        with open(sense_path, 'rb') as inp:
+            maps = pickle.load(inp)
+
         # TODO: Save SVD matrix offline
         coil_compressed_x = ImageCropandKspaceCompression(x, None)  # (384, 384, 8)
+
+        S = sp.linop.Multiply((384, 384), maps)
+        target = torch.tensor(S.H * coil_compressed_x.transpose(2, 0, 1)).abs()
 
         im_tensor = transforms.to_tensor(coil_compressed_x).permute(2, 0, 1, 3)
 
@@ -70,7 +79,7 @@ class DataTransform:
         kspace = fft2c_new(im_tensor)
         masked_kspace = kspace * mask
 
-        return masked_kspace.float(), im_tensor.float(), mask.to(torch.bool), transforms.to_tensor(sense_maps), 16
+        return masked_kspace.float(), target.float(), mask.to(torch.bool), sense_maps, transforms.to_tensor(sense_maps), 16
 
 
 

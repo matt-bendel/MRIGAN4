@@ -154,7 +154,7 @@ class CFIDMetric:
         for i in range(multi_coil_inp.size(0)):
             reformatted = multi_coil_inp[i, :, :, :, :]
 
-            unnormal_im = reformatted
+            unnormal_im = ifft2c_new(reformatted)
 
             S = sp.linop.Multiply((self.args.im_size, self.args.im_size), maps[i])
 
@@ -192,7 +192,7 @@ class CFIDMetric:
         for i, data in tqdm(enumerate(self.loader),
                             desc='Computing generated distribution',
                             total=len(self.loader)):
-            y, x, mask, maps, num_low_freqs = data
+            y, x, mask, maps, num_low_freqs, cond = data
             y = y.cuda()
             x = x.cuda()
             mask = mask.cuda()
@@ -214,7 +214,7 @@ class CFIDMetric:
 
                     image = self._get_embed_im_no_maps(recon)
                     condition_im = self._get_embed_im(y, maps)
-                    true_im = self._get_embed_im(x, maps)
+                    true_im = self._get_embed_im_no_maps(x)
 
                     img_e = self.image_embedding(self.transforms(image))
                     cond_e = self.condition_embedding(self.transforms(condition_im))
@@ -256,7 +256,7 @@ class CFIDMetric:
 
                             image = self._get_embed_im_no_maps(recon)
                             condition_im = self._get_embed_im(y, maps)
-                            true_im = self._get_embed_im(x, maps)
+                            true_im = self._get_embed_im_no_maps(x)
 
                             img_e = self.image_embedding(self.transforms(image))
                             cond_e = self.condition_embedding(self.transforms(condition_im))

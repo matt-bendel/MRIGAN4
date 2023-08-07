@@ -183,11 +183,10 @@ if __name__ == "__main__":
 
                 for j in range(y.size(0)):
                     S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
-                    gt_ksp, avg_ksp = tensor_to_complex_np((gt[j]).cpu()), tensor_to_complex_np(
-                        (recon[j]).cpu())
+                    gt_ksp, avg_ksp = gt[j].cpu().numpy(), recon[j].cpu().numpu()
 
                     avg_gen_np = avg_ksp
-                    gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
+                    gt_np = gt_ksp
 
                     psnrs.append(psnr(gt_np, avg_gen_np))
                     ssims.append(ssim(gt_np, avg_gen_np))

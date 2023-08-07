@@ -183,7 +183,7 @@ class FIDMetric:
         for i in range(multi_coil_inp.size(0)):
             reformatted = multi_coil_inp[i, :, :, :, :]
 
-            unnormal_im = reformatted
+            unnormal_im = ifft2c_new(reformatted)
 
             S = sp.linop.Multiply((self.args.im_size, self.args.im_size), tensor_to_complex_np(maps[i].cpu()))
 
