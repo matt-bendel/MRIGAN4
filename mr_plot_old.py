@@ -176,7 +176,7 @@ if __name__ == "__main__":
                     torch.tensor(S.H * tensor_to_complex_np((avg_l1_ssim[j] * std[j] + mean[j]).cpu())).abs().numpy(),
                     180)
                 np_avgs['varnet'] = ndimage.rotate(
-                    torch.tensor(S.H * tensor_to_complex_np(avg_varnet[j].cpu())).abs().numpy(),
+                    avg_varnet[j].cpu().numpy(),
                     180)
 
                 for z in range(cfg.num_z_test):
