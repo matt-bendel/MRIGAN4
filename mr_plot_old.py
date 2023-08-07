@@ -417,6 +417,87 @@ if __name__ == "__main__":
 
                 plt.savefig(f'mr_figs/body_mri_fig_avg_err_std_{fig_count}.png', bbox_inches='tight', dpi=300)
 
+                # TODO: NIPS rebuttal
+                nrow = 1
+                ncol = 5
+
+                fig = plt.figure(figsize=(ncol + 1, nrow + 1))
+
+                gs = gridspec.GridSpec(nrow, ncol,
+                                       wspace=0.0, hspace=0.0,
+                                       top=1. - 0.5 / (nrow + 1), bottom=0.5 / (nrow + 1),
+                                       left=0.5 / (ncol + 1), right=1 - 0.5 / (ncol + 1))
+
+                ax = plt.subplot(gs[0, 0])
+                ax.imshow(np_gt, cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                ax1 = ax
+
+                rect = patches.Rectangle((zoom_startx, zoom_starty), zoom_length, zoom_length, linewidth=1,
+                                         edgecolor='r',
+                                         facecolor='none')
+
+                # Add the patch to the Axes
+                ax.add_patch(rect)
+
+                ax = plt.subplot(gs[0, 1])
+                ax.imshow(np_gt[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
+                          cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                connection_path_1 = patches.ConnectionPatch([zoom_startx + zoom_length, y_coords[0]], [0, 0], coordsA=ax1.transData,
+                                                            coordsB=ax.transData, color='r')
+                fig.add_artist(connection_path_1)
+                connection_path_2 = patches.ConnectionPatch([x_coord, y_coords[1]], [0, zoom_length],
+                                                            coordsA=ax1.transData,
+                                                            coordsB=ax.transData, color='r')
+                fig.add_artist(connection_path_2)
+
+                ax = plt.subplot(gs[0, 2])
+                ax.imshow(
+                    np_avgs['varnet'][zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
+                    cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                ax = plt.subplot(gs[0, 3])
+                ax.imshow(
+                    np_avgs['rcgan'][zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
+                    cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                ax = plt.subplot(gs[0, 4])
+                ax.imshow(
+                    np_samps['rcgan'][0][zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
+                    cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                ax = plt.subplot(gs[0, 5])
+                ax.imshow(
+                    np_samps['rcgan'][1][zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
+                    cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                plt.savefig(f'mr_figs/nips_rebuttal_{fig_count}.png', bbox_inches='tight', dpi=300)
+
                 # TODO: top row: zoomed avg, next two rows samps.
                 nrow = 3
                 ncol = 1
