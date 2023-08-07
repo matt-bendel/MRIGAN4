@@ -192,8 +192,8 @@ if __name__ == "__main__":
 
                     psnrs.append(psnr(gt_np, avg_gen_np))
                     ssims.append(ssim(gt_np, avg_gen_np))
-                    lpipss.append(lpips_met(rgb(gt_np), rgb(avg_gen_np)).numpy())
-                    distss.append(dists_met(rgb(gt_np, unit_norm=True), rgb(avg_gen_np, unit_norm=True)).numpy())
+                    lpipss.append(lpips_met(rgb(gt_np), rgb(avg_gen_np)).cpu().numpy())
+                    distss.append(dists_met(rgb(gt_np, unit_norm=True), rgb(avg_gen_np, unit_norm=True)).cpu().numpy())
 
             print(f'TIME: {np.mean(times)}')
             n_psnrs.append(np.mean(psnrs))
