@@ -138,9 +138,14 @@ if __name__ == "__main__":
     dists_met = DISTS()
     dists_met = dists_met.cuda()
 
+    psnr_str = ''
+    ssim_str = ''
+    lpips_str = ''
+    dists_str = ''
+
     with torch.no_grad():
         model = model_alias.load_from_checkpoint(
-            checkpoint_path='/storage/matt_models/mri/e2e_varnet/varnet/varnet_demo/checkpoints/epoch=25-step=238368.ckpt')
+            checkpoint_path='/storage/matt_models/mri/e2e_varnet/varnet/varnet_demo/checkpoints/epoch=30-step=284208.ckpt')
         model.cuda()
         model.eval()
 
@@ -201,10 +206,7 @@ if __name__ == "__main__":
             n_lpipss.append(np.mean(lpipss))
             n_distss.append(np.mean(distss))
 
-        psnr_str = ''
-        ssim_str = ''
-        lpips_str = ''
-        dists_str = ''
+
 
         for i in range(len(n_psnrs)):
             psnr_str = f'{psnr_str} {n_psnrs[i]:.2f} &'
@@ -212,10 +214,6 @@ if __name__ == "__main__":
             lpips_str = f'{lpips_str} {n_lpipss[i]:.4f} &'
             dists_str = f'{dists_str} {n_distss[i]:.4f} &'
         #
-        print(f'PSNR:\n{psnr_str}')
-        print(f'SSIM:\n{ssim_str}')
-        print(f'LPIPS:\n{lpips_str}')
-        print(f'DISTS:\n{dists_str}')
 
             # print(f'APSD: {np.mean(apsds)}')
     cfids = []
@@ -289,6 +287,13 @@ if __name__ == "__main__":
 
     print(f'FID: {fid}; FJD: {fjd}')
 
+    for l in range(3):
+        print(f'CFID_{l+1}: {cfids[l]:.2f}; M_COMP: {m_comps[l]:.4f}; C_COMP: {c_comps[l]:.4f}')
+
+    print(f'PSNR:\n{psnr_str}')
+    print(f'SSIM:\n{ssim_str}')
+    print(f'LPIPS:\n{lpips_str}')
+    print(f'DISTS:\n{dists_str}')
     # print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
     # print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
     # print(f'APSD: {np.mean(apsds)}')

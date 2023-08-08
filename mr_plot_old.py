@@ -72,7 +72,7 @@ if __name__ == "__main__":
         l1_ssim_model = L1SSIMMRI.load_from_checkpoint(
             checkpoint_path=cfg.checkpoint_dir + '/neurips/l1_ssim/checkpoint_best.ckpt')
         varnet_model = VarNetModule.load_from_checkpoint(
-            checkpoint_path='/storage/matt_models/mri/e2e_varnet/varnet/varnet_demo/checkpoints/epoch=15-step=146688.ckpt')
+            checkpoint_path='/storage/matt_models/mri/e2e_varnet/varnet/varnet_demo/checkpoints/epoch=30-step=284208.ckpt')
 
         rcGAN_model.cuda()
         ohayon_model.cuda()
@@ -465,7 +465,7 @@ if __name__ == "__main__":
 
                 ax = plt.subplot(gs[0, 2])
                 ax.imshow(
-                    np_avgs['varnet'][zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
+                    np_avgs['l1_ssim'][zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
                     cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
@@ -474,7 +474,7 @@ if __name__ == "__main__":
 
                 ax = plt.subplot(gs[0, 3])
                 ax.imshow(
-                    np_avgs['rcgan'][zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
+                    np_avgs['varnet'][zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
                     cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
@@ -483,16 +483,18 @@ if __name__ == "__main__":
 
                 ax = plt.subplot(gs[0, 4])
                 ax.imshow(
-                    np_samps['rcgan'][0][zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
+                    np_avgs['rcgan'][zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
                     cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
                 ax.set_xticks([])
                 ax.set_yticks([])
 
+                rcgan_2 = (np_samps['rcgan'][0] + np_samps['rcgan'][1]) / 2
+
                 ax = plt.subplot(gs[0, 5])
                 ax.imshow(
-                    np_samps['rcgan'][1][zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
+                    rcgan_2[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
                     cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
