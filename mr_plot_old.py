@@ -219,6 +219,7 @@ if __name__ == "__main__":
                 langevin_std = np.std(langevin_recons, axis=0)
 
                 keys = ['l1_ssim', 'varnet', 'rcgan', 'ohayon', 'adler']
+                print(j)
                 if j == 0:
                     zoom_startx = 180
                     zoom_starty = 40
