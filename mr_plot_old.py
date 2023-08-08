@@ -233,6 +233,8 @@ if __name__ == "__main__":
                     if p <= 0.5:
                         zoom_starty = zoom_starty2
 
+                    print(zoom_starty)
+
                     zoom_length = 80
 
                 x_coord = zoom_startx + zoom_length
