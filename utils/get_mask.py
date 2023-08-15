@@ -10,9 +10,14 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type
     a = None
 
     if mask_type == 4:
-        R = np.random.randint(2, 8)
-        args.calib_width = 32 if R <= 5 else 16
-        mask_type = 2
+        r = np.random.randint(2, 8)
+        cw = 32 if R <= 5 else 16
+        midway = resolution // 2
+        s = midway - cw // 2
+        e = s + cw
+        m[:, s:e] = True
+        a = np.random.choice(resolution - cw, resolution // r - cw, replace=False)
+        a = np.where(a < s, a, a + args.calib_width)
 
     if mask_type == 3:
         a = np.array(
