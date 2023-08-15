@@ -9,6 +9,11 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type
     m = np.zeros((resolution, resolution))
     a = None
 
+    if mask_type == 4:
+        R = np.random.randint(2, 8)
+        args.calib_width = 32 if R <= 5 else 16
+        mask_type = 2
+
     if mask_type == 3:
         a = np.array(
             [
