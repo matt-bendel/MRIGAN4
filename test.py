@@ -58,6 +58,7 @@ import matplotlib.patches as patches
 # STATIC RANDOM MASK TEST
 # python test.py --mri --rcgan --exp-name neurips/rcgan_big --mask-type 3 && python test.py --mri --rcgan --exp-name neurips/random_blind --mask-type 3 && python test.py --mri --rcgan --exp-name neurips/random_proposed --mask-type 3 && python test.py --mri --rcgan --exp-name neurips/rcgan_statis --mask-type 3
 
+# python test.py --mri --rcgan --exp-name neurips/rcgan_blind_many_R --mask-type 4 && python test.py --mri --rcgan --exp-name neurips/random_proposed_many_R --mask-type 4
 
 def generate_image(fig, target, image, method, image_ind, rows, cols, kspace=False, disc_num=False):
     # rows and cols are both previously defined ints
@@ -370,8 +371,8 @@ if __name__ == "__main__":
 
 
             # TODO: PSNR HISTOGRAM
-            if n == 32 and args.mask_type == 2:
-                plt.hist(psnrs, 30)
+            if n == 32 and (args.mask_type == 4 or args.mask_type == 2):
+                plt.scatter(psnrs)
                 plt.title(f'{args.exp_name}')
                 plt.ylabel('PSNR')
                 plt.savefig(f'{args.exp_name}_psnr_hist.png')
