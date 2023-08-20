@@ -58,10 +58,11 @@ import matplotlib.patches as patches
 # STATIC RANDOM MASK TEST
 # python test.py --mri --rcgan --exp-name neurips/rcgan_big --mask-type 3 && python test.py --mri --rcgan --exp-name neurips/random_blind --mask-type 3 && python test.py --mri --rcgan --exp-name neurips/random_proposed --mask-type 3 && python test.py --mri --rcgan --exp-name neurips/rcgan_statis --mask-type 3
 
-# python test.py --mri --rcgan --exp-name neurips/rcgan_blind_many_R --mask-type 4 && python test.py --mri --rcgan --exp-name neurips/random_proposed_many_R --mask-type 4
+# python test.py --mri --rcgan --exp-name neurips/rcgan_blind_many_R --mask-type 4 && python test.py --mri --rcgan --exp-name neurips/rcgan_proposed_many_R --mask-type 4
 
 
-# python test.py --mri --rcgan --exp-name neurips/random_proposed_many_R --mask-type 4 --R 8 && python test.py --mri --rcgan --exp-name neurips/random_proposed_many_R --mask-type 4 --R 7 && python test.py --mri --rcgan --exp-name neurips/random_proposed_many_R --mask-type 4 --R 6 && python test.py --mri --rcgan --exp-name neurips/random_proposed_many_R --mask-type 4 --R 5 && python test.py --mri --rcgan --exp-name neurips/random_proposed_many_R --mask-type 4 --R 4 && python test.py --mri --rcgan --exp-name neurips/random_proposed_many_R --mask-type 4 --R 3 && python test.py --mri --rcgan --exp-name neurips/random_proposed_many_R --mask-type 4 --R 2
+# python test.py --mri --rcgan --exp-name neurips/rcgan_proposed_many_R --mask-type 1 --R 8 && python test.py --mri --rcgan --exp-name neurips/rcgan_proposed_many_R --mask-type 1 --R 7 && python test.py --mri --rcgan --exp-name neurips/rcgan_proposed_many_R --mask-type 1 --R 6 && python test.py --mri --rcgan --exp-name neurips/rcgan_proposed_many_R --mask-type 1 --R 5 && python test.py --mri --rcgan --exp-name neurips/rcgan_proposed_many_R --mask-type 1 --R 4 && python test.py --mri --rcgan --exp-name neurips/rcgan_proposed_many_R --mask-type 1 --R 3 && python test.py --mri --rcgan --exp-name neurips/rcgan_proposed_many_R --mask-type 1 --R 2
+# python test.py --mri --rcgan --exp-name neurips/rcgan_blind_many_R --mask-type 1 --R 8 && python test.py --mri --rcgan --exp-name neurips/rcgan_blind_many_R --mask-type 1 --R 7 && python test.py --mri --rcgan --exp-name neurips/rcgan_blind_many_R --mask-type 1 --R 6 && python test.py --mri --rcgan --exp-name neurips/rcgan_blind_many_R --mask-type 1 --R 5 && python test.py --mri --rcgan --exp-name neurips/rcgan_blind_many_R --mask-type 1 --R 4 && python test.py --mri --rcgan --exp-name neurips/rcgan_blind_many_R --mask-type 1 --R 3 && python test.py --mri --rcgan --exp-name neurips/rcgan_blind_many_R --mask-type 1 --R 2
 
 
 def generate_image(fig, target, image, method, image_ind, rows, cols, kspace=False, disc_num=False):

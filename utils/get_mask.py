@@ -10,8 +10,12 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type
     a = None
 
     if mask_type == 4:
-        r = np.random.randint(2, 8)
-        cw = 32 if R <= 5 else 16
+        x = [2, 8]
+        y = [32, 16]
+        r = np.random.randint(2, 9)
+        cw = np.rint(np.interp(r, x, y))
+        if cw % 2 != 0:
+            cw = cw + 1
         midway = resolution // 2
         s = midway - cw // 2
         e = s + cw
