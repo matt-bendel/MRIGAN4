@@ -16,7 +16,7 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type
         print(r)
         cw_interp = np.interp(r, x, y)
         print(cw_interp)
-        cw = np.rint(np.interp(r, x, y))
+        cw = int(np.rint(np.interp(r, x, y)))
         print(cw)
         if cw % 2 != 0:
             cw = cw + 1
