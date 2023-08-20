@@ -13,11 +13,8 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type
         x = [2, 8]
         y = [32, 16]
         r = np.random.randint(2, 9)
-        print(r)
         cw_interp = np.interp(r, x, y)
-        print(cw_interp)
         cw = int(np.rint(np.interp(r, x, y)))
-        print(cw)
         if cw % 2 != 0:
             cw = cw + 1
         midway = resolution // 2
