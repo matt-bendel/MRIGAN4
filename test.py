@@ -60,6 +60,10 @@ import matplotlib.patches as patches
 
 # python test.py --mri --rcgan --exp-name neurips/rcgan_blind_many_R --mask-type 4 && python test.py --mri --rcgan --exp-name neurips/random_proposed_many_R --mask-type 4
 
+
+# python test.py --mri --rcgan --exp-name neurips/random_proposed_many_R --mask-type 4 --R 8 && python test.py --mri --rcgan --exp-name neurips/random_proposed_many_R --mask-type 4 --R 7 && python test.py --mri --rcgan --exp-name neurips/random_proposed_many_R --mask-type 4 --R 6 && python test.py --mri --rcgan --exp-name neurips/random_proposed_many_R --mask-type 4 --R 5 && python test.py --mri --rcgan --exp-name neurips/random_proposed_many_R --mask-type 4 --R 4 && python test.py --mri --rcgan --exp-name neurips/random_proposed_many_R --mask-type 4 --R 3 && python test.py --mri --rcgan --exp-name neurips/random_proposed_many_R --mask-type 4 --R 2
+
+
 def generate_image(fig, target, image, method, image_ind, rows, cols, kspace=False, disc_num=False):
     # rows and cols are both previously defined ints
     ax = fig.add_subplot(rows, cols, image_ind)
@@ -242,6 +246,10 @@ if __name__ == "__main__":
             cfg = json.loads(json.dumps(cfg), object_hook=load_object)
 
         cfg.batch_size = cfg.batch_size * 4
+
+        if args.R != 8:
+            cfg.R = args.R
+
         dm = MRIDataModule(cfg, args.mask_type, big_test=True)
 
         dm.setup()
@@ -276,6 +284,8 @@ if __name__ == "__main__":
 
     dists_met = dists_met.cuda()
     lpips_met = lpips_met.cuda()
+
+    print(f"R = {cfg.R}")
 
     with torch.no_grad():
         model = model_alias.load_from_checkpoint(
