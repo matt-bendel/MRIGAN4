@@ -405,10 +405,10 @@ if __name__ == "__main__":
             lpips_str = f'{lpips_str} {n_lpipss[i]:.4f} &'
             dists_str = f'{dists_str} {n_distss[i]:.4f} &'
 
-        print(f'PSNR:\n{psnr_str}')
-        print(f'SSIM:\n{ssim_str}')
-        print(f'LPIPS:\n{lpips_str}')
-        print(f'DISTS:\n{dists_str}')
+        print("PSNR and SSIM:")
+        print(f'{psnr_str} {ssim_str}')
+        print("LPIPS and DISTS")
+        print(f'{lpips_str} {dists_str}')
 
             # print(f'APSD: {np.mean(apsds)}')
     exit()
