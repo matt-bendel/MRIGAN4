@@ -357,14 +357,6 @@ if __name__ == "__main__":
                     avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
                     gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
 
-                    plt.imshow(gt_np, cmap='gray')
-                    plt.savefig('test_ag_gt.png')
-
-                    plt.imshow(avg_gen_np, cmap='gray')
-                    plt.savefig('test_ag_avg.png')
-
-                    exit()
-
                     for z in range(n):
                         np_samp = tensor_to_complex_np((gens[j, z, :, :, :, :] * std[j] + mean[j]).cpu())
                         single_samps[z, :, :] = torch.tensor(S.H * np_samp).abs().numpy()
