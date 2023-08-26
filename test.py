@@ -138,6 +138,7 @@ def rgb(im, unit_norm=False):
 
     return embed_ims.unsqueeze(0)
 
+
 def get_com_fig(np_gt, np_avg, np_med, n, fig_num):
     zoom_startx = 80  # np.random.randint(120, 250)
     zoom_starty1 = 180  # np.random.randint(30, 80)
@@ -197,7 +198,6 @@ def get_com_fig(np_gt, np_avg, np_med, n, fig_num):
                                                 coordsB=ax.transData, color='r')
     fig.add_artist(connection_path_2)
 
-
     ax = plt.subplot(gs[0, 2])
     ax.imshow(np_avg[zoom_starty:zoom_starty + zoom_length,
               zoom_startx:zoom_startx + zoom_length], cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
@@ -218,8 +218,8 @@ def get_com_fig(np_gt, np_avg, np_med, n, fig_num):
 
     ax = plt.subplot(gs[1, 2])
     ax.imshow(2 * np.abs(np_avg - gt_np)[zoom_starty:zoom_starty + zoom_length,
-              zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0,
-                   vmax=np.max(np.abs(np_avg - gt_np)))
+                  zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0,
+              vmax=np.max(np.abs(np_avg - gt_np)))
     ax.set_xticklabels([])
     ax.set_yticklabels([])
     ax.set_xticks([])
@@ -227,14 +227,15 @@ def get_com_fig(np_gt, np_avg, np_med, n, fig_num):
 
     ax = plt.subplot(gs[1, 3])
     ax.imshow(2 * np.abs(med_np - gt_np)[zoom_starty:zoom_starty + zoom_length,
-              zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0,
-                   vmax=np.max(np.abs(np_avg - gt_np)))
+                  zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0,
+              vmax=np.max(np.abs(np_avg - gt_np)))
     ax.set_xticklabels([])
     ax.set_yticklabels([])
     ax.set_xticks([])
     ax.set_yticks([])
 
     plt.savefig(f'med_tests_{n}_samps_{fig_num}.png', bbox_inches='tight', dpi=300)
+
 
 if __name__ == "__main__":
     torch.set_float32_matmul_precision('medium')
@@ -302,7 +303,7 @@ if __name__ == "__main__":
         model.cuda()
         model.eval()
 
-        n_samps = [1,2,4,8,16,32]
+        n_samps = [1, 2, 4, 8, 16, 32]
 
         n_psnrs = []
         n_ssims = []
@@ -356,6 +357,14 @@ if __name__ == "__main__":
                     avg_gen_np = torch.tensor(S.H * avg_ksp).abs().numpy()
                     gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
 
+                    plt.imshow(gt_np, cmap='gray')
+                    plt.savefig('test_ag_gt.png')
+
+                    plt.imshow(avg_gen_np, cmap='gray')
+                    plt.savefig('test_ag_avg.png')
+
+                    exit()
+
                     for z in range(n):
                         np_samp = tensor_to_complex_np((gens[j, z, :, :, :, :] * std[j] + mean[j]).cpu())
                         single_samps[z, :, :] = torch.tensor(S.H * np_samp).abs().numpy()
@@ -379,7 +388,6 @@ if __name__ == "__main__":
             # print(f'SSIM: {np.mean(med_ssims)} \pm {np.std(med_ssims) / np.sqrt(len(med_ssims))}')
             # print(f'LPIPS: {np.mean(med_lpipss)} \pm {np.std(med_lpipss) / np.sqrt(len(med_lpipss))}')
             # print(f'DISTS: {np.mean(med_distss)} \pm {np.std(med_distss) / np.sqrt(len(med_distss))}')
-
 
             # TODO: PSNR HISTOGRAM
             if n == 32 and (args.mask_type == 4 or args.mask_type == 2):
@@ -410,7 +418,7 @@ if __name__ == "__main__":
         print("LPIPS and DISTS")
         print(f'{lpips_str} {dists_str}')
 
-            # print(f'APSD: {np.mean(apsds)}')
+        # print(f'APSD: {np.mean(apsds)}')
     exit()
     cfids = []
     m_comps = []
@@ -482,6 +490,6 @@ if __name__ == "__main__":
     # print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
     # print(f'APSD: {np.mean(apsds)}')
     for l in range(1):
-        print(f'CFID_{l+1}: {cfids[l]:.2f}; M_COMP: {m_comps[l]:.4f}; C_COMP: {c_comps[l]:.4f}')
+        print(f'CFID_{l + 1}: {cfids[l]:.2f}; M_COMP: {m_comps[l]:.4f}; C_COMP: {c_comps[l]:.4f}')
     #
     # print(f'FID: {fid}')
