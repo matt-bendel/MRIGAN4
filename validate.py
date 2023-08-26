@@ -75,6 +75,6 @@ if __name__ == "__main__":
 
     print(f"BEST EPOCH: {best_epoch}")
 
-    for epoch in range(50, end_epoch):
+    for epoch in range(start_epoch, end_epoch):
         if epoch != best_epoch:
             os.remove(cfg.checkpoint_dir + args.exp_name + f'/checkpoint-epoch={epoch}.ckpt')
