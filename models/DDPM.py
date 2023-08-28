@@ -17,7 +17,8 @@ class DDPM(pl.LightningModule):
             dim_mults=(1, 1, 2, 2, 4, 4),
             channels=2,
             resnet_block_groups=2,
-            attn_dim_head=32
+            attn_dim_head=24,
+            full_attn=(False, False, False, False, True, False)
         )
         self.diffusion = GaussianDiffusion(
             self.ddpm_net,
