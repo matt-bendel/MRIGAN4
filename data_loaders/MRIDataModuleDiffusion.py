@@ -167,7 +167,7 @@ class MRIDataModuleDiffusion(pl.LightningDataModule):
 
     # define your dataloaders
     # again, here defined for train, validate and test, not for predict as the project is not there yet.
-    def train_dataloader(self, sampler):
+    def train_dataloader(self):
         return DataLoader(
             dataset=self.train,
             batch_size=4,
