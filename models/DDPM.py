@@ -35,6 +35,7 @@ class DDPM(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         x = batch
+        x = x.float()
 
         # train generator
         loss = self.diffusion(x)
@@ -45,6 +46,7 @@ class DDPM(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx, external_test=False):
         x = batch
+        x = x.float()
 
         # TODO: Plot as tensors using torch function
         if batch_idx == 0:
