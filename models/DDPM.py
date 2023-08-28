@@ -26,7 +26,7 @@ class DDPM(pl.LightningModule):
             timesteps=1000
         )
 
-        self.resolution = self.args.im_size
+        self.resolution = 384
 
         self.save_hyperparameters()  # Save passed values
 
