@@ -172,7 +172,6 @@ class MRIDataModuleDiffusion(pl.LightningDataModule):
             dataset=self.train,
             batch_size=4,
             num_workers=10,
-            sampler=sampler,
             drop_last=True,
             pin_memory=True
         )
