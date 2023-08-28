@@ -57,6 +57,8 @@ class DDPM(pl.LightningModule):
                 samps[i, :, :] = (samps[i, :, :] - samps[i, :, :].min()) / (samps[i, :, :].max() - samps[i, :, :].min())
 
             if self.global_rank == 0 and self.current_epoch % 5 == 0:
+                print(samps.max())
+                print(samps.min())
                 self.logger.log_image(
                     key=f"epoch_{self.current_epoch}_img",
                     images=[Image.fromarray(np.uint8(samps[0, :, :].cpu().numpy()*255), 'L'), Image.fromarray(np.uint8(samps[1, :, :].cpu().numpy()*255), 'L'), Image.fromarray(np.uint8(samps[2, :, :].cpu().numpy()*255)), Image.fromarray(np.uint8(samps[3, :, :].cpu().numpy()*255))],

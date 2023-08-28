@@ -62,8 +62,11 @@ class DataTransform:
         S = sp.linop.Multiply((384, 384), sense_maps)
         coil_combined_x = S.H * coil_compressed_x.transpose(2, 0, 1)
         gt_ksp = fft(coil_combined_x, (0, 1))
+        gt_ksp = np.concatenate([np.expand_dims(np.real(gt_ksp), axis=0), np.expand_dims(np.imag(gt_ksp), axis=0)], axis=0)
 
-        return np.concatenate([np.expand_dims(np.real(gt_ksp), axis=0), np.expand_dims(np.imag(gt_ksp), axis=0)], axis=0)
+        # gt_ksp = (gt_ksp - np.min(gt_ksp)) / (np.max(gt_ksp) - np.min(gt_ksp))
+
+        return gt_ksp
 
 
 def reduce_resolution(im):
