@@ -23,7 +23,10 @@ class DDPM(pl.LightningModule):
         self.diffusion = GaussianDiffusion(
             self.ddpm_net,
             image_size=384,
-            timesteps=1000
+            timesteps=1000,
+            auto_normalize=False,
+            beta_schedule='linear',
+            objective='pred_noise'
         )
 
         self.resolution = 384
@@ -57,8 +60,6 @@ class DDPM(pl.LightningModule):
                 samps[i, :, :] = (samps[i, :, :] - samps[i, :, :].min()) / (samps[i, :, :].max() - samps[i, :, :].min())
 
             if self.global_rank == 0 and self.current_epoch % 5 == 0:
-                print(samps.max())
-                print(samps.min())
                 self.logger.log_image(
                     key=f"epoch_{self.current_epoch}_img",
                     images=[Image.fromarray(np.uint8(samps[0, :, :].cpu().numpy()*255), 'L'), Image.fromarray(np.uint8(samps[1, :, :].cpu().numpy()*255), 'L'), Image.fromarray(np.uint8(samps[2, :, :].cpu().numpy()*255)), Image.fromarray(np.uint8(samps[3, :, :].cpu().numpy()*255))],
@@ -78,7 +79,7 @@ class DDPM(pl.LightningModule):
         self.trainer.strategy.barrier()
 
     def configure_optimizers(self):
-        opt_g = torch.optim.Adam(self.ddpm_net.parameters(), lr=5e-5, weight_decay=0)
+        opt_g = torch.optim.Adam(self.ddpm_net.parameters(), lr=1e-5, weight_decay=0)
 
         return opt_g
 
