@@ -17,6 +17,7 @@ from models.rcGAN import rcGAN
 from models.super_res_rcgan import SRrcGAN
 from models.adler import Adler
 from models.l1_ssim_module import L1SSIMMRI
+from models.rcGAN_no_dc import rcGANNoDC
 from models.ohayon import Ohayon
 from models.mri_unet import MRIUnet
 from models.CoModGAN import InpaintUNet
@@ -63,7 +64,10 @@ if __name__ == '__main__':
 
         if args.rcgan:
             noise_structure = {"AWGN": args.awgn, "structure": args.noise_structure}
-            model = rcGAN(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure, args.num_gpus)
+            if args.nodc:
+                model = rcGANNoDC(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure, args.num_gpus)
+            else:
+                model = rcGAN(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure, args.num_gpus)
         else:
             noise_structure = {"AWGN": args.awgn, "structure": args.noise_structure}
             model = L1SSIMMRI(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure, args.num_gpus)
