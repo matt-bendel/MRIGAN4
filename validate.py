@@ -10,6 +10,7 @@ from data_loaders.MRIDataModule import MRIDataModule
 from datasets.fastmri_multicoil_general import FastMRIDataModule
 from utils.parse_args import create_arg_parser
 from models.rcGAN import rcGAN
+from models.rcGAN_no_dc import rcGANNoDC
 from models.adler import Adler
 from models.ohayon import Ohayon
 from pytorch_lightning import seed_everything
@@ -44,7 +45,11 @@ if __name__ == "__main__":
         for epoch in range(start_epoch, end_epoch):
             print(f"VALIDATING EPOCH: {epoch + 1}")
             try:
-                model = rcGAN.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + args.exp_name + f'/checkpoint-epoch={epoch}.ckpt')
+                if args.nodc:
+                    model = rcGANNoDC.load_from_checkpoint(
+                        checkpoint_path=cfg.checkpoint_dir + args.exp_name + f'/checkpoint-epoch={epoch}.ckpt')
+                else:
+                    model = rcGAN.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + args.exp_name + f'/checkpoint-epoch={epoch}.ckpt')
             except Exception as e:
                 print(e)
                 continue
