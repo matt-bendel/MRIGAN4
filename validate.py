@@ -41,8 +41,8 @@ if __name__ == "__main__":
     best_epoch = -1
     inception_embedding = VGG16Embedding()
     best_cfid = 10000000
-    start_epoch = 100
-    end_epoch = 150
+    start_epoch = 30
+    end_epoch = 50
 
     with torch.no_grad():
         for epoch in range(start_epoch, end_epoch):
