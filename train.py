@@ -56,6 +56,9 @@ if __name__ == '__main__':
             save_top_k=1
         )
 
+        if args.R != 8:
+            cfg.R = args.R
+
         if args.dp:
             cfg.batch_size = cfg.batch_size * args.num_gpus
 

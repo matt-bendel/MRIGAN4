@@ -32,6 +32,9 @@ if __name__ == "__main__":
         cfg = yaml.load(f, Loader=yaml.FullLoader)
         cfg = json.loads(json.dumps(cfg), object_hook=load_object)
 
+    if args.R != 8:
+        cfg.R = args.R
+
     dm = MRIDataModule(cfg, args.mask_type)
     dm.setup()
     val_loader = dm.val_dataloader()
