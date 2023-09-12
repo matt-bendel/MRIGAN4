@@ -298,6 +298,7 @@ if __name__ == "__main__":
     print(f'SSIM:\n{ssim_str}')
     print(f'LPIPS:\n{lpips_str}')
     print(f'DISTS:\n{dists_str}')
+    print("\n")
     # print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
     # print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
     # print(f'APSD: {np.mean(apsds)}')
