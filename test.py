@@ -339,12 +339,6 @@ if __name__ == "__main__":
                 mean = mean.cuda()
                 std = std.cuda()
 
-                test_maps = tensor_to_complex_np(maps[0].cpu())
-                test_map = test_maps[0, :, :] > 1e-3
-                plt.imshow(test_map, cmap='gray')
-                plt.savefig('mask_test.png')
-                exit()
-
                 gens = torch.zeros(size=(y.size(0), n, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
                 for z in range(n):
                     gens[:, z, :, :, :, :] = model.reformat(model.forward(y, mask))

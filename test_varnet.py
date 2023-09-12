@@ -196,7 +196,10 @@ if __name__ == "__main__":
                     S = sp.linop.Multiply((cfg.im_size, cfg.im_size), tensor_to_complex_np(maps[j].cpu()))
                     gt_ksp, avg_ksp = gt[j].cpu().numpy(), recon[j].cpu().numpy()
 
-                    avg_gen_np = avg_ksp
+                    test_maps = tensor_to_complex_np(maps[j].cpu())
+                    test_mask = test_maps[0, :, :] > 1e-3
+
+                    avg_gen_np = avg_ksp * test_mask
                     gt_np = gt_ksp
 
                     psnrs.append(psnr(gt_np, avg_gen_np))
