@@ -16,7 +16,7 @@ for ((i=2; i<9; i++)); do
   echo "Random VarNet" >> "$i.txt"
   python test_varnet.py --mri --mask-type 1 --exp-name neurips/e2e_varnet_agnostic --R $i >> "$i.txt"
 
-  if [$i == 4]
+  if [$i == 4]; then
     echo "R=4 VarNet" >> "$i.txt"
     python test_varnet.py --mri --mask-type 5 --exp-name neurips/e2e_varnet_R=4 --R $i >> "$i.txt"
 
