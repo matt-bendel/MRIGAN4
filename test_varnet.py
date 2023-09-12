@@ -219,11 +219,18 @@ if __name__ == "__main__":
             dists_str = f'{dists_str} {n_distss[i]:.4f} &'
         #
 
+
             # print(f'APSD: {np.mean(apsds)}')
     cfids = []
     m_comps = []
     c_comps = []
 
+    print(f'PSNR:\n{psnr_str}')
+    print(f'SSIM:\n{ssim_str}')
+    print(f'LPIPS:\n{lpips_str}')
+    print(f'DISTS:\n{dists_str}')
+    print("\n")
+    exit()
     inception_embedding = VGG16Embedding(parallel=True)
     # CFID_1
     cfid_metric = CFIDMetric(gan=model,

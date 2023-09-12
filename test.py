@@ -414,6 +414,7 @@ if __name__ == "__main__":
         print("LPIPS and DISTS")
         print(f'{lpips_str} {dists_str}')
 
+    exit()
         # print(f'APSD: {np.mean(apsds)}')
     cfids = []
     m_comps = []
