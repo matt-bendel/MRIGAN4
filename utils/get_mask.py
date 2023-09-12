@@ -4,10 +4,11 @@ import numpy as np
 from data import transforms
 
 
-def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type=2):
+def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type=2, varnet=False):
     # total_lines = resolution // R - args.calib_width
     m = np.zeros((resolution, resolution))
     a = None
+    num_low_freqs = 16
 
     if mask_type == 4:
         x = [2, 8]
@@ -23,6 +24,7 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type
         m[:, s:e] = True
         a = np.random.choice(resolution - cw, resolution // r - cw, replace=False)
         a = np.where(a < s, a, a + args.calib_width)
+        num_low_freqs = cw
 
     if mask_type == 3:
         a = np.array(
@@ -32,6 +34,7 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type
                 348, 354, 369, 372, 381
             ]
         )
+        num_low_freqs = 16
 
     # RANDOM MASK GENERATION
     if mask_type == 2:
@@ -41,6 +44,7 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type
         m[:, s:e] = True
         a = np.random.choice(resolution - args.calib_width, resolution // R - args.calib_width, replace=False)
         a = np.where(a < s, a, a + args.calib_width)
+        num_low_freqs = 16
 
     # LOW DIM GRO:
     if mask_type == 1:
@@ -54,6 +58,7 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type
         a = [1, 23, 42, 60, 77, 92, 105, 117, 128, 138, 147, 155, 162, 169, 176, 182, 184, 185, 186, 187, 188, 189, 190,
              191, 192, 193, 194, 195,
              196, 197, 198, 199, 200, 204, 210, 217, 224, 231, 239, 248, 258, 269, 281, 294, 309, 326, 344, 363]
+        num_low_freqs = 16
 
         # HIGH DIM R=7 GRO
         if R == 7:
@@ -62,6 +67,8 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type
                  188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 206, 211, 216, 222, 228, 235, 242,
                  249,
                  257, 266, 275, 286, 297, 309, 322, 336, 351, 367]
+            num_low_freqs = 16
+
 
         # HIGH DIM R=6 GRO
         if R == 6:
@@ -70,6 +77,7 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type
                  184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 202, 206, 211,
                  215,
                  220, 225, 230, 236, 242, 248, 254, 261, 268, 276, 284, 293, 302, 312, 323, 334, 345, 358, 371]
+            num_low_freqs = 16
 
         # HIGH DIM R=5 GRO
         if R == 5:
@@ -80,6 +88,7 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type
                  200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 214, 219, 224, 230, 235, 242, 248, 255, 262, 270,
                  279,
                  288, 297, 307, 318, 330, 343, 356, 370]
+            num_low_freqs = 32
 
         # HIGH DIM R=4 GRO
         if R == 4:
@@ -94,6 +103,8 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type
                  220, 223, 226, 229, 233, 236,
                  240, 244, 248, 252, 257, 262, 266, 272, 277, 283, 289, 295, 301, 308, 315, 323, 330, 338, 347, 356,
                  365, 374]
+            num_low_freqs = 32
+
 
         # HIGH DIM R=3 GRO
         if R == 3:
@@ -108,6 +119,8 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type
                  249, 252, 256, 259, 262, 266, 270, 273, 277, 281, 285, 289, 293, 297, 302, 306, 310, 315, 320, 324,
                  329,
                  334, 339, 345, 350, 356, 361, 367, 373, 379]
+            num_low_freqs = 32
+
 
         # HIGH DIM R=2 GRO
         if R == 2:
@@ -128,6 +141,7 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type
                  317, 319, 322, 325, 327, 330, 333, 335, 338, 341, 343, 346, 349, 352, 355, 358, 361, 364, 367, 370,
                  373,
                  376, 379, 382]
+            num_low_freqs = 32
 
         a = np.array(a)
 
@@ -138,6 +152,7 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type
              220, 223, 226, 229, 233, 236,
              240, 244, 248, 252, 257, 262, 266, 272, 277, 283, 289, 295, 301, 308, 315, 323, 330, 338, 347, 356,
              365, 374]
+        num_low_freqs = 32
         a = np.array(a)
 
     # LOW DIM RANDOM R=4 MASK:
@@ -168,4 +183,7 @@ def get_mask(resolution, return_mask=False, R=4, p_m=False, args=None, mask_type
     mask = transforms.to_tensor(np.tile(samp, (numcoil, 1, 1)).astype(np.float32))
     mask = torch.unsqueeze(mask, -1).repeat(1, 1, 1, 2)
 
-    return mask
+    if varnet:
+        return mask, num_low_freqs
+    else:
+        return mask

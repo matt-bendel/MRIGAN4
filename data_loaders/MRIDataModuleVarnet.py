@@ -56,7 +56,7 @@ class DataTransform:
                 norm (float): L2 norm of the entire volume.
         """
         # GRO Sampling mask:
-        mask = get_mask(self.args.im_size, return_mask=True, R=self.args.R, args=self.args, mask_type=self.mask_type)
+        mask, n_freq = get_mask(self.args.im_size, return_mask=True, R=self.args.R, args=self.args, mask_type=self.mask_type, varnet=True)
         kspace = kspace.transpose(1, 2, 0)
         x = ifft(kspace, (0, 1))  # (768, 396, 16)
 
@@ -75,7 +75,7 @@ class DataTransform:
         kspace = fft2c_new(im_tensor)
         masked_kspace = kspace * mask
 
-        return masked_kspace.float(), target.float(), mask.to(torch.bool), transforms.to_tensor(sense_maps), 16
+        return masked_kspace.float(), target.float(), mask.to(torch.bool), transforms.to_tensor(sense_maps), n_freq
 
 
 
