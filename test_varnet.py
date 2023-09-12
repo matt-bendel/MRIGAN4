@@ -123,6 +123,10 @@ if __name__ == "__main__":
         cfg = json.loads(json.dumps(cfg), object_hook=load_object)
 
     cfg.batch_size = 1
+
+    if args.R != 8:
+        cfg.R = args.R
+
     dm = MRIDataModule(cfg, 1, big_test=True)
 
     dm.setup()
@@ -145,7 +149,7 @@ if __name__ == "__main__":
 
     with torch.no_grad():
         model = model_alias.load_from_checkpoint(
-            checkpoint_path='/storage/matt_models/mri/e2e_varnet/varnet/varnet_demo/checkpoints/epoch=30-step=284208.ckpt')
+            checkpoint_path=f'/storage/matt_models/mri/{args.exp_name}/varnet/varnet_demo/checkpoints/checkpoint_best.ckpt')
         model.cuda()
         model.eval()
 
