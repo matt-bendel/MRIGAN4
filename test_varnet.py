@@ -146,10 +146,11 @@ if __name__ == "__main__":
     ssim_str = ''
     lpips_str = ''
     dists_str = ''
+    args.exp_name = 'e2e_varnet'
 
     with torch.no_grad():
         model = model_alias.load_from_checkpoint(
-            checkpoint_path=f'/storage/matt_models/mri/{args.exp_name}/varnet/varnet_demo/checkpoints/checkpoint_best.ckpt')
+            checkpoint_path=f'/storage/matt_models/mri/{args.exp_name}/varnet/varnet_demo/checkpoints/epoc=24-step=229200.ckpt')
         model.cuda()
         model.eval()
 
