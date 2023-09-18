@@ -171,7 +171,7 @@ for k in vals:
 
             for j in range(k):
                 try:
-                    new_filename = recon_directory + filename + f'{filename}_{i}_sample_{j}.pt'
+                    new_filename = recon_directory + f'{filename}_{i}_sample_{j}.pt'
                     recon_object = torch.load(new_filename)
                     count += 1
                 except:
@@ -189,7 +189,7 @@ for k in vals:
                 continue
 
             mean = np.mean(recons, axis=0) * test_mask
-            new_filename = recon_directory + filename + f'{filename}_{i}_gt.pt'
+            new_filename = recon_directory + f'{filename}_{i}_gt.pt'
             gt = torch.load(new_filename)
             apsd = np.mean(np.std(recons, axis=0), axis=(0, 1))
 
@@ -202,6 +202,7 @@ for k in vals:
                 dists_vals.append(dists_met(rgb(gt, unit_norm=True), rgb(mean, unit_norm=True)))
 
     # print('AVERAGE')
+    print(psnr_vals)
     print(np.mean(psnr_vals))
     print(np.mean(ssim_vals))
     n_psnrs.append(np.mean(psnr_vals))
