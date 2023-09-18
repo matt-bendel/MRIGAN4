@@ -202,6 +202,8 @@ for k in vals:
                 dists_vals.append(dists_met(rgb(gt, unit_norm=True), rgb(mean, unit_norm=True)))
 
     # print('AVERAGE')
+    print(np.mean(psnr_vals))
+    print(np.mean(ssim_vals))
     n_psnrs.append(np.mean(psnr_vals))
     n_ssims.append(np.mean(ssim_vals))
     n_lpipss.append(np.mean(lpips_vals))
