@@ -188,11 +188,10 @@ for k in vals:
                 exceptions = False
                 continue
 
-            mean = np.mean(recons, axis=0) #* test_mask
-            print(mean.max())
+            mean = np.mean(recons, axis=0) * test_mask
             new_filename = recon_directory + f'{filename}_{i}_gt.pt'
             gt = torch.load(new_filename)
-            gt = torch.load(new_filename)[0, :, :].cpu().numpy() #* test_mask
+            gt = torch.load(new_filename)[0, :, :].cpu().numpy() * test_mask
             apsd = np.mean(np.std(recons, axis=0), axis=(0, 1))
 
             apsd_vals.append(apsd)
