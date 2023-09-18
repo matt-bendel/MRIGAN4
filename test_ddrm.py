@@ -175,7 +175,7 @@ for k in vals:
                     recon_object = torch.load(new_filename)
                     count += 1
                 except:
-                    print(filename)
+                    # print(filename)
                     exceptions = True
                     continue
                 # temp_recon = unnormalize(recon_object['mvue'], recon_object['zfr'])
@@ -183,7 +183,7 @@ for k in vals:
                 recons[j] = recon_object[0, :, :].cpu().numpy()
 
             if exceptions:
-                print("EXCEPTION")
+                # print("EXCEPTION")
                 exceptions = False
                 continue
 
