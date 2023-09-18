@@ -129,7 +129,7 @@ recon_directory = f'/storage/matt_models/mri/diff_out/'
 # iterate over files in
 # that directory
 
-args = create_arg_parser().parse_args()
+# args = create_arg_parser().parse_args()
 
 # train_loader, _ = create_data_loaders(args, big_test=False)
 # get_cfid(args, None, train_loader, None)
