@@ -139,7 +139,7 @@ recon_directory = f'/storage/matt_models/mri/diff_out/'
 #     get_fid(args, None, train_loader, None, num_samps=n)
 # exit()
 # vals = [1, 2, 4, 8, 16, 32]
-vals = [1]
+vals = [1, 8]
 lpips_met = lpips.LPIPS(net='alex')
 dists_met = DISTS()
 
