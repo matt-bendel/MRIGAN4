@@ -180,7 +180,6 @@ for k in vals:
                     continue
                 # temp_recon = unnormalize(recon_object['mvue'], recon_object['zfr'])
 
-                print(recon_object.shape)
                 recons[j] = recon_object[0, :, :].cpu().numpy()
 
             if exceptions:
@@ -190,8 +189,7 @@ for k in vals:
 
             mean = np.mean(recons, axis=0) * test_mask
             new_filename = recon_directory + f'{filename}_{i}_gt.pt'
-            gt = torch.load(new_filename) #* test_mask
-            print(gt.shape)
+            gt = torch.load(new_filename)[0, :, :].cpu().numpy() * test_mask
             apsd = np.mean(np.std(recons, axis=0), axis=(0, 1))
 
             apsd_vals.append(apsd)
