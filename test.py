@@ -472,7 +472,7 @@ if __name__ == "__main__":
     inception_embedding = VGG16Embedding()
     fid_metric = FIDMetric(gan=model,
                            ref_loader=train_dataloader,
-                           loader=val_dataloader,
+                           loader=test_loader,
                            image_embedding=inception_embedding,
                            condition_embedding=inception_embedding,
                            cuda=True,
