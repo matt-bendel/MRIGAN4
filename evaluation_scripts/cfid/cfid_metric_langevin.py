@@ -160,7 +160,7 @@ class CFIDMetric:
 
     def _get_embed_im(self, inp, mean, std):
         embed_ims = torch.zeros(size=(inp.size(0), 3, 128, 128),
-                                device=self.args.device)
+                                device=torch.device('cuda'))
         for i in range(inp.size(0)):
             im = inp[i, :, :, :] * std[i, :, None, None] + mean[i, :, None, None]
             im = (im - torch.min(im)) / (torch.max(im) - torch.min(im))
@@ -170,7 +170,7 @@ class CFIDMetric:
 
     def _get_embed_im(self, inp):
         embed_ims = torch.zeros(size=(inp.size(0), 3, 384, 384),
-                                device=self.args.device)
+                                device=torch.device('cuda'))
         for i in range(inp.size(0)):
             im = inp[i]
             im = (im - torch.min(im)) / (torch.max(im) - torch.min(im))
@@ -189,7 +189,7 @@ class CFIDMetric:
         true_embed = []
 
         ref_directory = '/storage/fastMRI_brain/data/small_T2_test'
-        recon_directory = f'/storage/fastMRI_brain/Langevin_Recons_R=4/'
+        recon_directory = f'/storage/matt_models/mri/ddrm_R=4/'
 
         for filename in os.listdir(ref_directory):
             for i in range(6):
@@ -197,12 +197,14 @@ class CFIDMetric:
                 with torch.no_grad():
                     for j in range(32):
                         try:
-                            new_filename = recon_directory + filename + f'|langevin|slide_idx_{i}_R=4_sample={j}_outputs.pt'
-                            recon_object = torch.load(new_filename)
+                            new_filename = recon_directory + f'{filename}_{i}_sample_{j}.pt'
+                            recon = torch.load(new_filename).unsqueeze(0).unsqueeze(0)
 
-                            recon = complex_abs(recon_object['mvue'][0].permute(1, 2, 0)).cuda().unsqueeze(0).unsqueeze(0)
-                            true = recon_object['gt'][0][0].abs().unsqueeze(0).unsqueeze(0)
-                            zfr = recon_object['zfr'][0].abs().cuda().unsqueeze(0).unsqueeze(0)
+                            new_filename = recon_directory + f'{filename}_{i}_gt.pt'
+                            true = torch.load(new_filename).unsqueeze(0).unsqueeze(0)
+
+                            new_filename = recon_directory + f'{filename}_{i}_cond.pt'
+                            zfr = torch.load(new_filename).unsqueeze(0).unsqueeze(0)
 
                             image = self._get_embed_im(recon)
                             true_im = self._get_embed_im(true)

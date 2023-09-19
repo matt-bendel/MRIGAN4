@@ -6,6 +6,7 @@ import numpy as np
 import sigpy as sp
 from scipy import linalg
 from utils.math import complex_abs
+from utils.math import complex_abs, tensor_to_complex_np
 
 from tqdm import tqdm
 import torchvision.transforms as transforms
@@ -123,7 +124,8 @@ class FIDMetric:
                  condition_embedding,
                  cuda=False,
                  args=None,
-                 eps=1e-6):
+                 eps=1e-6,
+                 num_samps=32):
 
         self.gan = gan
         self.args = args
@@ -134,6 +136,7 @@ class FIDMetric:
         self.cuda = cuda
         self.eps = eps
         self.gen_embeds, self.cond_embeds, self.true_embeds = None, None, None
+        self.num_samps = num_samps
 
         self.mu_fake, self.sigma_fake = None, None
         self.mu_real, self.sigma_real = None, None
@@ -160,7 +163,7 @@ class FIDMetric:
 
     def _get_embed_im(self, inp, mean, std):
         embed_ims = torch.zeros(size=(inp.size(0), 3, 128, 128),
-                                device=self.args.device)
+                                device=torch.device('cuda'))
         for i in range(inp.size(0)):
             im = inp[i, :, :, :] * std[i, :, None, None] + mean[i, :, None, None]
             im = (im - torch.min(im)) / (torch.max(im) - torch.min(im))
@@ -170,7 +173,7 @@ class FIDMetric:
 
     def _get_embed_im(self, inp):
         embed_ims = torch.zeros(size=(inp.size(0), 3, 384, 384),
-                                device=self.args.device)
+                                device=torch.device('cuda'))
         for i in range(inp.size(0)):
             im = inp[i]
             im = (im - torch.min(im)) / (torch.max(im) - torch.min(im))
@@ -188,19 +191,19 @@ class FIDMetric:
         cond_embed = []
 
         ref_directory = '/storage/fastMRI_brain/data/small_T2_test'
-        recon_directory = f'/storage/fastMRI_brain/Langevin_Recons_R=4/'
+        recon_directory = f'/storage/matt_models/mri/ddrm_R=4/'
 
         for filename in os.listdir(ref_directory):
             for i in range(6):
                 recon_object = None
                 with torch.no_grad():
-                    for j in range(32):
+                    for j in range(self.num_samps):
                         try:
-                            new_filename = recon_directory + filename + f'|langevin|slide_idx_{i}_R=4_sample={j}_outputs.pt'
-                            recon_object = torch.load(new_filename)
+                            new_filename = recon_directory + f'{filename}_{i}_sample_{j}.pt'
+                            recon = torch.load(new_filename).unsqueeze(0).unsqueeze(0)
 
-                            recon = complex_abs(recon_object['mvue'][0].permute(1, 2, 0)).cuda().unsqueeze(0).unsqueeze(0)
-                            zfr = recon_object['zfr'][0].abs().cuda().unsqueeze(0).unsqueeze(0)
+                            new_filename = recon_directory + f'{filename}_{i}_cond.pt'
+                            zfr = torch.load(new_filename).unsqueeze(0).unsqueeze(0)
 
                             image = self._get_embed_im(recon)
                             condition_im = self._get_embed_im(zfr)
@@ -218,7 +221,7 @@ class FIDMetric:
                             exit()
                         except Exception as e:
                             print(e)
-                            print(recon_directory + filename + f'|langevin|slide_idx_{i}_R=4_sample={j}_outputs.pt')
+                            print(recon_directory + filename + f'|langevin|slide_idx_{i}_R=8_sample={j}_outputs.pt')
                             break
 
         print("WE GOT EMBEDDINGS BABY")
@@ -259,7 +262,7 @@ class FIDMetric:
 
     def _get_embed_im_ref(self, multi_coil_inp, mean, std, maps):
         embed_ims = torch.zeros(size=(multi_coil_inp.size(0), 3, 384, 384),
-                                device=self.args.device)
+                                device=torch.device('cuda'))
         for i in range(multi_coil_inp.size(0)):
             reformatted = torch.zeros(size=(8, 384, 384, 2),
                                       device=self.args.device)
@@ -296,7 +299,7 @@ class FIDMetric:
                 for j in range(condition.shape[0]):
                     new_y_true = fft2c_new(ifft2c_new(true_cond[j]) * std[j] + mean[j])
                     s_maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=32,
-                                                 device=sp.Device(0), show_pbar=False, crop=0.70,
+                                                 device=sp.Device(3), show_pbar=False, crop=0.70,
                                                  kernel_width=6).run().get()
                     S = sp.linop.Multiply((384, 384), s_maps)
 
