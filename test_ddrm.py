@@ -138,8 +138,8 @@ recon_directory = f'/storage/matt_models/mri/diff_out/'
 #     print(f"{n} SAMPLES")
 #     get_fid(args, None, train_loader, None, num_samps=n)
 # exit()
-# vals = [1, 2, 4, 8, 16, 32]
-vals = [1, 8]
+vals = [1, 2, 4, 8, 16, 32]
+# vals = [1, 8]
 lpips_met = lpips.LPIPS(net='alex')
 dists_met = DISTS()
 
@@ -149,78 +149,157 @@ n_psnrs = []
 n_ssims = []
 n_distss = []
 n_lpipss = []
+max_p = 32
 
-for k in vals:
-    print(f"{k} CODE VECTORS")
-    psnr_vals = []
-    ssim_vals = []
-    snr_vals = []
-    apsd_vals = []
-    lpips_vals = []
-    dists_vals = []
+psnr_vals = {
+    1: [],
+    2: [],
+    4: [],
+    8: [],
+    16: [],
+    32: []
+}
 
-    for filename in os.listdir(ref_directory):
-        for i in range(6):
-            recons = np.zeros((k, 384, 384))
-            recon_object = None
+ssim_vals = {
+    1: [],
+    2: [],
+    4: [],
+    8: [],
+    16: [],
+    32: []
+}
 
-            maps = None
-            with open(f'/storage/fastMRI_brain/sense_maps/test_full_res/{filename}_{i}.pkl', 'rb') as inp:
-                maps = pickle.load(inp)
+lpips_vals = {
+    1: [],
+    2: [],
+    4: [],
+    8: [],
+    16: [],
+    32: []
+}
 
-            test_mask = maps[0, :, :] > 1e-3
+dists_vals = {
+    1: [],
+    2: [],
+    4: [],
+    8: [],
+    16: [],
+    32: []
+}
 
-            for j in range(k):
-                try:
-                    new_filename = recon_directory + f'{filename}_{i}_sample_{j}.pt'
-                    recon_object = torch.load(new_filename)
-                    count += 1
-                except:
-                    # print(filename)
-                    exceptions = True
-                    continue
-                # temp_recon = unnormalize(recon_object['mvue'], recon_object['zfr'])
+for filename in os.listdir(ref_directory):
+    for i in range(6):
+        recons = np.zeros((max_p, 384, 384))
+        recon_object = None
 
-                recons[j] = recon_object[0, :, :].cpu().numpy()
+        maps = None
+        with open(f'/storage/fastMRI_brain/sense_maps/test_full_res/{filename}_{i}.pkl', 'rb') as inp:
+            maps = pickle.load(inp)
 
-            if exceptions:
-                # print("EXCEPTION")
-                exceptions = False
+        test_mask = maps[0, :, :] > 1e-3
+
+        for j in range(max_p):
+            try:
+                new_filename = recon_directory + f'{filename}_{i}_sample_{j}.pt'
+                recon_object = torch.load(new_filename)
+                count += 1
+            except:
+                # print(filename)
+                exceptions = True
                 continue
+            # temp_recon = unnormalize(recon_object['mvue'], recon_object['zfr'])
 
-            mean = np.mean(recons, axis=0) * test_mask
-            new_filename = recon_directory + f'{filename}_{i}_gt.pt'
-            gt = torch.load(new_filename)
-            gt = torch.load(new_filename)[0, :, :].cpu().numpy() * test_mask
-            apsd = np.mean(np.std(recons, axis=0), axis=(0, 1))
+            recons[j] = recon_object[0, :, :].cpu().numpy()
 
-            apsd_vals.append(apsd)
-            psnr_vals.append(psnr(gt, mean))
-            snr_vals.append(snr(gt, mean))
-            ssim_vals.append(ssim(gt, mean))
+        if exceptions:
+            # print("EXCEPTION")
+            exceptions = False
+            continue
+
+        new_filename = recon_directory + f'{filename}_{i}_gt.pt'
+        gt = torch.load(new_filename)
+        gt = torch.load(new_filename)[0, :, :].cpu().numpy() * test_mask
+
+        for P in vals:
+            mean = np.mean(recons[:P, :, :], axis=0) * test_mask
+
+            psnr_vals[P].append(psnr(gt, mean))
+            ssim_vals[P].append(ssim(gt, mean))
             with torch.no_grad():
-                lpips_vals.append(lpips_met(rgb(gt), rgb(mean)).numpy())
-                dists_vals.append(dists_met(rgb(gt, unit_norm=True), rgb(mean, unit_norm=True)))
+                lpips_vals[P].append(lpips_met(rgb(gt), rgb(mean)).numpy())
+                dists_vals[P].append(dists_met(rgb(gt, unit_norm=True), rgb(mean, unit_norm=True)))
 
-    # print('AVERAGE')
-    print(psnr_vals)
-    print(np.mean(psnr_vals))
-    print(np.mean(ssim_vals))
-    n_psnrs.append(np.mean(psnr_vals))
-    n_ssims.append(np.mean(ssim_vals))
-    n_lpipss.append(np.mean(lpips_vals))
-    n_distss.append(np.mean(dists_vals))
+# for k in vals:
+#     print(f"{k} CODE VECTORS")
+#     psnr_vals = []
+#     ssim_vals = []
+#     snr_vals = []
+#     apsd_vals = []
+#     lpips_vals = []
+#     dists_vals = []
+#
+#     for filename in os.listdir(ref_directory):
+#         for i in range(6):
+#             recons = np.zeros((k, 384, 384))
+#             recon_object = None
+#
+#             maps = None
+#             with open(f'/storage/fastMRI_brain/sense_maps/test_full_res/{filename}_{i}.pkl', 'rb') as inp:
+#                 maps = pickle.load(inp)
+#
+#             test_mask = maps[0, :, :] > 1e-3
+#
+#             for j in range(k):
+#                 try:
+#                     new_filename = recon_directory + f'{filename}_{i}_sample_{j}.pt'
+#                     recon_object = torch.load(new_filename)
+#                     count += 1
+#                 except:
+#                     # print(filename)
+#                     exceptions = True
+#                     continue
+#                 # temp_recon = unnormalize(recon_object['mvue'], recon_object['zfr'])
+#
+#                 recons[j] = recon_object[0, :, :].cpu().numpy()
+#
+#             if exceptions:
+#                 # print("EXCEPTION")
+#                 exceptions = False
+#                 continue
+#
+#             mean = np.mean(recons, axis=0) * test_mask
+#             new_filename = recon_directory + f'{filename}_{i}_gt.pt'
+#             gt = torch.load(new_filename)
+#             gt = torch.load(new_filename)[0, :, :].cpu().numpy() * test_mask
+#             apsd = np.mean(np.std(recons, axis=0), axis=(0, 1))
+#
+#             apsd_vals.append(apsd)
+#             psnr_vals.append(psnr(gt, mean))
+#             snr_vals.append(snr(gt, mean))
+#             ssim_vals.append(ssim(gt, mean))
+#             with torch.no_grad():
+#                 lpips_vals.append(lpips_met(rgb(gt), rgb(mean)).numpy())
+#                 dists_vals.append(dists_met(rgb(gt, unit_norm=True), rgb(mean, unit_norm=True)))
+#
+#     # print('AVERAGE')
+#     print(psnr_vals)
+#     print(np.mean(psnr_vals))
+#     print(np.mean(ssim_vals))
+#     n_psnrs.append(np.mean(psnr_vals))
+#     n_ssims.append(np.mean(ssim_vals))
+#     n_lpipss.append(np.mean(lpips_vals))
+#     n_distss.append(np.mean(dists_vals))
 
 psnr_str = ''
 ssim_str = ''
 lpips_str = ''
 dists_str = ''
 
-for i in range(len(n_psnrs)):
-    psnr_str = f'{psnr_str} {n_psnrs[i]:.2f} &'
-    ssim_str = f'{ssim_str} {n_ssims[i]:.4f} &'
-    lpips_str = f'{lpips_str} {n_lpipss[i]:.4f} &'
-    dists_str = f'{dists_str} {n_distss[i]:.4f} &'
+for P in vals:
+    psnr_str = f'{psnr_str} {np.mean(psnr_vals[P]):.2f} &'
+    ssim_str = f'{ssim_str} {np.mean(ssim_vals[P]):.4f} &'
+    lpips_str = f'{lpips_str} {np.mean(lpips_vals[P]):.4f} &'
+    dists_str = f'{dists_str} {np.mean(dists_vals[P]):.4f} &'
 
 print("PSNR and SSIM:")
 print(f'{psnr_str} {ssim_str}')
