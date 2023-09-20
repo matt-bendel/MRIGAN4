@@ -131,12 +131,12 @@ recon_directory = f'/storage/matt_models/mri/ddrm_R={R}/'
 # args = create_arg_parser().parse_args()
 
 # train_loader, _ = create_data_loaders(args, big_test=False)
-get_cfid()
-# n_samps = [1, 2, 4, 8, 16, 32]
-# for n in n_samps:
-#     print(f"{n} SAMPLES")
-get_fid()
-exit()
+# get_cfid()
+# # n_samps = [1, 2, 4, 8, 16, 32]
+# # for n in n_samps:
+# #     print(f"{n} SAMPLES")
+# get_fid()
+# exit()
 vals = [1, 2, 4, 8, 16, 32]
 # vals = [1, 8]
 lpips_met = lpips.LPIPS(net='alex')
