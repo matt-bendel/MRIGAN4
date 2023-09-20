@@ -106,14 +106,14 @@ if __name__ == "__main__":
             gens_l1_ssim = torch.zeros(
                 size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
             gens_varnet = torch.zeros(
-                size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
+                size=(y.size(0), cfg.num_z_test, cfg.im_size, cfg.im_size)).cuda()
 
             for z in range(cfg.num_z_test):
                 gens_rcgan_wo_gr_w_dc[:, z, :, :, :, :] = rcGAN_model_wo_gr_w_dc.reformat(rcGAN_model_wo_gr_w_dc.forward(y, mask))
                 gens_rcgan_w_gr_wo_dc[:, z, :, :, :, :] = rcGAN_model_w_gr_wo_dc.reformat(rcGAN_model_w_gr_wo_dc.forward(y, mask))
                 gens_rcgan_w_gr_w_dc[:, z, :, :, :, :] = rcGAN_model_w_gr_w_dc.reformat(rcGAN_model_w_gr_w_dc.forward(y, mask))
                 gens_l1_ssim[:, z, :, :, :, :] = l1_ssim_model.reformat(l1_ssim_model.forward(y, mask))
-                gens_varnet[:, z, :, :, :, :] = varnet_model(varnet_y.float(), mask == 1, num_low_freqs)
+                gens_varnet[:, z, :, :] = varnet_model(varnet_y.float(), mask == 1, num_low_freqs)
 
             avg_rcgan_wo_gr_w_dc = torch.mean(gens_rcgan_wo_gr_w_dc, dim=1)
             avg_rcgan_w_gr_wo_dc = torch.mean(gens_rcgan_w_gr_wo_dc, dim=1)
@@ -169,7 +169,7 @@ if __name__ == "__main__":
                     torch.tensor(S.H * tensor_to_complex_np((avg_l1_ssim[j] * std[j] + mean[j]).cpu())).abs().numpy(),
                     180)
                 np_avgs['varnet'] = ndimage.rotate(
-                    torch.tensor(S.H * tensor_to_complex_np(avg_varnet[j].cpu())).abs().numpy(),
+                    torch.tensor(avg_varnet[j].cpu().numpy()).abs().numpy(),
                     180)
 
                 for z in range(cfg.num_z_test):
