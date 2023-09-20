@@ -247,7 +247,7 @@ if __name__ == "__main__":
                 print("Got DDRM")
                 print("Plot time baby")
 
-                keys = ['l1_ssim', 'varnet', 'rcgan_wo_gr_w_dc', 'rcgan_w_gr_wo_dc', 'rcgan_w_gr_w_dc']
+                keys = ['l1_ssim', 'varnet', 'rcgan_w_gr_w_dc']
                 if j == 0:
                     zoom_startx = 180
                     zoom_starty = 40
