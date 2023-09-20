@@ -252,7 +252,7 @@ if __name__ == "__main__":
                 print("Plot time baby")
 
                 keys = ['varnet', 'rcgan_w_gr_w_dc']
-                if j == 0:
+                if False:#j == 0:
                     zoom_startx = 180
                     zoom_starty = 40
                     zoom_length = 80
