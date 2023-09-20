@@ -251,7 +251,7 @@ if __name__ == "__main__":
                 print("Got DDRM")
                 print("Plot time baby")
 
-                keys = ['l1_ssim', 'varnet', 'rcgan_w_gr_w_dc']
+                keys = ['varnet', 'rcgan_w_gr_w_dc']
                 if j == 0:
                     zoom_startx = 180
                     zoom_starty = 40
@@ -290,6 +290,8 @@ if __name__ == "__main__":
                 ax.set_yticklabels([])
                 ax.set_xticks([])
                 ax.set_yticks([])
+
+                ax_lines = ax
 
                 rect = patches.Rectangle((zoom_startx, zoom_starty), zoom_length, zoom_length, linewidth=1,
                                          edgecolor='r',
@@ -368,7 +370,7 @@ if __name__ == "__main__":
                     count += 1
 
                 ax = plt.subplot(gs[1, count])
-                ax.imshow(5 * np.abs(langevin_avg - langevin_gt), cmap='jet', vmin=0,
+                ax.imshow(3 * np.abs(langevin_avg - langevin_gt), cmap='jet', vmin=0,
                           vmax=np.max(np.abs(np_avgs['rcgan_wo_gr_w_dc'] - np_gt)))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
@@ -445,6 +447,14 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
+                connection_path_1 = patches.ConnectionPatch([zoom_startx, y_coords[1]], [0, 0], coordsA=ax_lines.transData,
+                                                            coordsB=ax.transData, color='r')
+                fig.add_artist(connection_path_1)
+                connection_path_2 = patches.ConnectionPatch([x_coord, y_coords[1]], [zoom_length, 0],
+                                                            coordsA=ax_lines.transData,
+                                                            coordsB=ax.transData, color='r')
+                fig.add_artist(connection_path_2)
+
                 count = 1
                 for method in keys:
                     ax = plt.subplot(gs[3, count])
@@ -512,7 +522,7 @@ if __name__ == "__main__":
                     count += 1
 
                 ax = plt.subplot(gs[4, count])
-                ax.imshow(5 * np.abs(langevin_avg - langevin_gt)[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0,
+                ax.imshow(3 * np.abs(langevin_avg - langevin_gt)[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0,
                           vmax=np.max(np.abs(np_avgs['rcgan_wo_gr_w_dc'] - np_gt)))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
