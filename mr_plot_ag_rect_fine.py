@@ -571,7 +571,7 @@ if __name__ == "__main__":
 
                 plt.savefig(f'mr_figs_workshop/workshop_body_R={args.R}_rect_{fig_count}.png', bbox_inches='tight', dpi=300)
                 plt.close(fig)
-                if fig_count == 1:
+                if fig_count == 5:
                     print(fig_count)
                     exit()
                 fig_count += 1
