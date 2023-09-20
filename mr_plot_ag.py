@@ -527,7 +527,7 @@ if __name__ == "__main__":
                         ax.set_yticks([])
                     else:
                         ax = plt.subplot(gs[5, count])
-                        im = ax.imshow(np.zeros((384, 384)[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length]), cmap='viridis', vmin=0,
+                        im = ax.imshow(np.zeros((384, 384))[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length], cmap='viridis', vmin=0,
                                        vmax=np.max(np_stds['rcgan_wo_gr_w_dc']))
                         ax.set_xticklabels([])
                         ax.set_yticklabels([])
