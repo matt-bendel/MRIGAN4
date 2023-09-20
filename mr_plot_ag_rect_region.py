@@ -501,7 +501,7 @@ if __name__ == "__main__":
                 ax.set_yticks([])
 
                 gss = gs[3, count+1].subgridspec(2, 1)
-                ax = plt.subplot(gs[0, 0])
+                ax = plt.subplot(gss[0, 0])
                 ax.imshow(ddrm_avg[zoom_starty:zoom_starty + zoom_lengthy, zoom_startx:zoom_startx + zoom_lengthx], cmap='gray', vmin=0, vmax=0.7 * np.max(langevin_gt))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])

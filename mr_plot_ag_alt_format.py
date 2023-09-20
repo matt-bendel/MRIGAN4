@@ -275,7 +275,7 @@ if __name__ == "__main__":
                 # TODO: metrics
                 # OG FIG
                 nrow = 6
-                ncol = 6
+                ncol = 5
 
                 fig = plt.figure(figsize=(ncol + 1, nrow + 1))
 
