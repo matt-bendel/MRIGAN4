@@ -221,6 +221,8 @@ if __name__ == "__main__":
 
                 recon_directory = f'/storage/matt_models/mri/ddrm_R={args.R}/'
                 ddrm_recons = np.zeros((32, 384, 384))
+                recon_object = None
+                exceptions = False
 
                 for l in range(cfg.num_z_test):
                     try:
