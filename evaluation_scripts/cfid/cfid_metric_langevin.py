@@ -188,8 +188,10 @@ class CFIDMetric:
         cond_embed = []
         true_embed = []
 
+        R = 4
+
         ref_directory = '/storage/fastMRI_brain/data/small_T2_test'
-        recon_directory = f'/storage/matt_models/mri/ddrm_R=4/'
+        recon_directory = f'/storage/matt_models/mri/ddrm_R={R}/'
 
         for filename in os.listdir(ref_directory):
             for i in range(6):
@@ -225,7 +227,6 @@ class CFIDMetric:
                             exit()
                         except Exception as e:
                             print(e)
-                            print(recon_directory + filename + f'|langevin|slide_idx_{i}_R=4_sample={j}_outputs.pt')
                             break
 
         print("WE GOT EMBEDDINGS BABY")
