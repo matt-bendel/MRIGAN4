@@ -405,7 +405,7 @@ if __name__ == "__main__":
                         # fig.subplots_adjust(right=0.85)  # Make room for colorbar
 
                         # Get position of final error map axis
-                        if method == 'l1_ssim':
+                        if count == 1:
                             [[x10, y10], [x11, y11]] = ax.get_position().get_points()
 
                             # Appropriately rescale final axis so that colorbar does not effect formatting
@@ -558,7 +558,7 @@ if __name__ == "__main__":
                         # fig.subplots_adjust(right=0.85)  # Make room for colorbar
 
                         # Get position of final error map axis
-                        if method == 'l1_ssim':
+                        if count == 1:
                             [[x10, y10], [x11, y11]] = ax.get_position().get_points()
 
                             # Appropriately rescale final axis so that colorbar does not effect formatting
