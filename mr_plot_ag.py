@@ -113,7 +113,7 @@ if __name__ == "__main__":
                 gens_rcgan_w_gr_wo_dc[:, z, :, :, :, :] = rcGAN_model_w_gr_wo_dc.reformat(rcGAN_model_w_gr_wo_dc.forward(y, mask))
                 gens_rcgan_w_gr_w_dc[:, z, :, :, :, :] = rcGAN_model_w_gr_w_dc.reformat(rcGAN_model_w_gr_w_dc.forward(y, mask))
                 gens_l1_ssim[:, z, :, :, :, :] = l1_ssim_model.reformat(l1_ssim_model.forward(y, mask))
-                gens_varnet[:, z, :, :, :, :] = varnet_model(varnet_y.float(), mask, num_low_freqs)
+                gens_varnet[:, z, :, :, :, :] = varnet_model(varnet_y.float(), mask == 1, num_low_freqs)
 
             avg_rcgan_wo_gr_w_dc = torch.mean(gens_rcgan_wo_gr_w_dc, dim=1)
             avg_rcgan_w_gr_wo_dc = torch.mean(gens_rcgan_w_gr_wo_dc, dim=1)
