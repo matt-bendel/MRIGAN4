@@ -121,6 +121,8 @@ if __name__ == "__main__":
             avg_l1_ssim = torch.mean(gens_l1_ssim, dim=1)
             avg_varnet = torch.mean(gens_varnet, dim=1)
 
+            print("Got Recons")
+
             gt = rcGAN_model_wo_gr_w_dc.reformat(x)
             zfr = rcGAN_model_wo_gr_w_dc.reformat(y)
 
@@ -172,6 +174,8 @@ if __name__ == "__main__":
                     torch.tensor(avg_varnet[j].cpu().numpy()).abs().numpy(),
                     180)
 
+                print("Got Means")
+
                 for z in range(cfg.num_z_test):
                     np_samps['rcgan_wo_gr_w_dc'].append(ndimage.rotate(torch.tensor(
                         S.H * tensor_to_complex_np((gens_rcgan_wo_gr_w_dc[j, z] * std[j] + mean[j]).cpu())).abs().numpy(), 180))
@@ -179,6 +183,8 @@ if __name__ == "__main__":
                         S.H * tensor_to_complex_np((gens_rcgan_w_gr_wo_dc[j, z] * std[j] + mean[j]).cpu())).abs().numpy(), 180))
                     np_samps['rcgan_w_gr_w_dc'].append(ndimage.rotate(torch.tensor(
                         S.H * tensor_to_complex_np((gens_rcgan_w_gr_w_dc[j, z] * std[j] + mean[j]).cpu())).abs().numpy(), 180))
+
+                print("Got Samps")
 
                 np_stds['rcgan_wo_gr_w_dc'] = np.std(np.stack(np_samps['rcgan_wo_gr_w_dc']), axis=0)
                 np_stds['rcgan_w_gr_wo_dc'] = np.std(np.stack(np_samps['rcgan_w_gr_wo_dc']), axis=0)
@@ -211,6 +217,8 @@ if __name__ == "__main__":
                 langevin_avg = np.mean(langevin_recons, axis=0)
                 langevin_std = np.std(langevin_recons, axis=0)
 
+                print("Got Langevin")
+
                 recon_directory = f'/storage/matt_models/mri/ddrm_R={args.R}/'
                 ddrm_recons = np.zeros((32, 384, 384))
 
@@ -234,6 +242,8 @@ if __name__ == "__main__":
                 ddrm_gt = torch.load(new_filename)[0, :, :].cpu().numpy()
                 ddrm_avg = np.mean(ddrm_recons, axis=0)
                 ddrm_std = np.std(ddrm_recons, axis=0)
+                print("Got DDRM")
+                print("Plot time baby")
 
                 keys = ['l1_ssim', 'varnet', 'rcgan_wo_gr_w_dc', 'rcgan_w_gr_wo_dc', 'rcgan_w_gr_w_dc']
                 if j == 0:
