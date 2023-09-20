@@ -122,8 +122,8 @@ R = 4
 
 # assign directory
 ref_directory = '/storage/fastMRI_brain/data/small_T2_test'
-# recon_directory = f'/storage/matt_models/mri/ddrm_R={R}/'
-recon_directory = f'/storage/matt_models/mri/diff_out/'
+recon_directory = f'/storage/matt_models/mri/ddrm_R={R}/'
+# recon_directory = f'/storage/matt_models/mri/diff_out/'
 
 # iterate over files in
 # that directory

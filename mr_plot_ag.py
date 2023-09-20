@@ -225,7 +225,6 @@ if __name__ == "__main__":
                 for l in range(cfg.num_z_test):
                     try:
                         new_filename = recon_directory + f'{fname[j]}_{slice[j]}_sample_{l}.pt'
-                        print(new_filename)
                         recon_object = torch.load(new_filename)
                         count += 1
                     except:
