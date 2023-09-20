@@ -351,7 +351,7 @@ if __name__ == "__main__":
                     ax.set_xticks([])
                     ax.set_yticks([])
 
-                    if count == 1:
+                    if count == 2:
                         [[x10, y10], [x11, y11]] = ax.get_position().get_points()
 
                         # Appropriately rescale final axis so that colorbar does not effect formatting
@@ -370,7 +370,7 @@ if __name__ == "__main__":
                         tl[0].set_verticalalignment('bottom')
                         tl[-1].set_verticalalignment('top')
 
-                    count += 1
+                    count += 2
 
                 ax = plt.subplot(gs[2:4, count:count+2])
                 ax.imshow(3 * np.abs(langevin_avg - langevin_gt), cmap='jet', vmin=0,
@@ -408,7 +408,7 @@ if __name__ == "__main__":
                         # fig.subplots_adjust(right=0.85)  # Make room for colorbar
 
                         # Get position of final error map axis
-                        if count == 1:
+                        if count == 2:
                             [[x10, y10], [x11, y11]] = ax.get_position().get_points()
 
                             # Appropriately rescale final axis so that colorbar does not effect formatting
@@ -427,7 +427,7 @@ if __name__ == "__main__":
                             tl[0].set_verticalalignment('bottom')
                             tl[-1].set_verticalalignment('top')
 
-                    count += 1
+                    count += 2
 
                 ax = plt.subplot(gs[4:6, count:count+2])
                 ax.imshow(langevin_std, cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan_wo_gr_w_dc']))
@@ -479,7 +479,7 @@ if __name__ == "__main__":
                     # ax.text(0.46, 0.04, f'PSNR: {psnr_val:.2f}  SSIM: {ssim_val:.4f}',
                     #         horizontalalignment='center', verticalalignment='center', fontsize=3.5, color='yellow',
                     #         transform=ax.transAxes)
-                    count += 1
+                    count += 2
 
                 ax = plt.subplot(gs[6, count:count+2])
                 ax.imshow(langevin_avg[zoom_starty:zoom_starty + zoom_lengthy, zoom_startx:zoom_startx + zoom_lengthx], cmap='gray', vmin=0, vmax=0.7 * np.max(langevin_gt))
