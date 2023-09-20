@@ -202,7 +202,8 @@ for filename in os.listdir(ref_directory):
                 new_filename = recon_directory + f'{filename}_{i}_sample_{j}.pt'
                 recon_object = torch.load(new_filename)
                 count += 1
-            except:
+            except Exception as e:
+                print(e)
                 # print(filename)
                 exceptions = True
                 continue
