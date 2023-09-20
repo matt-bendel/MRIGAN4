@@ -234,14 +234,14 @@ if __name__ == "__main__":
                         continue
                     # temp_recon = unnormalize(recon_object['mvue'], recon_object['zfr'])
 
-                    ddrm_recons[l, :, :] = recon_object[0, :, :].cpu().numpy()
+                    ddrm_recons[l, :, :] = ndimage.rotate(recon_object[0, :, :].cpu().numpy(), 180)
 
                 if exceptions:
                     exceptions = False
                     continue
 
                 new_filename = recon_directory + f'{fname[j]}_{slice[j]}_gt.pt'
-                ddrm_gt = torch.load(new_filename)[0, :, :].cpu().numpy()
+                ddrm_gt = ndimage.rotate(torch.load(new_filename)[0, :, :].cpu().numpy(), 180)
                 ddrm_avg = np.mean(ddrm_recons, axis=0)
                 ddrm_std = np.std(ddrm_recons, axis=0)
                 print("Got DDRM")
@@ -357,7 +357,7 @@ if __name__ == "__main__":
                     count += 1
 
                 ax = plt.subplot(gs[1, count])
-                ax.imshow(3 * np.abs(langevin_avg - langevin_gt), cmap='jet', vmin=0,
+                ax.imshow(4 * np.abs(langevin_avg - langevin_gt), cmap='jet', vmin=0,
                           vmax=np.max(np.abs(np_avgs['rcgan_wo_gr_w_dc'] - np_gt)))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
@@ -501,7 +501,7 @@ if __name__ == "__main__":
                     count += 1
 
                 ax = plt.subplot(gs[4, count])
-                ax.imshow(3 * np.abs(langevin_avg - langevin_gt)[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0,
+                ax.imshow(4 * np.abs(langevin_avg - langevin_gt)[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length], cmap='jet', vmin=0,
                           vmax=np.max(np.abs(np_avgs['rcgan_wo_gr_w_dc'] - np_gt)))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
