@@ -212,7 +212,7 @@ for filename in os.listdir(ref_directory):
             recons[j] = recon_object[0, :, :].cpu().numpy()
 
         if exceptions:
-            # print("EXCEPTION")
+            print("EXCEPTION")
             exceptions = False
             continue
 

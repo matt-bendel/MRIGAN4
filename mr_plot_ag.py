@@ -229,7 +229,8 @@ if __name__ == "__main__":
                         new_filename = recon_directory + f'{fname[j]}_{slice[j]}_sample_{l}.pt'
                         recon_object = torch.load(new_filename)
                         count += 1
-                    except:
+                    except Exception as e:
+                        print(e)
                         exceptions = True
                         continue
                     # temp_recon = unnormalize(recon_object['mvue'], recon_object['zfr'])
