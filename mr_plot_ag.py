@@ -228,7 +228,6 @@ if __name__ == "__main__":
                     try:
                         new_filename = recon_directory + f'{fname[j]}_{slice[j]}_sample_{l}.pt'
                         recon_object = torch.load(new_filename)
-                        count += 1
                     except Exception as e:
                         print(e)
                         exceptions = True
