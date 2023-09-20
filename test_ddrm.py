@@ -43,7 +43,7 @@ def get_cfid():
     cfid = cfid_metric.get_cfid_torch_pinv()
     print(f"CFID: {cfid}")
 
-def get_fid(args, G, ref_loader, cond_loader, num_samps=32):
+def get_fid():
     print("GETTING INCEPTION EMBEDDING")
     vgg_embedding = VGG16Embedding(parallel=True)
 
