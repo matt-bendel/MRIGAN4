@@ -255,14 +255,14 @@ if __name__ == "__main__":
                 if j == 0:
                     zoom_startx = 180
                     zoom_starty = 40
-                    zoom_lengthx = 80
-                    zoom_lengthy = 160
+                    zoom_lengthx = 160
+                    zoom_lengthy = 80
                 else:
                     zoom_startx = 80  # np.random.randint(120, 250)
                     zoom_starty1 = 180  # np.random.randint(30, 80)
                     zoom_starty2 = 180  # np.random.randint(260, 300)
-                    zoom_lengthx = 80
-                    zoom_lengthy = 160
+                    zoom_lengthx = 160
+                    zoom_lengthy = 80
 
                     p = np.random.rand()
                     zoom_starty = zoom_starty1
