@@ -190,7 +190,7 @@ class FIDMetric:
         image_embed = []
         cond_embed = []
 
-        R = 4
+        R = 8
 
         ref_directory = '/storage/fastMRI_brain/data/small_T2_test'
         recon_directory = f'/storage/matt_models/mri/ddrm_R={R}/'
