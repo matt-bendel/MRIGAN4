@@ -54,7 +54,7 @@ class DataTransform:
                 norm (float): L2 norm of the entire volume.
         """
         # GRO Sampling mask:
-        mask = get_mask(self.args.im_size, return_mask=True, R=self.args.R, args=self.args, mask_type=self.mask_type)
+        mask, nlf = get_mask(self.args.im_size, return_mask=True, R=self.args.R, args=self.args, mask_type=self.mask_type, varnet=True)
         kspace = kspace.transpose(1, 2, 0)
         x = ifft(kspace, (0, 1))  # (768, 396, 16)
 
@@ -82,7 +82,7 @@ class DataTransform:
         final_gt[0:8, :, :] = normalized_gt[:, :, :, 0]
         final_gt[8:16, :, :] = normalized_gt[:, :, :, 1]
 
-        return final_input.float(), final_gt.float(), mask, mean, std, transforms.to_tensor(sense_maps), fname, slice
+        return final_input.float(), final_gt.float(), mask, mean, std, transforms.to_tensor(sense_maps), fname, slice, nlf
 
 
 
