@@ -225,6 +225,7 @@ if __name__ == "__main__":
                 for l in range(cfg.num_z_test):
                     try:
                         new_filename = recon_directory + f'{fname[j]}_{slice[j]}_sample_{l}.pt'
+                        print(new_filename)
                         recon_object = torch.load(new_filename)
                         count += 1
                     except:
@@ -571,3 +572,8 @@ if __name__ == "__main__":
                 ax.set_yticks([])
 
                 plt.savefig(f'mr_figs_workshop/workshop_body_{fig_count}.png', bbox_inches='tight', dpi=300)
+                plt.close(fig)
+                if fig_count == 5:
+                    print(fig_count)
+                    exit()
+                fig_count += 1
