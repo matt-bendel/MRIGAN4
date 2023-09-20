@@ -136,9 +136,9 @@ if __name__ == "__main__":
                 }
 
                 np_samps = {
-                    'rcgan_wo_gr_w_dc': None,
-                    'rcgan_w_gr_wo_dc': None,
-                    'rcgan_w_gr_w_dc': None
+                    'rcgan_wo_gr_w_dc': [],
+                    'rcgan_w_gr_wo_dc': [],
+                    'rcgan_w_gr_w_dc': []
                 }
 
                 np_stds = {
