@@ -287,6 +287,13 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
+                rect = patches.Rectangle((zoom_startx, zoom_starty), zoom_length, zoom_length, linewidth=1,
+                                         edgecolor='r',
+                                         facecolor='none')
+
+                # Add the patch to the Axes
+                ax.add_patch(rect)
+
                 count = 1
                 for method in keys:
                     ax = plt.subplot(gs[0, count])
