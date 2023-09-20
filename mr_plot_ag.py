@@ -58,6 +58,10 @@ if __name__ == "__main__":
         cfg = json.loads(json.dumps(cfg), object_hook=load_object)
 
     cfg.batch_size = cfg.batch_size
+
+    if args.R != 8:
+        cfg.R = args.R
+
     dm = MRIDataModule(cfg, args.mask_type, big_test=True)
     fig_count = 1
     dm.setup()
