@@ -71,7 +71,7 @@ if __name__ == "__main__":
         rcGAN_model_w_gr_w_dc = rcGAN.load_from_checkpoint(
             checkpoint_path=cfg.checkpoint_dir + '/neurips/rcgan_agnostic_proposed/checkpoint_best.ckpt')
         l1_ssim_model = L1SSIMMRI.load_from_checkpoint(
-            checkpoint_path=cfg.checkpoint_dir + '/neurips/l1_ssim/checkpoint_best.ckpt')
+            checkpoint_path=cfg.checkpoint_dir + '/neurips/l1_ssim_agnostic/checkpoint_best.ckpt')
         varnet_model = VarNetModule.load_from_checkpoint(
             checkpoint_path='/storage/matt_models/mri/neurips/e2e_varnet_agnostic/varnet/varnet_demo/checkpoints/checkpoint_best.ckpt')
 
