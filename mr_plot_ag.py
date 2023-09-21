@@ -195,7 +195,7 @@ if __name__ == "__main__":
                 np_stds['rcgan_w_gr_w_dc'] = np.std(np.stack(np_samps['rcgan_w_gr_w_dc']), axis=0)
 
                 recon_directory = f'/storage/fastMRI_brain/Langevin_Recons_R={args.R}/'
-                langevin_recons = np.zeros((32, 384, 384))
+                langevin_recons = np.zeros((cfg.num_z_test, 384, 384))
                 recon_object = None
                 exceptions = False
 
@@ -224,7 +224,7 @@ if __name__ == "__main__":
                 print("Got Langevin")
 
                 recon_directory = f'/storage/matt_models/mri/ddrm_R={args.R}/'
-                ddrm_recons = np.zeros((32, 384, 384))
+                ddrm_recons = np.zeros((cfg.num_z_test, 384, 384))
                 recon_object = None
                 exceptions = False
 
@@ -593,7 +593,7 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                plt.savefig(f'mr_figs_workshop/workshop_body_R={args.R}_{fig_count}.png', bbox_inches='tight', dpi=300)
+                plt.savefig(f'mr_figs_workshop/workshop_body_R={args.R}_P={cfg.num_z_test}_{fig_count}.png', bbox_inches='tight', dpi=300)
                 plt.close(fig)
                 if fig_count == 5:
                     print(fig_count)
