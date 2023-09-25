@@ -596,7 +596,7 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                plt.savefig(f'mr_figs_workshop/workshop_body_R={args.R}_P={cfg.num_z_test}_{fig_count}.png', bbox_inches='tight', dpi=300)
+                plt.savefig(f'mr_figs_workshop/workshop_body_R={args.R}_P={4}_{fig_count}.png', bbox_inches='tight', dpi=300)
                 plt.close(fig)
                 if fig_count == 30:
                     print(fig_count)
