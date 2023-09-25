@@ -119,11 +119,11 @@ if __name__ == "__main__":
                 gens_l1_ssim[:, z, :, :, :, :] = l1_ssim_model.reformat(l1_ssim_model.forward(y, mask))
                 gens_varnet[:, z, :, :] = varnet_model(varnet_y.float(), mask == 1, num_low_freqs)
 
-            avg_rcgan_wo_gr_w_dc = torch.mean(gens_rcgan_wo_gr_w_dc, dim=1)
-            avg_rcgan_w_gr_wo_dc = torch.mean(gens_rcgan_w_gr_wo_dc, dim=1)
-            avg_rcgan_w_gr_w_dc = torch.mean(gens_rcgan_w_gr_w_dc, dim=1)
-            avg_l1_ssim = torch.mean(gens_l1_ssim, dim=1)
-            avg_varnet = torch.mean(gens_varnet, dim=1)
+            avg_rcgan_wo_gr_w_dc = torch.mean(gens_rcgan_wo_gr_w_dc[0:4], dim=1)
+            avg_rcgan_w_gr_wo_dc = torch.mean(gens_rcgan_w_gr_wo_dc[0:4], dim=1)
+            avg_rcgan_w_gr_w_dc = torch.mean(gens_rcgan_w_gr_w_dc[0:4], dim=1)
+            avg_l1_ssim = torch.mean(gens_l1_ssim[0:4], dim=1)
+            avg_varnet = torch.mean(gens_varnet[0:4], dim=1)
 
             print("Got Recons")
 
@@ -218,7 +218,7 @@ if __name__ == "__main__":
                     continue
 
                 langevin_gt = ndimage.rotate(recon_object['gt'][0][0].abs().cpu().numpy(), 180)
-                langevin_avg = np.mean(langevin_recons, axis=0)
+                langevin_avg = np.mean(langevin_recons[0:4], axis=0)
                 langevin_std = np.std(langevin_recons, axis=0)
 
                 print("Got Langevin")
@@ -246,7 +246,7 @@ if __name__ == "__main__":
 
                 new_filename = recon_directory + f'{fname[j]}_{slice[j]}_gt.pt'
                 ddrm_gt = ndimage.rotate(torch.load(new_filename)[0, :, :].cpu().numpy(), 180)
-                ddrm_avg = np.mean(ddrm_recons, axis=0)
+                ddrm_avg = np.mean(ddrm_recons[0:4], axis=0)
                 ddrm_std = np.std(ddrm_recons, axis=0)
                 print("Got DDRM")
                 print("Plot time baby")
@@ -311,6 +311,9 @@ if __name__ == "__main__":
 
                     psnr_val = psnr(np_gt, np_avgs[method])
                     ssim_val = ssim(np_gt, np_avgs[method])
+
+                    if method == 'rcgan_w_gr_w_dc':
+                        print(ssim_val)
 
                     # ax.text(0.46, 0.04, f'PSNR: {psnr_val:.2f}  SSIM: {ssim_val:.4f}',
                     #         horizontalalignment='center', verticalalignment='center', fontsize=3.5, color='yellow',
@@ -595,7 +598,7 @@ if __name__ == "__main__":
 
                 plt.savefig(f'mr_figs_workshop/workshop_body_R={args.R}_P={cfg.num_z_test}_{fig_count}.png', bbox_inches='tight', dpi=300)
                 plt.close(fig)
-                if fig_count == 5:
+                if fig_count == 30:
                     print(fig_count)
                     exit()
                 fig_count += 1
