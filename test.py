@@ -317,7 +317,6 @@ if __name__ == "__main__":
         print(f"EXPERIMENT: {args.exp_name}")
 
         for n in n_samps:
-            break
             trial_distss = []
 
             print(f"{n} SAMPLES")
@@ -416,6 +415,7 @@ if __name__ == "__main__":
         print(f'{lpips_str} {dists_str}')
 
         # print(f'APSD: {np.mean(apsds)}')
+    exit()
     cfids = []
     m_comps = []
     c_comps = []
