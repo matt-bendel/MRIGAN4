@@ -118,7 +118,7 @@ def rgb(im, unit_norm=False):
 
     return embed_ims.unsqueeze(0)
 
-R = 4
+R = 2
 
 # assign directory
 ref_directory = '/storage/fastMRI_brain/data/small_T2_test'
