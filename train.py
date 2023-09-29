@@ -70,7 +70,7 @@ if __name__ == '__main__':
             if args.nodc:
                 model = rcGANNoDC(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure, args.num_gpus)
             else:
-                model = rcGAN(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure, args.num_gpus)
+                model = Adler(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure, args.num_gpus)
         else:
             noise_structure = {"AWGN": args.awgn, "structure": args.noise_structure}
             model = L1SSIMMRI(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure, args.num_gpus)
