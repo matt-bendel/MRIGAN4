@@ -29,7 +29,7 @@ class Adler(pl.LightningModule):
         self.noise_type = noise_type
         self.num_gpus = num_gpus
 
-        self.in_chans = args.in_chans + self.num_realizations * 2
+        self.in_chans = args.in_chans + 2
         self.out_chans = args.out_chans
 
         self.generator = UNetModel(
