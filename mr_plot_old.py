@@ -229,9 +229,9 @@ if __name__ == "__main__":
                     zoom_starty = 40
                     zoom_length = 80
                 else:
-                    zoom_startx = np.random.randint(120, 250) #80  # np.random.randint(120, 250)
-                    zoom_starty1 = np.random.randint(30, 80) # 180  # np.random.randint(30, 80)
-                    zoom_starty2 = np.random.randint(260, 300) #180  # np.random.randint(260, 300)
+                    zoom_startx = 80  # np.random.randint(120, 250)
+                    zoom_starty1 = 180  # np.random.randint(30, 80)
+                    zoom_starty2 = 180  # np.random.randint(260, 300)
 
                     p = np.random.rand()
                     zoom_starty = zoom_starty1
@@ -287,7 +287,7 @@ if __name__ == "__main__":
                 # TODO: OG fig plot
                 # TODO: metrics
                 # OG FIG
-                nrow = 2
+                nrow = 3
                 ncol = 6
 
                 fig = plt.figure(figsize=(ncol + 1, nrow + 1))
@@ -369,6 +369,53 @@ if __name__ == "__main__":
                 ax = plt.subplot(gs[1, count])
                 ax.imshow(3 * np.abs(langevin_avg - langevin_gt), cmap='jet', vmin=0,
                           vmax=np.max(np.abs(np_avgs['rcgan'] - np_gt)))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                count = 1
+                for method in keys:
+                    if method != 'varnet':
+                        ax = plt.subplot(gs[2, count])
+                        ax.imshow(np_stds[method], cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
+                        ax.set_xticklabels([])
+                        ax.set_yticklabels([])
+                        ax.set_xticks([])
+                        ax.set_yticks([])
+                    else:
+                        ax = plt.subplot(gs[2, count])
+                        im = ax.imshow(np.zeros((384, 384)), cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
+                        ax.set_xticklabels([])
+                        ax.set_yticklabels([])
+                        ax.set_xticks([])
+                        ax.set_yticks([])
+
+                        # fig.subplots_adjust(right=0.85)  # Make room for colorbar
+
+                        # Get position of final error map axis
+                        [[x10, y10], [x11, y11]] = ax.get_position().get_points()
+
+                        # Appropriately rescale final axis so that colorbar does not effect formatting
+                        pad = 0.01
+                        width = 0.02
+                        cbar_ax = fig.add_axes([x10 - 2 * pad, y10, width, y11 - y10])
+                        cbar = fig.colorbar(im, cax=cbar_ax, format='%.0e',
+                                            orientation='vertical')  # Generate colorbar
+                        cbar.ax.locator_params(nbins=3)
+                        cbar.ax.yaxis.set_ticks_position("left")
+                        cbar.ax.tick_params(labelsize=6)
+                        cbar.ax.tick_params(rotation=0)
+                        tl = cbar.ax.get_yticklabels()
+
+                        # set the alignment for the first and the last
+                        tl[0].set_verticalalignment('bottom')
+                        tl[-1].set_verticalalignment('top')
+
+                    count += 1
+
+                ax = plt.subplot(gs[2, count])
+                ax.imshow(langevin_std, cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
                 ax.set_xticks([])
