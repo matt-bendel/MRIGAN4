@@ -49,6 +49,8 @@ if __name__ == "__main__":
 
     args.mask_type = 1
 
+    R = args.R
+
     if args.default_model_descriptor:
         args.num_noise = 1
 
@@ -64,26 +66,26 @@ if __name__ == "__main__":
 
     with torch.no_grad():
         rcGAN_model = rcGAN.load_from_checkpoint(
-            checkpoint_path=cfg.checkpoint_dir + '/neurips/rcgan/checkpoint_best.ckpt')
+            checkpoint_path=cfg.checkpoint_dir + f'/neurips/rcgan_R{R}/checkpoint_best.ckpt')
         ohayon_model = Ohayon.load_from_checkpoint(
-            checkpoint_path=cfg.checkpoint_dir + '/neurips/ohayon_2/checkpoint_best.ckpt')
+            checkpoint_path=cfg.checkpoint_dir + f'/neurips/ohayon_R{R}/checkpoint_best.ckpt')
         adler_model = Adler.load_from_checkpoint(
-            checkpoint_path=cfg.checkpoint_dir + '/neurips/adler/checkpoint_best.ckpt')
-        l1_ssim_model = L1SSIMMRI.load_from_checkpoint(
-            checkpoint_path=cfg.checkpoint_dir + '/neurips/l1_ssim/checkpoint_best.ckpt')
+            checkpoint_path=cfg.checkpoint_dir + f'/neurips/adler_R{R}/checkpoint_best.ckpt')
+        # l1_ssim_model = L1SSIMMRI.load_from_checkpoint(
+        #     checkpoint_path=cfg.checkpoint_dir + '/neurips/l1_ssim/checkpoint_best.ckpt')
         varnet_model = VarNetModule.load_from_checkpoint(
-            checkpoint_path='/storage/matt_models/mri/e2e_varnet/varnet/varnet_demo/checkpoints/epoch=30-step=284208.ckpt')
+            checkpoint_path=f'/storage/matt_models/mri/neurips/e2e_varnet_R={R}/varnet/varnet_demo/checkpoints/checkpoint_best.ckpt')
 
         rcGAN_model.cuda()
         ohayon_model.cuda()
         adler_model.cuda()
-        l1_ssim_model.cuda()
+        # l1_ssim_model.cuda()
         varnet_model.cuda()
 
         rcGAN_model.eval()
         ohayon_model.eval()
         adler_model.eval()
-        l1_ssim_model.eval()
+        # l1_ssim_model.eval()
         varnet_model.eval()
 
         for i, data in enumerate(test_loader):
@@ -102,8 +104,8 @@ if __name__ == "__main__":
                 size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
             gens_adler = torch.zeros(
                 size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
-            gens_l1_ssim = torch.zeros(
-                size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
+            # gens_l1_ssim = torch.zeros(
+            #     size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
             gens_varnet = torch.zeros(
                 size=(y.size(0), cfg.num_z_test, cfg.im_size, cfg.im_size)).cuda()
 
@@ -111,13 +113,13 @@ if __name__ == "__main__":
                 gens_rcgan[:, z, :, :, :, :] = rcGAN_model.reformat(rcGAN_model.forward(y, mask))
                 gens_ohayon[:, z, :, :, :, :] = ohayon_model.reformat(ohayon_model.forward(y, mask))
                 gens_adler[:, z, :, :, :, :] = adler_model.reformat(adler_model.forward(y, mask))
-                gens_l1_ssim[:, z, :, :, :, :] = l1_ssim_model.reformat(l1_ssim_model.forward(y, mask))
+                # gens_l1_ssim[:, z, :, :, :, :] = l1_ssim_model.reformat(l1_ssim_model.forward(y, mask))
                 gens_varnet[:, z, :, :] = varnet_model(varnet_y.float(), mask.to(torch.bool), num_low_freqs.float())
 
             avg_rcgan = torch.mean(gens_rcgan, dim=1)
             avg_ohayon = torch.mean(gens_ohayon, dim=1)
             avg_adler = torch.mean(gens_adler, dim=1)
-            avg_l1_ssim = torch.mean(gens_l1_ssim, dim=1)
+            # avg_l1_ssim = torch.mean(gens_l1_ssim, dim=1)
             avg_varnet = torch.mean(gens_varnet, dim=1)
 
             gt = rcGAN_model.reformat(x)
@@ -127,7 +129,7 @@ if __name__ == "__main__":
 
             for j in range(y.size(0)):
                 np_avgs = {
-                    'l1_ssim': None,
+                    # 'l1_ssim': None,
                     'varnet': None,
                     'rcgan': None,
                     'ohayon': None,
@@ -172,9 +174,9 @@ if __name__ == "__main__":
                 np_avgs['adler'] = ndimage.rotate(
                     torch.tensor(S.H * tensor_to_complex_np((avg_adler[j] * std[j] + mean[j]).cpu())).abs().numpy(),
                     180)
-                np_avgs['l1_ssim'] = ndimage.rotate(
-                    torch.tensor(S.H * tensor_to_complex_np((avg_l1_ssim[j] * std[j] + mean[j]).cpu())).abs().numpy(),
-                    180)
+                # np_avgs['l1_ssim'] = ndimage.rotate(
+                #     torch.tensor(S.H * tensor_to_complex_np((avg_l1_ssim[j] * std[j] + mean[j]).cpu())).abs().numpy(),
+                #     180)
                 np_avgs['varnet'] = ndimage.rotate(
                     avg_varnet[j].cpu().numpy(),
                     180)
@@ -191,7 +193,7 @@ if __name__ == "__main__":
                 np_stds['ohayon'] = np.std(np.stack(np_samps['ohayon']), axis=0)
                 np_stds['adler'] = np.std(np.stack(np_samps['adler']), axis=0)
 
-                recon_directory = f'/storage/fastMRI_brain/Langevin_Recons_R=8/'
+                recon_directory = f'/storage/fastMRI_brain/Langevin_Recons_R={R}/'
                 langevin_recons = np.zeros((32, 384, 384))
                 recon_object = None
                 exceptions = False
@@ -199,7 +201,7 @@ if __name__ == "__main__":
                 for l in range(cfg.num_z_test):
                     try:
                         new_filename = recon_directory + fname[
-                            j] + f'|langevin|slide_idx_{slice[j]}_R=8_sample={l}_outputs.pt'
+                            j] + f'|langevin|slide_idx_{slice[j]}_R={R}_sample={l}_outputs.pt'
                         recon_object = torch.load(new_filename)
                     except Exception as e:
                         print(e)
@@ -218,7 +220,7 @@ if __name__ == "__main__":
                 langevin_avg = np.mean(langevin_recons, axis=0)
                 langevin_std = np.std(langevin_recons, axis=0)
 
-                keys = ['l1_ssim', 'varnet', 'rcgan', 'ohayon', 'adler']
+                keys = ['varnet', 'rcgan', 'ohayon', 'adler']
                 if i % 4 == 0:
                     zoom_startx = 180
                     zoom_starty = 40
@@ -283,7 +285,7 @@ if __name__ == "__main__":
                 # TODO: metrics
                 # OG FIG
                 nrow = 2
-                ncol = 7
+                ncol = 6
 
                 fig = plt.figure(figsize=(ncol + 1, nrow + 1))
 
@@ -369,139 +371,7 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                # count = 1
-                # for method in keys:
-                #     if method != 'l1_ssim' and method != 'varnet':
-                #         ax = plt.subplot(gs[2, count])
-                #         ax.imshow(np_stds[method], cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
-                #         ax.set_xticklabels([])
-                #         ax.set_yticklabels([])
-                #         ax.set_xticks([])
-                #         ax.set_yticks([])
-                #     else:
-                #         ax = plt.subplot(gs[2, count])
-                #         im = ax.imshow(np.zeros((384, 384)), cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
-                #         ax.set_xticklabels([])
-                #         ax.set_yticklabels([])
-                #         ax.set_xticks([])
-                #         ax.set_yticks([])
-                #
-                #         if method == 'l1_ssim':
-                #             # fig.subplots_adjust(right=0.85)  # Make room for colorbar
-                #
-                #             # Get position of final error map axis
-                #             [[x10, y10], [x11, y11]] = ax.get_position().get_points()
-                #
-                #             # Appropriately rescale final axis so that colorbar does not effect formatting
-                #             pad = 0.01
-                #             width = 0.02
-                #             cbar_ax = fig.add_axes([x10 - 2 * pad, y10, width, y11 - y10])
-                #             cbar = fig.colorbar(im, cax=cbar_ax, format='%.0e',
-                #                                 orientation='vertical')  # Generate colorbar
-                #             cbar.ax.locator_params(nbins=3)
-                #             cbar.ax.yaxis.set_ticks_position("left")
-                #             cbar.ax.tick_params(labelsize=6)
-                #             cbar.ax.tick_params(rotation=0)
-                #             tl = cbar.ax.get_yticklabels()
-                #
-                #             # set the alignment for the first and the last
-                #             tl[0].set_verticalalignment('bottom')
-                #             tl[-1].set_verticalalignment('top')
-                #
-                #     count += 1
-                #
-                # ax = plt.subplot(gs[2, count])
-                # ax.imshow(langevin_std, cmap='viridis', vmin=0, vmax=np.max(np_stds['rcgan']))
-                # ax.set_xticklabels([])
-                # ax.set_yticklabels([])
-                # ax.set_xticks([])
-                # ax.set_yticks([])
-
-                plt.savefig(f'mr_figs/body_mri_fig_avg_err_std_{fig_count}.png', bbox_inches='tight', dpi=300)
-                plt.close(fig)
-
-                # TODO: NIPS rebuttal
-                nrow = 1
-                ncol = 6
-
-                fig = plt.figure(figsize=(ncol + 1, nrow + 1))
-
-                gs = gridspec.GridSpec(nrow, ncol,
-                                       wspace=0.0, hspace=0.0,
-                                       top=1. - 0.5 / (nrow + 1), bottom=0.5 / (nrow + 1),
-                                       left=0.5 / (ncol + 1), right=1 - 0.5 / (ncol + 1))
-
-                ax = plt.subplot(gs[0, 0])
-                ax.imshow(np_gt, cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
-                ax.set_xticklabels([])
-                ax.set_yticklabels([])
-                ax.set_xticks([])
-                ax.set_yticks([])
-
-                ax1 = ax
-
-                rect = patches.Rectangle((zoom_startx, zoom_starty), zoom_length, zoom_length, linewidth=1,
-                                         edgecolor='r',
-                                         facecolor='none')
-
-                # Add the patch to the Axes
-                ax.add_patch(rect)
-
-                ax = plt.subplot(gs[0, 1])
-                ax.imshow(np_gt[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
-                          cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
-                ax.set_xticklabels([])
-                ax.set_yticklabels([])
-                ax.set_xticks([])
-                ax.set_yticks([])
-
-                connection_path_1 = patches.ConnectionPatch([zoom_startx + zoom_length, y_coords[0]], [0, 0], coordsA=ax1.transData,
-                                                            coordsB=ax.transData, color='r')
-                fig.add_artist(connection_path_1)
-                connection_path_2 = patches.ConnectionPatch([x_coord, y_coords[1]], [0, zoom_length],
-                                                            coordsA=ax1.transData,
-                                                            coordsB=ax.transData, color='r')
-                fig.add_artist(connection_path_2)
-
-                ax = plt.subplot(gs[0, 2])
-                ax.imshow(
-                    np_avgs['l1_ssim'][zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
-                    cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
-                ax.set_xticklabels([])
-                ax.set_yticklabels([])
-                ax.set_xticks([])
-                ax.set_yticks([])
-
-                ax = plt.subplot(gs[0, 3])
-                ax.imshow(
-                    np_avgs['varnet'][zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
-                    cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
-                ax.set_xticklabels([])
-                ax.set_yticklabels([])
-                ax.set_xticks([])
-                ax.set_yticks([])
-
-                ax = plt.subplot(gs[0, 4])
-                ax.imshow(
-                    np_avgs['rcgan'][zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
-                    cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
-                ax.set_xticklabels([])
-                ax.set_yticklabels([])
-                ax.set_xticks([])
-                ax.set_yticks([])
-
-                rcgan_2 = (np_samps['rcgan'][0] + np_samps['rcgan'][1]) / 2
-
-                ax = plt.subplot(gs[0, 5])
-                ax.imshow(
-                    rcgan_2[zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
-                    cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
-                ax.set_xticklabels([])
-                ax.set_yticklabels([])
-                ax.set_xticks([])
-                ax.set_yticks([])
-
-                plt.savefig(f'mr_figs/nips_rebuttal_{fig_count}.png', bbox_inches='tight', dpi=300)
+                plt.savefig(f'mr_figs/body_mri_fig_R_{R}_avg_err_std_{fig_count}.png', bbox_inches='tight', dpi=300)
                 plt.close(fig)
 
                 # TODO: top row: zoomed avg, next two rows samps.
@@ -549,14 +419,14 @@ if __name__ == "__main__":
 
                 ax = plt.subplot(gs[2, 0])
                 ax.imshow(
-                    np_avgs['l1_ssim'][zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
+                    np_avgs['varnet'][zoom_starty:zoom_starty + zoom_length, zoom_startx:zoom_startx + zoom_length],
                     cmap='gray', vmin=0, vmax=0.7 * np.max(np_gt))
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                plt.savefig(f'mr_figs/body_mri_fig_left_{fig_count}.png', bbox_inches='tight', dpi=300)
+                plt.savefig(f'mr_figs/body_mri_fig_R_{R}_left_{fig_count}.png', bbox_inches='tight', dpi=300)
 
                 nrow = 3
                 ncol = 4
@@ -611,7 +481,7 @@ if __name__ == "__main__":
                     ax.set_xticks([])
                     ax.set_yticks([])
 
-                plt.savefig(f'mr_figs/body_mri_fig_right_{fig_count}.png', bbox_inches='tight', dpi=300)
+                plt.savefig(f'mr_figs/body_mri_fig_R_{R}_right_{fig_count}.png', bbox_inches='tight', dpi=300)
                 plt.close(fig)
 
                 # TODO: Rizwan Idea: zoomed, 1st row avg, 2nd error, 3rd std. dev, 4, 5, 6 samps
@@ -684,7 +554,7 @@ if __name__ == "__main__":
                         ax.set_xticks([])
                         ax.set_yticks([])
 
-                        if method == 'l1_ssim':
+                        if method == 'varnet':
                             # fig.subplots_adjust(right=0.85)  # Make room for colorbar
 
                             # Get position of final error map axis
@@ -859,7 +729,7 @@ if __name__ == "__main__":
                     ax.set_xticks([])
                     ax.set_yticks([])
 
-                plt.savefig(f'mr_figs/app_mri_fig_{fig_count}.png', bbox_inches='tight', dpi=300)
+                plt.savefig(f'mr_figs/app_mri_R_{R}_fig_{fig_count}.png', bbox_inches='tight', dpi=300)
                 plt.close(fig)
                 if fig_count == 24:
                     exit()
