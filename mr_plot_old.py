@@ -58,6 +58,9 @@ if __name__ == "__main__":
         cfg = yaml.load(f, Loader=yaml.FullLoader)
         cfg = json.loads(json.dumps(cfg), object_hook=load_object)
 
+    if args.R != 8:
+        cfg.R = args.R
+
     cfg.batch_size = cfg.batch_size
     dm = MRIDataModule(cfg, args.mask_type, big_test=True)
     fig_count = 1
