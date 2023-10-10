@@ -486,7 +486,7 @@ if __name__ == "__main__":
 
                 # TODO: Rizwan Idea: zoomed, 1st row avg, 2nd error, 3rd std. dev, 4, 5, 6 samps
                 nrow = 6
-                ncol = 7
+                ncol = 6
 
                 fig = plt.figure(figsize=(ncol + 1, nrow + 1))
 
@@ -640,7 +640,7 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                count = 3
+                count = 2
                 for method in keys:
                     if method == 'l1_ssim' or method == 'varnet':
                         continue
@@ -674,7 +674,7 @@ if __name__ == "__main__":
                 ax.set_xticks([])
                 ax.set_yticks([])
 
-                count = 3
+                count = 2
                 for method in keys:
                     if method == 'l1_ssim' or method == 'varnet':
                         continue
@@ -702,7 +702,7 @@ if __name__ == "__main__":
                 ax.set_yticks([])
 
                 for samp in range(2):
-                    count = 3
+                    count = 2
                     for method in keys:
                         if method != 'l1_ssim' and method != 'varnet':
                             ax = plt.subplot(gs[samp + 4, count])
