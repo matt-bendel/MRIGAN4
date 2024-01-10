@@ -263,5 +263,21 @@ if __name__ == "__main__":
             std = std.cuda()
             maps = maps.cuda()
 
-            print(maps.shape)
+            reformatted_tensor = torch.zeros(size=(8, 384, 384, 2),
+                                             device=x.device)
+            reformatted_tensor[:, :, :, 0] = x[0, 0:8, :, :]
+            reformatted_tensor[:, :, :, 1] = x[0, 8:16, :, :]
+
+            x_hat = torch.view_as_complex(reformatted_tensor)
+            maps_complex_conj = torch.view_as_complex(maps[0])
+
+            new_im = torch.einsum('bij, bjk -> bik ', maps_complex_conj, x_hat)
+            print(new_im.shape)
+            exit()
+
+            x_hat_mag = x_hat.abs().cpu().numpy()
+
+            plt.imshow(x_hat_mag, cmap='gray')
+            plt.savefig('coiltest.png')
+
             exit()
