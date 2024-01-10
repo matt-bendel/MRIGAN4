@@ -273,6 +273,7 @@ if __name__ == "__main__":
 
             # new_im = torch.einsum('bij, bjk -> bik ', maps_complex_conj, x_hat)
             new_im = torch.bmm(maps_complex_conj, x_hat)
+            new_im = maps_complex_conj * x_hat
 
             print(torch.sum(torch.bmm(maps_complex_conj, torch.view_as_complex(maps[0])), dim=0))
             combined_new_im = torch.sum(new_im, dim=0)
