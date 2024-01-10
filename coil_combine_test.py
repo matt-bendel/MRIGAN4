@@ -279,7 +279,18 @@ if __name__ == "__main__":
             combined_new_im = torch.sum(new_im, dim=0)
             abs_new_im = combined_new_im.abs().cpu().numpy()
 
+            plt.figure()
             plt.imshow(abs_new_im, cmap='gray')
             plt.savefig('coiltest.png')
+            plt.close()
+
+            S = sp.linop.Multiply((384, 384), tensor_to_complex_np(maps[0].cpu()))
+            gt_ksp, avg_ksp = tensor_to_complex_np((x[0] * std[0] + mean[0]).cpu())
+            gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
+
+            plt.figure()
+            plt.imshow(gt_np, cmap='gray')
+            plt.savefig('coiltest_true.png')
+            plt.close()
 
             exit()
