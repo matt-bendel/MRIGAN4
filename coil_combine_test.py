@@ -272,12 +272,10 @@ if __name__ == "__main__":
             maps_complex_conj = torch.view_as_complex(maps[0])
 
             new_im = torch.einsum('bij, bjk -> bik ', maps_complex_conj, x_hat)
-            print(new_im.shape)
-            exit()
+            combined_new_im = torch.sum(new_im, dim=0)
+            abs_new_im = combined_new_im.abs().cpu().numpy()
 
-            x_hat_mag = x_hat.abs().cpu().numpy()
-
-            plt.imshow(x_hat_mag, cmap='gray')
+            plt.imshow(abs_new_im, cmap='gray')
             plt.savefig('coiltest.png')
 
             exit()
