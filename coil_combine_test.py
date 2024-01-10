@@ -285,7 +285,7 @@ if __name__ == "__main__":
             plt.close()
 
             S = sp.linop.Multiply((384, 384), tensor_to_complex_np(maps[0].cpu()))
-            gt_ksp = tensor_to_complex_np((reformatted_tensor * std[0] + mean[0]).cpu())
+            gt_ksp = tensor_to_complex_np(reformatted_tensor.cpu())
             gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
 
             plt.figure()
