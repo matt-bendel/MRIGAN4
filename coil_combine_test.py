@@ -287,7 +287,10 @@ if __name__ == "__main__":
             plt.savefig('coiltest.png')
             plt.close()
 
+            temp = tensor_to_complex_np(maps[0].cpu())
+            print(temp[0])
             S = sp.linop.Multiply((384, 384), tensor_to_complex_np(maps[0].cpu()))
+            print(type(temp))
             gt_ksp = tensor_to_complex_np(reformatted_tensor.cpu())
             gt_np = torch.tensor(S.H * gt_ksp).abs().numpy()
 
