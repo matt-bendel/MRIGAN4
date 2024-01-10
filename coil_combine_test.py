@@ -269,7 +269,7 @@ if __name__ == "__main__":
             reformatted_tensor[:, :, :, 1] = x[0, 8:16, :, :] * std[0] + mean[0]
 
             x_hat = torch.view_as_complex(reformatted_tensor)
-            maps_complex_conj = torch.view_as_complex(maps[0]).mH
+            maps_complex_conj = torch.view_as_complex(maps[0]).conj()
 
             # new_im = torch.einsum('bij, bk -> bik ', maps_complex_conj, x_hat.view(8, -1))
             # new_im = torch.bmm(maps_complex_conj, x_hat)
