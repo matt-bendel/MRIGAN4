@@ -265,8 +265,8 @@ if __name__ == "__main__":
 
             reformatted_tensor = torch.zeros(size=(8, 384, 384, 2),
                                              device=x.device)
-            reformatted_tensor[:, :, :, 0] = x[0, 0:8, :, :]
-            reformatted_tensor[:, :, :, 1] = x[0, 8:16, :, :]
+            reformatted_tensor[:, :, :, 0] = x[0, 0:8, :, :] * std[0] + mean[0]
+            reformatted_tensor[:, :, :, 1] = x[0, 8:16, :, :] * std[0] + mean[0]
 
             x_hat = torch.view_as_complex(reformatted_tensor)
             maps_complex_conj = torch.view_as_complex(maps[0])
