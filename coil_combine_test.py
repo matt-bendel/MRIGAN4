@@ -268,6 +268,8 @@ if __name__ == "__main__":
             reformatted_tensor[:, :, :, 0] = x[0, 0:8, :, :] * std[0] + mean[0]
             reformatted_tensor[:, :, :, 1] = x[0, 8:16, :, :] * std[0] + mean[0]
 
+            print(maps[0])
+
             x_hat = torch.view_as_complex(reformatted_tensor)
             maps_complex_conj = torch.view_as_complex(maps[0]).mH
             print(torch.view_as_complex(maps[0])[0])
