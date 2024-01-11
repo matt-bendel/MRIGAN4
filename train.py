@@ -13,7 +13,7 @@ from data_loaders.CelebAHQDataModule import CelebAHQDataModule
 from data_loaders.BSD400DataModule import BSD400DataModule
 from data_loaders.SRDataModule import SRDataModule
 from utils.parse_args import create_arg_parser
-from models.rcGAN import rcGAN
+from models.rcGAN import rcGAN, rcGANLatent
 from models.super_res_rcgan import SRrcGAN
 from models.adler import Adler
 from models.l1_ssim_module import L1SSIMMRI
@@ -70,7 +70,7 @@ if __name__ == '__main__':
             if args.nodc:
                 model = rcGANNoDC(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure, args.num_gpus)
             else:
-                model = Ohayon(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure, args.num_gpus)
+                model = rcGANLatent(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure, args.num_gpus)
         else:
             noise_structure = {"AWGN": args.awgn, "structure": args.noise_structure}
             model = L1SSIMMRI(cfg, args.num_noise, args.default_model_descriptor, args.exp_name, noise_structure, args.num_gpus)
