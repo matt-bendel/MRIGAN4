@@ -517,14 +517,10 @@ class rcGANLatent(pl.LightningModule):
 
             g_loss = self.adversarial_loss_generator(y, gens)
 
-            new_gens = gens = torch.zeros(
+            new_gens = torch.zeros(
                 size=(y.size(0), self.args.num_z_train, 512),
                 device=self.device)
             for z in range(self.args.num_z_train):
-                print(gens.shape)
-                temp = self._get_embed_im(gens[:, z, :, :, :], mean, std, maps)
-                print(temp.shape)
-                exit()
                 new_gens[:, z, :] = self._get_embed_im(gens[:, z, :, :, :], mean, std, maps)
 
             avg_recon = torch.mean(gens, dim=1)
