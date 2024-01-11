@@ -376,24 +376,22 @@ class rcGANLatent(pl.LightningModule):
         self.save_hyperparameters()  # Save passed values
 
     def _get_embed_im(self, multi_coil_inp, mean, std, maps):
-        embed_ims = torch.zeros(size=(multi_coil_inp.size(0), 3, self.args.im_size, self.args.im_size)).cuda()
+        embed_ims = torch.zeros(size=(multi_coil_inp.size(0), 3, self.args.im_size, self.args.im_size), device=self.device)
+        reformatted = self.reformat(multi_coil_inp)
+        unnormal_im = reformatted * std[:, None, None, None, None] + mean[:, None, None, None, None]
+
         for i in range(multi_coil_inp.size(0)):
-            reformatted = torch.zeros(size=(8, self.args.im_size, self.args.im_size, 2)).cuda()
-            reformatted[:, :, :, 0] = multi_coil_inp[i, 0:8, :, :]
-            reformatted[:, :, :, 1] = multi_coil_inp[i, 8:16, :, :]
+            x_hat = torch.view_as_complex(unnormal_im[i])
+            maps_complex_conj = torch.view_as_complex(maps[i]).conj()
 
-            unnormal_im = reformatted * std[i] + mean[i]
-
-            S = sp.linop.Multiply((self.args.im_size, self.args.im_size), maps[i])
-
-            im = torch.tensor(S.H * tensor_to_complex_np(unnormal_im.cpu())).abs().cuda()
+            im = (maps_complex_conj * x_hat).abs()
             im = (im - torch.min(im)) / (torch.max(im) - torch.min(im))
 
             embed_ims[i, 0, :, :] = im
             embed_ims[i, 1, :, :] = im
             embed_ims[i, 2, :, :] = im
 
-        return embed_ims
+        return self.feature_extractor(embed_ims)
 
     def get_noise(self, num_vectors, mask):
         z = torch.randn(num_vectors, self.resolution, self.resolution, 2, device=self.device)
@@ -518,12 +516,18 @@ class rcGANLatent(pl.LightningModule):
 
             g_loss = self.adversarial_loss_generator(y, gens)
 
-            # TODO Embed w/ VGG
+            new_gens = gens = torch.zeros(
+                size=(y.size(0), self.args.num_z_train, 512),
+                device=self.device)
+            for z in range(self.args.num_z_train):
+                new_gens[:, z, :] = self._get_embed_im(new_gens, mean, std, maps)
 
             avg_recon = torch.mean(gens, dim=1)
 
+            x_embed = self._get_embed_im(x, mean, std, maps)
+
             # adversarial loss is binary cross-entropy
-            g_loss += self.l1_std_p(avg_recon, gens, x)
+            g_loss += self.l1_std_p(avg_recon, gens, x_embed)
 
             self.log('g_loss', g_loss, prog_bar=True)
 
