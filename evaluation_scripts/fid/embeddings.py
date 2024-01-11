@@ -103,7 +103,7 @@ class VGG16Embedding:
         if device:
             vgg_model = WrapVGG(vgg_model).to(device)
         else:
-            vgg_model = WrapVGG(vgg_model)
+            vgg_model = WrapVGG(vgg_model).cuda()
 
         if parallel:
             vgg_model = nn.DataParallel(vgg_model)

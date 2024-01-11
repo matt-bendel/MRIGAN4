@@ -385,7 +385,6 @@ class rcGANLatent(pl.LightningModule):
             maps_complex_conj = torch.view_as_complex(maps[i]).conj()
 
             im = torch.sum(maps_complex_conj * x_hat, dim=0).abs()
-            print(im.shape)
             im = (im - torch.min(im)) / (torch.max(im) - torch.min(im))
 
             embed_ims[i, 0, :, :] = im
