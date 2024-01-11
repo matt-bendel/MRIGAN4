@@ -339,6 +339,7 @@ import torch.nn.functional as F
 from torch.nn import Parameter as P
 from torchvision.models import vgg16
 
+
 class WrapVGG(nn.Module):
     def __init__(self, net):
         super(WrapVGG, self).__init__()
@@ -367,7 +368,7 @@ class WrapVGG(nn.Module):
 
         # if x.shape[2] != 256 or x.shape[3] != 256:
         #     x = F.interpolate(x, size=(256, 256), mode='bilinear', align_corners=True)
-            # x = TF.resize(x, 256)
+        # x = TF.resize(x, 256)
         #
         # x = TF.center_crop(x, 224)
         #
@@ -383,6 +384,7 @@ class WrapVGG(nn.Module):
         # out = self.flatten(out)
         # out = self.fc(out)
         return out
+
 
 class rcGANLatent(pl.LightningModule):
     def __init__(self, args, num_realizations, default_model_descriptor, exp_name, noise_type, num_gpus):
@@ -408,7 +410,7 @@ class rcGANLatent(pl.LightningModule):
         )
 
         self.feature_extractor = vgg16(pretrained=True).eval()
-        self.feature_extractor = WrapVGG(vgg_model)
+        self.feature_extractor = WrapVGG(self.feature_extractor)
         self.transforms = torch.nn.Sequential(
             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
         )
@@ -424,7 +426,8 @@ class rcGANLatent(pl.LightningModule):
         self.save_hyperparameters()  # Save passed values
 
     def _get_embed_im(self, multi_coil_inp, mean, std, maps):
-        embed_ims = torch.zeros(size=(multi_coil_inp.size(0), 3, self.args.im_size, self.args.im_size), device=self.device)
+        embed_ims = torch.zeros(size=(multi_coil_inp.size(0), 3, self.args.im_size, self.args.im_size),
+                                device=self.device)
         reformatted = self.reformat(multi_coil_inp * std[:, None, None, None] + mean[:, None, None, None])
         unnormal_im = reformatted
 
