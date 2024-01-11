@@ -360,7 +360,7 @@ class rcGANLatent(pl.LightningModule):
             out_chans=self.out_chans
         )
 
-        self.feature_extractor = VGG16Embedding(parallel=False).to(self.device)
+        self.feature_extractor = VGG16Embedding(parallel=False, device=self.device)
         self.transforms = torch.nn.Sequential(
             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
         )
@@ -391,7 +391,7 @@ class rcGANLatent(pl.LightningModule):
             embed_ims[i, 1, :, :] = im
             embed_ims[i, 2, :, :] = im
 
-        return self.feature_extractor(embed_ims)
+        return self.feature_extractor(self.transforms(embed_ims))
 
     def get_noise(self, num_vectors, mask):
         z = torch.randn(num_vectors, self.resolution, self.resolution, 2, device=self.device)
