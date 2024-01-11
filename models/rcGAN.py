@@ -384,7 +384,7 @@ class rcGANLatent(pl.LightningModule):
             x_hat = torch.view_as_complex(unnormal_im[i])
             maps_complex_conj = torch.view_as_complex(maps[i]).conj()
 
-            im = (maps_complex_conj * x_hat).abs()
+            im = torch.sum(maps_complex_conj * x_hat, dim=0).abs()
             print(im.shape)
             im = (im - torch.min(im)) / (torch.max(im) - torch.min(im))
 
