@@ -377,14 +377,15 @@ class rcGANLatent(pl.LightningModule):
 
     def _get_embed_im(self, multi_coil_inp, mean, std, maps):
         embed_ims = torch.zeros(size=(multi_coil_inp.size(0), 3, self.args.im_size, self.args.im_size), device=self.device)
-        reformatted = self.reformat(multi_coil_inp)
-        unnormal_im = reformatted * std[:, None, None, None, None] + mean[:, None, None, None, None]
+        reformatted = self.reformat(multi_coil_inp * std[:, None, None, None] + mean[:, None, None, None])
+        unnormal_im = reformatted
 
         for i in range(multi_coil_inp.size(0)):
             x_hat = torch.view_as_complex(unnormal_im[i])
             maps_complex_conj = torch.view_as_complex(maps[i]).conj()
 
             im = (maps_complex_conj * x_hat).abs()
+            print(im.shape)
             im = (im - torch.min(im)) / (torch.max(im) - torch.min(im))
 
             embed_ims[i, 0, :, :] = im
@@ -520,6 +521,7 @@ class rcGANLatent(pl.LightningModule):
                 size=(y.size(0), self.args.num_z_train, 512),
                 device=self.device)
             for z in range(self.args.num_z_train):
+                print(gens.shape)
                 temp = self._get_embed_im(gens[:, z, :, :, :], mean, std, maps)
                 print(temp.shape)
                 exit()
