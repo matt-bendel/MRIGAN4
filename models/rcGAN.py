@@ -520,7 +520,7 @@ class rcGANLatent(pl.LightningModule):
                 size=(y.size(0), self.args.num_z_train, 512),
                 device=self.device)
             for z in range(self.args.num_z_train):
-                new_gens[:, z, :] = self._get_embed_im(new_gens, mean, std, maps)
+                new_gens[:, z, :] = self._get_embed_im(new_gens[:, z, :, :, :], mean, std, maps)
 
             avg_recon = torch.mean(gens, dim=1)
 
