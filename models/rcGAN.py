@@ -410,7 +410,7 @@ class rcGANLatent(pl.LightningModule):
         )
 
         self.feature_extractor = vgg16(pretrained=True).eval()
-        self.feature_extractor = WrapVGG(self.feature_extractor)
+        self.feature_extractor = WrapVGG(self.feature_extractor).eval()
         self.transforms = torch.nn.Sequential(
             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
         )
@@ -534,11 +534,11 @@ class rcGANLatent(pl.LightningModule):
         for k in range(y.shape[0] - 1):
             gen_pred_loss += torch.mean(fake_pred[k + 1])
 
-        adv_weight = 1e-5
+        adv_weight = 1e-4
         if self.current_epoch <= 4:
             adv_weight = 1e-2
         elif self.current_epoch <= 22:
-            adv_weight = 1e-4
+            adv_weight = 1e-3
 
         return - adv_weight * gen_pred_loss.mean()
 
