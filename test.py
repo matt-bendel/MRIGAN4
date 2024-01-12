@@ -15,7 +15,7 @@ from data_loaders.CelebAHQDataModule import CelebAHQDataModule
 from utils.parse_args import create_arg_parser
 from pytorch_lightning import seed_everything
 from models.mri_unet import MRIUnet
-from models.rcGAN import rcGAN
+from models.rcGAN import rcGAN, rcGANLatent
 from models.rcGAN_no_dc import rcGANNoDC
 from models.adler import Adler
 from models.ohayon import Ohayon
@@ -261,7 +261,7 @@ if __name__ == "__main__":
             if args.nodc:
                 model_alias = rcGANNoDC
             else:
-                model_alias = rcGAN
+                model_alias = rcGANLatent
         else:
             model_alias = L1SSIMMRI
     elif args.inpaint:
@@ -438,35 +438,35 @@ if __name__ == "__main__":
 
     # inception_embedding = VGG16Embedding(parallel=True)
     # # CFID_2
-    # cfid_metric = CFIDMetric(gan=model,
-    #                          loader=val_dataloader,
-    #                          image_embedding=inception_embedding,
-    #                          condition_embedding=inception_embedding,
-    #                          cuda=True,
-    #                          args=cfg,
-    #                          ref_loader=False,
-    #                          num_samps=1)
-    #
-    # cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
-    # cfids.append(cfid)
-    # m_comps.append(m_comp)
-    # c_comps.append(c_comp)
-    #
+    cfid_metric = CFIDMetric(gan=model,
+                             loader=val_dataloader,
+                             image_embedding=inception_embedding,
+                             condition_embedding=inception_embedding,
+                             cuda=True,
+                             args=cfg,
+                             ref_loader=False,
+                             num_samps=1)
+
+    cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
+    cfids.append(cfid)
+    m_comps.append(m_comp)
+    c_comps.append(c_comp)
+
     # inception_embedding = VGG16Embedding(parallel=True)
     # # CFID_3
-    # cfid_metric = CFIDMetric(gan=model,
-    #                          loader=val_dataloader,
-    #                          image_embedding=inception_embedding,
-    #                          condition_embedding=inception_embedding,
-    #                          cuda=True,
-    #                          args=cfg,
-    #                          ref_loader=train_dataloader,
-    #                          num_samps=1)
-    #
-    # cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
-    # cfids.append(cfid)
-    # m_comps.append(m_comp)
-    # c_comps.append(c_comp)
+    cfid_metric = CFIDMetric(gan=model,
+                             loader=val_dataloader,
+                             image_embedding=inception_embedding,
+                             condition_embedding=inception_embedding,
+                             cuda=True,
+                             args=cfg,
+                             ref_loader=train_dataloader,
+                             num_samps=1)
+
+    cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
+    cfids.append(cfid)
+    m_comps.append(m_comp)
+    c_comps.append(c_comp)
 
 
     inception_embedding = VGG16Embedding()
@@ -482,7 +482,7 @@ if __name__ == "__main__":
     # print(f'PSNR: {np.mean(psnrs)} \pm {np.std(psnrs) / np.sqrt(len(psnrs))}')
     # print(f'SSIM: {np.mean(ssims)} \pm {np.std(ssims) / np.sqrt(len(ssims))}')
     # print(f'APSD: {np.mean(apsds)}')
-    for l in range(1):
+    for l in range(3):
         print(f'CFID_{l + 1}: {cfids[l]:.2f}; M_COMP: {m_comps[l]:.4f}; C_COMP: {c_comps[l]:.4f}')
     #
     print(f'FID: {fid}')
