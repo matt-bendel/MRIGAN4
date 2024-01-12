@@ -534,7 +534,7 @@ class rcGANLatent(pl.LightningModule):
         for k in range(y.shape[0] - 1):
             gen_pred_loss += torch.mean(fake_pred[k + 1])
 
-        adv_weight = 1e-4
+        adv_weight = 1e-5
         if self.current_epoch <= 4:
             adv_weight = 1e-2
         elif self.current_epoch <= 22:
