@@ -419,7 +419,7 @@ class rcGANLatent(pl.LightningModule):
         #     input_nc=args.in_chans * 2
         # )
 
-        self.std_mult = 0.25
+        self.std_mult = 1
         self.is_good_model = 0
         self.resolution = self.args.im_size
 
@@ -535,10 +535,12 @@ class rcGANLatent(pl.LightningModule):
             gen_pred_loss += torch.mean(fake_pred[k + 1])
 
         adv_weight = 1e-5
-        # if self.current_epoch <= 4:
-        #     adv_weight = 1e-2
-        # elif self.current_epoch <= 22:
-        #     adv_weight = 1e-3
+        if self.current_epoch <= 4:
+            adv_weight = 1e-2
+        elif self.current_epoch <= 22:
+            adv_weight = 1e-3
+        elif self.current_epoch <= 50:
+            adv_weight = 1e-4
 
         return - adv_weight * gen_pred_loss.mean()
 
