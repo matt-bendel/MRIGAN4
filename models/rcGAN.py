@@ -419,7 +419,7 @@ class rcGANLatent(pl.LightningModule):
         #     input_nc=args.in_chans * 2
         # )
 
-        self.std_mult = 0.5
+        self.std_mult = 0.25
         self.is_good_model = 0
         self.resolution = self.args.im_size
 
