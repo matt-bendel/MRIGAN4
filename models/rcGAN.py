@@ -537,7 +537,7 @@ class rcGANLatent(pl.LightningModule):
         adv_weight = 1e-5
         if self.current_epoch <= 4:
             adv_weight = 1e-2
-        elif self.current_epoch <= 22:
+        elif self.current_epoch <= 35:
             adv_weight = 1e-3
         elif self.current_epoch <= 50:
             adv_weight = 1e-4
