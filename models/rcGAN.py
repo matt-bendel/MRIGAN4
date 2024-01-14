@@ -534,12 +534,10 @@ class rcGANLatent(pl.LightningModule):
         for k in range(y.shape[0] - 1):
             gen_pred_loss += torch.mean(fake_pred[k + 1])
 
-        adv_weight = 5e-5
+        adv_weight = 1e-5
         if self.current_epoch <= 4:
             adv_weight = 1e-2
-        elif self.current_epoch <= 35:
-            adv_weight = 1e-3
-        elif self.current_epoch <= 50:
+        elif self.current_epoch <= 22:
             adv_weight = 1e-4
 
         return - adv_weight * gen_pred_loss.mean()
@@ -703,7 +701,7 @@ class rcGANLatent(pl.LightningModule):
         psnr_diff = (avg_single_psnr + 2.5) - avg_psnr
         psnr_diff = psnr_diff
 
-        mu_0 = 2e-2
+        mu_0 = 2e-3
         self.std_mult += mu_0 * psnr_diff
 
         if np.abs(psnr_diff) <= 0.25:
