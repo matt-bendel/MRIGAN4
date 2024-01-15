@@ -537,7 +537,7 @@ class rcGANLatent(pl.LightningModule):
         adv_weight = 1e-5
         if self.current_epoch <= 4:
             adv_weight = 1e-2
-        elif self.current_epoch <= 40:
+        elif self.current_epoch <= 100:
             adv_weight = 1e-4
 
         return - adv_weight * gen_pred_loss.mean()
