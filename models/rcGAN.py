@@ -378,9 +378,11 @@ class WrapVGG(nn.Module):
         # if x.shape[2] != 224 or x.shape[3] != 224:
         #     x = F.interpolate(x, size=(224, 224), mode='bilinear', align_corners=True)
 
-        out = self.features(x)
+        out = self.features(x).view(x.size(0), -1)
+        print(out.shape)
+        exit()
         # out = self.pooling(out)
-        out = self.pooling(out).view(x.size(0), -1)
+        # out = self.pooling(out).view(x.size(0), -1)
         # out = self.flatten(out)
         # out = self.fc(out)
         return out
