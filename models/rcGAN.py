@@ -379,8 +379,6 @@ class WrapVGG(nn.Module):
         #     x = F.interpolate(x, size=(224, 224), mode='bilinear', align_corners=True)
 
         out = self.features(x).view(x.size(0), -1)
-        print(out.shape)
-        exit()
         # out = self.pooling(out)
         # out = self.pooling(out).view(x.size(0), -1)
         # out = self.flatten(out)
@@ -570,7 +568,7 @@ class rcGANLatent(pl.LightningModule):
             g_loss = self.adversarial_loss_generator(y, gens)
 
             new_gens = torch.zeros(
-                size=(y.size(0), self.args.num_z_train, 2048),
+                size=(y.size(0), self.args.num_z_train, 73728),
                 device=self.device)
             for z in range(self.args.num_z_train):
                 new_gens[:, z, :] = self._get_embed_im(gens[:, z, :, :, :], mean, std, maps)
