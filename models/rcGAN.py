@@ -378,9 +378,9 @@ class WrapVGG(nn.Module):
         # if x.shape[2] != 224 or x.shape[3] != 224:
         #     x = F.interpolate(x, size=(224, 224), mode='bilinear', align_corners=True)
 
-        out = self.features(x).view(x.size(0), -1)
+        out = self.features(x)
         # out = self.pooling(out)
-        # out = self.pooling(out).view(x.size(0), -1)
+        out = self.pooling(out).view(x.size(0), -1)
         # out = self.flatten(out)
         # out = self.fc(out)
         return out
@@ -420,6 +420,7 @@ class rcGANLatent(pl.LightningModule):
         # )
 
         self.std_mult = 1
+        self.std_mult_latent = 0.5
         self.is_good_model = 0
         self.resolution = self.args.im_size
 
@@ -534,16 +535,16 @@ class rcGANLatent(pl.LightningModule):
         for k in range(y.shape[0] - 1):
             gen_pred_loss += torch.mean(fake_pred[k + 1])
 
-        adv_weight = 1e-4
+        adv_weight = 1e-5
         if self.current_epoch <= 4:
             adv_weight = 1e-2
-        elif self.current_epoch <= 50:
-            adv_weight = 1e-3
+        elif self.current_epoch <= 22:
+            adv_weight = 1e-4
 
         return - adv_weight * gen_pred_loss.mean()
 
-    def l1_std_p(self, avg_recon, gens, x):
-        return F.l1_loss(avg_recon, x) - self.std_mult * np.sqrt(
+    def l1_std_p(self, avg_recon, gens, x, std_mult):
+        return F.l1_loss(avg_recon, x) - std_mult * np.sqrt(
             2 / (np.pi * self.args.num_z_train * (self.args.num_z_train + 1))) * torch.std(gens, dim=1).mean()
 
     def gradient_penalty(self, x_hat, x, y):
@@ -567,6 +568,10 @@ class rcGANLatent(pl.LightningModule):
 
             g_loss = self.adversarial_loss_generator(y, gens)
 
+            # avg_recon_pixel = torch.mean(gens, dim=1)
+
+            # l1_std_latent = self.l1_std_p(avg_recon_pixel, gens, x, self.std_mult)
+
             new_gens = torch.zeros(
                 size=(y.size(0), self.args.num_z_train, 73728),
                 device=self.device)
@@ -578,8 +583,10 @@ class rcGANLatent(pl.LightningModule):
             x_embed = self._get_embed_im(x, mean, std, maps)
 
             # adversarial loss is binary cross-entropy
-            g_loss += self.l1_std_p(avg_recon, gens, x_embed)
+            l1_std_latent = self.l1_std_p(avg_recon, new_gens, x_embed, self.std_mult)
 
+            self.log('l1_std_latent', l1_std_latent, prog_bar=True)
+            g_loss += l1_std_latent
             self.log('g_loss', g_loss, prog_bar=True)
 
             return g_loss
