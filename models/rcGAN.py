@@ -347,7 +347,7 @@ class WrapVGG(nn.Module):
         self.features = nn.Sequential(*self.features)
         # Extract VGG-16 Average Pooling Layer
         # self.pooling = net.avgpool
-        self.pooling = nn.AdaptiveAvgPool2d((2, 2))
+        self.pooling = nn.AdaptiveAvgPool2d((1, 1))
 
         # Convert the image into one-dimensional vector
         self.flatten = nn.Flatten()
@@ -573,7 +573,7 @@ class rcGANLatent(pl.LightningModule):
             # l1_std_latent = self.l1_std_p(avg_recon_pixel, gens, x, self.std_mult)
 
             new_gens = torch.zeros(
-                size=(y.size(0), self.args.num_z_train, 73728),
+                size=(y.size(0), self.args.num_z_train, 512),
                 device=self.device)
             for z in range(self.args.num_z_train):
                 new_gens[:, z, :] = self._get_embed_im(gens[:, z, :, :, :], mean, std, maps)
