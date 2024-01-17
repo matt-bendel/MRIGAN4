@@ -420,7 +420,8 @@ class rcGANLatent(pl.LightningModule):
         # )
 
         self.std_mult = 1
-        # self.std_mult_latent = 0.5
+        self.std_mult_latent = 0.5
+        self.latent_weight = 1e-1
         self.is_good_model = 0
         self.resolution = self.args.im_size
 
@@ -568,9 +569,10 @@ class rcGANLatent(pl.LightningModule):
 
             g_loss = self.adversarial_loss_generator(y, gens)
 
-            # avg_recon_pixel = torch.mean(gens, dim=1)
+            avg_recon_pixel = torch.mean(gens, dim=1)
 
-            # l1_std_latent = self.l1_std_p(avg_recon_pixel, gens, x, self.std_mult)
+            l1_std_pixel = self.l1_std_p(avg_recon_pixel, gens, x, self.std_mult)
+            self.log('l1_std_pixel', l1_std_pixel, prog_bar=True)
 
             new_gens = torch.zeros(
                 size=(y.size(0), self.args.num_z_train, 512),
@@ -578,15 +580,16 @@ class rcGANLatent(pl.LightningModule):
             for z in range(self.args.num_z_train):
                 new_gens[:, z, :] = self._get_embed_im(gens[:, z, :, :, :], mean, std, maps)
 
-            avg_recon = torch.mean(new_gens, dim=1)
+            avg_recon_latent = torch.mean(new_gens, dim=1)
 
             x_embed = self._get_embed_im(x, mean, std, maps)
 
             # adversarial loss is binary cross-entropy
-            l1_std_latent = self.l1_std_p(avg_recon, new_gens, x_embed, self.std_mult)
+            l1_std_latent = self.l1_std_p(avg_recon_latent, new_gens, x_embed, self.std_mult_latent)
 
             self.log('l1_std_latent', l1_std_latent, prog_bar=True)
-            g_loss += l1_std_latent
+            g_loss += l1_std_pixel
+            g_loss += self.latent_weight * l1_std_latent
             self.log('g_loss', g_loss, prog_bar=True)
 
             return g_loss
@@ -709,7 +712,9 @@ class rcGANLatent(pl.LightningModule):
         psnr_diff = psnr_diff
 
         mu_0 = 2e-2
+        mu_0_latent = 2e-4
         self.std_mult += mu_0 * psnr_diff
+        self.std_mult_latent += mu_0_latent * psnr_diff
 
         if np.abs(psnr_diff) <= 0.25:
             self.is_good_model = 1
