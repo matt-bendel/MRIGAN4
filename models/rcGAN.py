@@ -589,7 +589,7 @@ class rcGANLatent(pl.LightningModule):
 
             self.log('l1_std_latent', l1_std_latent, prog_bar=True)
             g_loss += l1_std_pixel
-            g_loss += l1_std_latent
+            g_loss += self.latent_weight * l1_std_latent
             self.log('g_loss', g_loss, prog_bar=True)
 
             return g_loss
