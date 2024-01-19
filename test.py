@@ -317,7 +317,7 @@ if __name__ == "__main__":
         print(f"EXPERIMENT: {args.exp_name}")
 
         for n in n_samps:
-            break
+            # break
             trial_distss = []
 
             print(f"{n} SAMPLES")
@@ -399,24 +399,25 @@ if __name__ == "__main__":
             n_lpipss.append(np.mean(lpipss))
             n_distss.append(np.mean(distss))
 
-        # psnr_str = ''
-        # ssim_str = ''
-        # lpips_str = ''
-        # dists_str = ''
-        #
-        # for i in range(len(n_psnrs)):
-        #     psnr_str = f'{psnr_str} {n_psnrs[i]:.2f} &'
-        #     ssim_str = f'{ssim_str} {n_ssims[i]:.4f} &'
-        #     lpips_str = f'{lpips_str} {n_lpipss[i]:.4f} &'
-        #     dists_str = f'{dists_str} {n_distss[i]:.4f} &'
-        #
-        # print("PSNR and SSIM:")
-        # print(f'{psnr_str} {ssim_str}')
-        # print("LPIPS and DISTS")
-        # print(f'{lpips_str} {dists_str}')
-        #
-        # print(f'APSD: {np.mean(apsds)}')
+        psnr_str = ''
+        ssim_str = ''
+        lpips_str = ''
+        dists_str = ''
 
+        for i in range(len(n_psnrs)):
+            psnr_str = f'{psnr_str} {n_psnrs[i]:.2f} &'
+            ssim_str = f'{ssim_str} {n_ssims[i]:.4f} &'
+            lpips_str = f'{lpips_str} {n_lpipss[i]:.4f} &'
+            dists_str = f'{dists_str} {n_distss[i]:.4f} &'
+
+        print("PSNR and SSIM:")
+        print(f'{psnr_str} {ssim_str}')
+        print("LPIPS and DISTS")
+        print(f'{lpips_str} {dists_str}')
+
+        print(f'APSD: {np.mean(apsds)}')
+
+    exit()
     cfids = []
     m_comps = []
     c_comps = []
