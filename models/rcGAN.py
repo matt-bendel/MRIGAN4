@@ -569,10 +569,10 @@ class rcGANLatent(pl.LightningModule):
 
             g_loss = self.adversarial_loss_generator(y, gens)
 
-            # avg_recon_pixel = torch.mean(gens, dim=1)
-            #
-            # l1_std_pixel = self.l1_std_p(avg_recon_pixel, gens, x, self.std_mult)
-            # self.log('l1_std_pixel', l1_std_pixel, prog_bar=True)
+            avg_recon_pixel = torch.mean(gens, dim=1)
+
+            l1_std_pixel = self.l1_std_p(avg_recon_pixel, gens, x, self.std_mult)
+            self.log('l1_std_pixel', l1_std_pixel, prog_bar=True)
 
             new_gens = torch.zeros(
                 size=(y.size(0), self.args.num_z_train, 512),
@@ -585,13 +585,13 @@ class rcGANLatent(pl.LightningModule):
             x_embed = self._get_embed_im(x, mean, std, maps)
 
             # adversarial loss is binary cross-entropy
-            # l1_std_latent = self.l1_std_p(avg_recon_latent, new_gens, x_embed, self.std_mult_latent)
-            l1_std_latent = self.l1_std_p(avg_recon_latent, new_gens, x_embed, self.std_mult)
+            l1_std_latent = self.l1_std_p(avg_recon_latent, new_gens, x_embed, self.std_mult_latent)
+            # l1_std_latent = self.l1_std_p(avg_recon_latent, new_gens, x_embed, self.std_mult)
 
             self.log('l1_std_latent', l1_std_latent, prog_bar=True)
-            # g_loss += l1_std_pixel
-            # g_loss += self.latent_weight * l1_std_latent
-            g_loss += l1_std_latent
+            g_loss += l1_std_pixel
+            g_loss += self.latent_weight * l1_std_latent
+            # g_loss += l1_std_latent
 
             self.log('g_loss', g_loss, prog_bar=True)
 
