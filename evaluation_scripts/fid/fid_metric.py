@@ -172,7 +172,7 @@ class FIDMetric:
             mu = mu.cpu().numpy()
             sigma = sigma.cpu().numpy()
 
-        np.savez('/storage/fastMRI/ref_stats.npz', mu=mu, sigma=sigma, alpha = alpha)
+        np.savez('/storage/fastMRI/ref_stats_alexnet.npz', mu=mu, sigma=sigma, alpha = alpha)
 
     def _calculate_alpha(self, image_embed, cond_embed):
         self.alpha = calculate_alpha(image_embed, cond_embed, cuda=self.cuda)
@@ -257,8 +257,8 @@ class FIDMetric:
         return mu.to('cuda:3'), sigma.to('cuda:3'), alpha.to('cuda:3')
 
     def _get_reference_distribution(self):
-        if os.path.isfile('/storage/fastMRI/ref_stats.npz'):
-            stats = self._get_statistics_from_file('/storage/fastMRI/ref_stats.npz')
+        if os.path.isfile('/storage/fastMRI/ref_stats_alexnet.npz'):
+            stats = self._get_statistics_from_file('/storage/fastMRI/ref_stats_alex_net.npz')
             mu_real, sigma_real, alpha = stats
         else:
             mu_real, sigma_real, alpha = self._compute_reference_distribution()
