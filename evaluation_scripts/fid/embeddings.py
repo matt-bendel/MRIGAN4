@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import Parameter as P
 from torchvision.models.inception import inception_v3
-from torchvision.models import vgg16
+from torchvision.models import vgg16, alexnet
 
 
 class IdentityEmbedding:
@@ -95,6 +95,41 @@ class WrapInception(nn.Module):
         pool = F.adaptive_avg_pool2d(x, 1).view(x.size(0), -1)
         # 1 x 1 x 2048
         return pool
+
+class AlexNetEmbedding:
+    def __init__(self, parallel=False, device=False):
+        # Expects inputs to be in range [-1, 1]
+        alexnet_model = alexnet(pretrained=True).eval()
+        if device:
+            alexnet_model = WrapAlexNet(alexnet_model).to(device)
+        else:
+            alexnet_model = WrapAlexNet(alexnet_model).cuda()
+
+        if parallel:
+            alexnet_model = nn.DataParallel(alexnet_model)
+
+        self.alexnet_model = alexnet_model
+
+    def __call__(self, x):
+        return self.alexnet_model(x)
+
+class WrapAlexNet(nn.Module):
+    def __init__(self, net):
+        super(WrapAlexNet, self).__init__()
+        self.features = list(net.features)
+        self.features = nn.Sequential(*self.features)
+        self.pooling = nn.AdaptiveAvgPool2d((4, 4))
+
+        self.net = net
+        self.mean = P(torch.tensor([0.485, 0.456, 0.406]).view(1, -1, 1, 1),
+                      requires_grad=False)
+        self.std = P(torch.tensor([0.229, 0.224, 0.225]).view(1, -1, 1, 1),
+                     requires_grad=False)
+
+    def forward(self, x):
+        out = self.features(x)
+        out = self.pooling(out).view(x.size(0), -1)
+        return out
 
 class VGG16Embedding:
     def __init__(self, parallel=False, device=False):
