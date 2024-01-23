@@ -23,7 +23,7 @@ from models.CoModGAN import InpaintUNet
 from models.l1_ssim_module import L1SSIMMRI
 from utils.math import complex_abs, tensor_to_complex_np
 from evaluation_scripts.metrics import psnr, ssim
-from evaluation_scripts.fid.embeddings import VGG16Embedding
+from evaluation_scripts.fid.embeddings import VGG16Embedding, AlexNetEmbedding
 from evaluation_scripts.cfid.cfid_metric import CFIDMetric
 from evaluation_scripts.fid.fid_metric import FIDMetric
 import matplotlib.pyplot as plt
@@ -317,7 +317,7 @@ if __name__ == "__main__":
         print(f"EXPERIMENT: {args.exp_name}")
 
         for n in n_samps:
-            # break
+            break
             trial_distss = []
 
             print(f"{n} SAMPLES")
@@ -404,25 +404,25 @@ if __name__ == "__main__":
         lpips_str = ''
         dists_str = ''
 
-        for i in range(len(n_psnrs)):
-            psnr_str = f'{psnr_str} {n_psnrs[i]:.2f} &'
-            ssim_str = f'{ssim_str} {n_ssims[i]:.4f} &'
-            lpips_str = f'{lpips_str} {n_lpipss[i]:.4f} &'
-            dists_str = f'{dists_str} {n_distss[i]:.4f} &'
+        # for i in range(len(n_psnrs)):
+        #     psnr_str = f'{psnr_str} {n_psnrs[i]:.2f} &'
+        #     ssim_str = f'{ssim_str} {n_ssims[i]:.4f} &'
+        #     lpips_str = f'{lpips_str} {n_lpipss[i]:.4f} &'
+        #     dists_str = f'{dists_str} {n_distss[i]:.4f} &'
+        #
+        # print("PSNR and SSIM:")
+        # print(f'{psnr_str} {ssim_str}')
+        # print("LPIPS and DISTS")
+        # print(f'{lpips_str} {dists_str}')
+        #
+        # print(f'APSD: {np.mean(apsds)}')
 
-        print("PSNR and SSIM:")
-        print(f'{psnr_str} {ssim_str}')
-        print("LPIPS and DISTS")
-        print(f'{lpips_str} {dists_str}')
-
-        print(f'APSD: {np.mean(apsds)}')
-
-    exit()
+    # exit()
     cfids = []
     m_comps = []
     c_comps = []
 
-    inception_embedding = VGG16Embedding(parallel=True)
+    inception_embedding = AlexNetEmbedding(parallel=True)
     # CFID_1
     cfid_metric = CFIDMetric(gan=model,
                              loader=test_loader,
