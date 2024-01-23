@@ -471,7 +471,7 @@ if __name__ == "__main__":
     c_comps.append(c_comp)
 
 
-    inception_embedding = VGG16Embedding()
+    inception_embedding = AlexNetEmbedding()
     fid_metric = FIDMetric(gan=model,
                            ref_loader=train_dataloader,
                            loader=test_loader,
