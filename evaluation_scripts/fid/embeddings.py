@@ -118,7 +118,7 @@ class WrapAlexNet(nn.Module):
         super(WrapAlexNet, self).__init__()
         self.features = list(net.features)
         self.features = nn.Sequential(*self.features)
-        self.pooling = nn.AdaptiveAvgPool2d((4, 4))
+        self.pooling = nn.AdaptiveAvgPool2d((2, 2))
 
         self.net = net
         self.mean = P(torch.tensor([0.485, 0.456, 0.406]).view(1, -1, 1, 1),
