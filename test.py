@@ -433,10 +433,10 @@ if __name__ == "__main__":
                              ref_loader=False,
                              num_samps=1)
 
-    # cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
-    # cfids.append(cfid)
-    # m_comps.append(m_comp)
-    # c_comps.append(c_comp)
+    cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
+    cfids.append(cfid)
+    m_comps.append(m_comp)
+    c_comps.append(c_comp)
 
     # inception_embedding = VGG16Embedding(parallel=True)
     # # CFID_2
@@ -449,10 +449,10 @@ if __name__ == "__main__":
                              ref_loader=False,
                              num_samps=1)
 
-    # cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
-    # cfids.append(cfid)
-    # m_comps.append(m_comp)
-    # c_comps.append(c_comp)
+    cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
+    cfids.append(cfid)
+    m_comps.append(m_comp)
+    c_comps.append(c_comp)
 
     # inception_embedding = VGG16Embedding(parallel=True)
     # # CFID_3
@@ -465,10 +465,10 @@ if __name__ == "__main__":
                              ref_loader=train_dataloader,
                              num_samps=1)
 
-    # cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
-    # cfids.append(cfid)
-    # m_comps.append(m_comp)
-    # c_comps.append(c_comp)
+    cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
+    cfids.append(cfid)
+    m_comps.append(m_comp)
+    c_comps.append(c_comp)
 
 
     inception_embedding = AlexNetEmbedding()
