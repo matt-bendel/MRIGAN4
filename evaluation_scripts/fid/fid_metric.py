@@ -276,12 +276,13 @@ class FIDMetric:
 
         for data in tqdm(self.ref_loader,
                          desc='Computing reference distribution'):
-            condition, gt, mask, mean, std, maps, _, _ = data
+            condition, gt, mask, mean, std, _, _, _ = data
             condition = condition.cuda()
             gt = gt.cuda()
             mean = mean.cuda()
             std = std.cuda()
             mask = mask.cuda()
+            maps =[]
 
             with torch.no_grad():
                 for j in range(condition.shape[0]):
