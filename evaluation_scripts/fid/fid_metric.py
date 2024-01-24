@@ -172,7 +172,7 @@ class FIDMetric:
             mu = mu.cpu().numpy()
             sigma = sigma.cpu().numpy()
 
-        np.savez('/storage/fastMRI/ref_stats_alexnet.npz', mu=mu, sigma=sigma, alpha = alpha)
+        np.savez('/storage/fastMRI/ref_stats_alexnet_R8.npz', mu=mu, sigma=sigma, alpha = alpha)
 
     def _calculate_alpha(self, image_embed, cond_embed):
         self.alpha = calculate_alpha(image_embed, cond_embed, cuda=self.cuda)
@@ -257,8 +257,8 @@ class FIDMetric:
         return mu.to('cuda:3'), sigma.to('cuda:3'), alpha.to('cuda:3')
 
     def _get_reference_distribution(self):
-        if os.path.isfile('/storage/fastMRI/ref_stats_alexnet.npz'):
-            stats = self._get_statistics_from_file('/storage/fastMRI/ref_stats_alex_net.npz')
+        if os.path.isfile('/storage/fastMRI/ref_stats_alexnet_R8.npz'):
+            stats = self._get_statistics_from_file('/storage/fastMRI/ref_stats_alexnet_R8.npz')
             mu_real, sigma_real, alpha = stats
         else:
             mu_real, sigma_real, alpha = self._compute_reference_distribution()
@@ -285,7 +285,7 @@ class FIDMetric:
 
             with torch.no_grad():
                 for j in range(condition.shape[0]):
-                    new_y_true = fft2c_new(condition * std[j] + mean[j])
+                    new_y_true = fft2c_new(self.gan.reformat(condition) * std[j] + mean[j])
                     s_maps = mr.app.EspiritCalib(tensor_to_complex_np(new_y_true.cpu()), calib_width=16,
                                                  device=sp.Device(0), show_pbar=False, crop=0.70,
                                                  kernel_width=6).run().get()
