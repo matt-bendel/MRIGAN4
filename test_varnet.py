@@ -17,7 +17,7 @@ from models.mri_unet import MRIUnet
 from models.rcGAN import rcGAN
 from models.l1_ssim_module import L1SSIMMRI
 from utils.math import complex_abs, tensor_to_complex_np
-from evaluation_scripts.fid.embeddings import VGG16Embedding
+from evaluation_scripts.fid.embeddings import VGG16Embedding, AlexNetEmbedding
 from evaluation_scripts.cfid.cfid_metric_varnet import CFIDMetric
 from evaluation_scripts.fid.fid_metric_varnet import FIDMetric
 from evaluation_scripts.metrics import psnr, ssim
@@ -235,23 +235,23 @@ if __name__ == "__main__":
     # print(f'DISTS:\n{dists_str}')
     # print("\n")
 
+    inception_embedding = AlexNetEmbedding(parallel=True)
+    # CFID_1
+    cfid_metric = CFIDMetric(gan=model,
+                             loader=test_loader,
+                             image_embedding=inception_embedding,
+                             condition_embedding=inception_embedding,
+                             cuda=True,
+                             args=cfg,
+                             ref_loader=False,
+                             num_samps=32)
+
+    cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
+    cfids.append(cfid)
+    m_comps.append(m_comp)
+    c_comps.append(c_comp)
+    #
     # inception_embedding = VGG16Embedding(parallel=True)
-    # # CFID_1
-    # cfid_metric = CFIDMetric(gan=model,
-    #                          loader=test_loader,
-    #                          image_embedding=inception_embedding,
-    #                          condition_embedding=inception_embedding,
-    #                          cuda=True,
-    #                          args=cfg,
-    #                          ref_loader=False,
-    #                          num_samps=32)
-    #
-    # cfid, m_comp, c_comp = cfid_metric.get_cfid_torch_pinv()
-    # cfids.append(cfid)
-    # m_comps.append(m_comp)
-    # c_comps.append(c_comp)
-    #
-    inception_embedding = VGG16Embedding(parallel=True)
     # CFID_2
     cfid_metric = CFIDMetric(gan=model,
                              loader=val_dataloader,
@@ -267,7 +267,7 @@ if __name__ == "__main__":
     m_comps.append(m_comp)
     c_comps.append(c_comp)
 
-    inception_embedding = VGG16Embedding(parallel=True)
+    # inception_embedding = VGG16Embedding(parallel=True)
     # CFID_3
     cfid_metric = CFIDMetric(gan=model,
                              loader=val_dataloader,

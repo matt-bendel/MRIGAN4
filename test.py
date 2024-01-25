@@ -263,7 +263,7 @@ if __name__ == "__main__":
             else:
                 model_alias = rcGAN
         else:
-            model_alias = Ohayon
+            model_alias = Adler
     elif args.inpaint:
         with open('configs/inpaint/config.yml', 'r') as f:
             cfg = yaml.load(f, Loader=yaml.FullLoader)
