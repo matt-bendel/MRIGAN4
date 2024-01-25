@@ -261,9 +261,9 @@ if __name__ == "__main__":
             if args.nodc:
                 model_alias = rcGANNoDC
             else:
-                model_alias = rcGANLatent
+                model_alias = rcGAN
         else:
-            model_alias = L1SSIMMRI
+            model_alias = Ohayon
     elif args.inpaint:
         with open('configs/inpaint/config.yml', 'r') as f:
             cfg = yaml.load(f, Loader=yaml.FullLoader)
