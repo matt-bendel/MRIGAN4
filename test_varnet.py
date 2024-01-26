@@ -283,27 +283,27 @@ if __name__ == "__main__":
     m_comps.append(m_comp)
     c_comps.append(c_comp)
 
-    for l in range(2):
-        print(f'CFID_{l+1}: {cfids[l]:.2f}; M_COMP: {m_comps[l]:.4f}; C_COMP: {c_comps[l]:.4f}')
+    # for l in range(2):
+    #     print(f'CFID_{l+1}: {cfids[l]:.2f}; M_COMP: {m_comps[l]:.4f}; C_COMP: {c_comps[l]:.4f}')
     #
 
     # n_samps = [1, 2, 4, 8, 16, 32]
     # for n in n_samps:
     # #     print(f"{n} SAMPLES")
     # inception_embedding = VGG16Embedding()
-    # fid_metric = FIDMetric(gan=model,
-    #                        ref_loader=train_dataloader,
-    #                        loader=test_loader,
-    #                        image_embedding=inception_embedding,
-    #                        condition_embedding=inception_embedding,
-    #                        cuda=True,
-    #                        args=cfg)
-    # fid, fjd = fid_metric.get_fid()
-    #
-    # print(f'FID: {fid}; FJD: {fjd}')
+    fid_metric = FIDMetric(gan=model,
+                           ref_loader=train_dataloader,
+                           loader=test_loader,
+                           image_embedding=inception_embedding,
+                           condition_embedding=inception_embedding,
+                           cuda=True,
+                           args=cfg)
+    fid, fjd = fid_metric.get_fid()
 
-    # for l in range(3):
-    #     print(f'CFID_{l+1}: {cfids[l]:.2f}; M_COMP: {m_comps[l]:.4f}; C_COMP: {c_comps[l]:.4f}')
+    print(f'FID: {fid}; FJD: {fjd}')
+
+    for l in range(3):
+        print(f'CFID_{l+1}: {cfids[l]:.2f}; M_COMP: {m_comps[l]:.4f}; C_COMP: {c_comps[l]:.4f}')
     #
     # print(f'PSNR:\n{psnr_str}')
     # print(f'SSIM:\n{ssim_str}')
