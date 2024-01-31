@@ -1153,11 +1153,6 @@ class EigenGAN(pl.LightningModule):
 
         self.trainer.strategy.barrier()
 
-    def on_train_epoch_end(self):
-        sch_g, _ = self.lr_schedulers()
-
-        sch_g.step(self.trainer.callback_metrics["cfid"])
-
     def configure_optimizers(self):
         opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.args.lr,
                                  betas=(self.args.beta_1, self.args.beta_2))
@@ -1172,14 +1167,9 @@ class EigenGAN(pl.LightningModule):
             min_lr=5e-5,
         )
 
-        reduce_lr_on_plateau_d = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            opt_d,
-            mode='min',
-            factor=0.1,
-            patience=5,
-            min_lr=5e-6,
-        )
-        return [[opt_g, opt_d], [reduce_lr_on_plateau_mean, reduce_lr_on_plateau_d]]
+        lr_scheduler = {"scheduler": reduce_lr_on_plateau_mean, "monitor": "cfid"}
+
+        return [opt_g, opt_d], lr_scheduler
 
     def on_save_checkpoint(self, checkpoint):
         checkpoint["beta_std"] = self.std_mult
