@@ -20,6 +20,7 @@ from evaluation_scripts.metrics import psnr
 from mail import send_mail
 from torchmetrics.functional import peak_signal_noise_ratio
 from fastmri.data.transforms import to_tensor
+from evaluation_scripts.cfid.cfid_metric import CFIDMetric
 
 
 class rcGAN(pl.LightningModule):
@@ -782,11 +783,11 @@ class EigenGAN(pl.LightningModule):
         self.std_mult = 1
         self.std_mult_latent = 0.5
         self.latent_weight = 1e-1
-        self.beta_pca = 1
+        self.beta_pca = 1e-1
         self.lam_eps = 0
         self.is_good_model = 0
         self.resolution = self.args.im_size
-
+        self.cfid = CFIDMetric(None, None, None, None)
         self.save_hyperparameters()  # Save passed values
 
     def _get_embed_im(self, multi_coil_inp, mean, std, maps):
@@ -1081,6 +1082,10 @@ class EigenGAN(pl.LightningModule):
         self.log('psnr_8_step', psnr_8s.mean(), on_step=True, on_epoch=False, prog_bar=True)
         self.log('psnr_1_step', psnr_1s.mean(), on_step=True, on_epoch=False, prog_bar=True)
 
+        img_e = self._get_embed_im(gens[:, 0, :, :, :], mean, std, maps)
+        cond_e = self._get_embed_im(y, mean, std, maps)
+        true_e = self._get_embed_im(x, mean, std, maps)
+
         ############################################
 
         # TODO: Plot as tensors using torch function
@@ -1105,12 +1110,21 @@ class EigenGAN(pl.LightningModule):
 
             self.trainer.strategy.barrier()
 
-        return {'psnr_8': psnr_8s.mean(), 'psnr_1': psnr_1s.mean()}
+        return {'psnr_8': psnr_8s.mean(), 'psnr_1': psnr_1s.mean(), 'img_e': img_e, 'cond_e': cond_e, 'true_e': true_e}
 
     def validation_epoch_end(self, validation_step_outputs):
         # GATHER
         avg_psnr = self.all_gather(torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()).mean()
         avg_single_psnr = self.all_gather(torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean()).mean()
+
+        true_embed = torch.cat([x['true_e'] for x in self.val_outputs], dim=0)
+        image_embed = torch.cat([x['img_e'] for x in self.val_outputs], dim=0)
+        cond_embed = torch.cat([x['cond_e'] for x in self.val_outputs], dim=0)
+
+        cfid, _, _ = self.cfid.get_cfid_torch_pinv(image_embed, true_embed, cond_embed)
+        cfid = self.all_gather(cfid).mean()
+
+        self.log('cfid', cfid, prog_bar=True)
 
         # NO GATHER
         # avg_psnr = torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()
@@ -1139,12 +1153,33 @@ class EigenGAN(pl.LightningModule):
 
         self.trainer.strategy.barrier()
 
+    def on_train_epoch_end(self):
+        sch_g, _ = self.lr_schedulers()
+
+        sch_g.step(self.trainer.callback_metrics["cfid"])
+
     def configure_optimizers(self):
         opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.args.lr,
                                  betas=(self.args.beta_1, self.args.beta_2))
         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.args.lr,
                                  betas=(self.args.beta_1, self.args.beta_2))
-        return [opt_d, opt_g], []
+
+        reduce_lr_on_plateau_mean = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            opt_g,
+            mode='min',
+            factor=0.75,
+            patience=5,
+            min_lr=5e-5,
+        )
+
+        reduce_lr_on_plateau_d = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            opt_d,
+            mode='min',
+            factor=0.1,
+            patience=5,
+            min_lr=5e-6,
+        )
+        return [[opt_g, opt_d], [reduce_lr_on_plateau_mean, reduce_lr_on_plateau_d]]
 
     def on_save_checkpoint(self, checkpoint):
         checkpoint["beta_std"] = self.std_mult
