@@ -1169,7 +1169,7 @@ class EigenGAN(pl.LightningModule):
 
         lr_scheduler = {"scheduler": reduce_lr_on_plateau_mean, "monitor": "cfid"}
 
-        return [opt_g, opt_d], lr_scheduler
+        return [opt_d, opt_g], lr_scheduler
 
     def on_save_checkpoint(self, checkpoint):
         checkpoint["beta_std"] = self.std_mult
