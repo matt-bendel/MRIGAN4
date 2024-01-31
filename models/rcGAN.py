@@ -1117,9 +1117,9 @@ class EigenGAN(pl.LightningModule):
         avg_psnr = self.all_gather(torch.stack([x['psnr_8'] for x in validation_step_outputs]).mean()).mean()
         avg_single_psnr = self.all_gather(torch.stack([x['psnr_1'] for x in validation_step_outputs]).mean()).mean()
 
-        true_embed = torch.cat([x['true_e'] for x in self.val_outputs], dim=0)
-        image_embed = torch.cat([x['img_e'] for x in self.val_outputs], dim=0)
-        cond_embed = torch.cat([x['cond_e'] for x in self.val_outputs], dim=0)
+        true_embed = torch.cat([x['true_e'] for x in validation_step_outputs], dim=0)
+        image_embed = torch.cat([x['img_e'] for x in validation_step_outputs], dim=0)
+        cond_embed = torch.cat([x['cond_e'] for x in validation_step_outputs], dim=0)
 
         cfid, _, _ = self.cfid.get_cfid_torch_pinv(image_embed, true_embed, cond_embed)
         cfid = self.all_gather(cfid).mean()
