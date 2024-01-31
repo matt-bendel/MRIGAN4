@@ -1163,8 +1163,8 @@ class EigenGAN(pl.LightningModule):
             opt_g,
             mode='min',
             factor=0.75,
-            patience=5,
-            min_lr=5e-5,
+            patience=10,
+            min_lr=1e-4,
         )
 
         lr_scheduler = {"scheduler": reduce_lr_on_plateau_mean, "monitor": "cfid"}
