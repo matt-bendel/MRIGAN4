@@ -364,7 +364,7 @@ class CFIDMetric:
 
         c_dist = c_dist1 + c_dist2
 
-        return cfid, m_dist.cpu().numpy(), c_dist.cpu().numpy()
+        return cfid.cpu().numpy(), m_dist.cpu().numpy(), c_dist.cpu().numpy()
 
         # for i in range(32):
         #     y_predict, x_true, y_true = y_predict_full[i*72:(i+1)*72, :], x_true_full[i*72:(i+1)*72, :], y_true_full[i*72:(i+1)*72, :]
