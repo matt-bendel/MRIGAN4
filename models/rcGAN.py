@@ -955,7 +955,7 @@ class EigenGAN(pl.LightningModule):
             g_loss += l1_std_pixel
             g_loss += self.latent_weight * l1_std_latent
 
-            if (self.global_step - 1) % self.args.pca_reg_freq == 0 and self.current_epoch >= 0:
+            if (self.global_step - 1) % self.args.pca_reg_freq == 0 and self.current_epoch >= 20:
                 gens_embed = torch.zeros(
                     size=(y.size(0), self.args.num_z_pca, 512),
                     device=self.device)
