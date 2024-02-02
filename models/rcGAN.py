@@ -783,7 +783,7 @@ class EigenGAN(pl.LightningModule):
         self.std_mult = 1
         self.std_mult_latent = 0.5
         self.latent_weight = 1e-1
-        self.beta_pca = 1
+        self.beta_pca = 1e-1
         self.lam_eps = 0
         self.is_good_model = 0
         self.resolution = self.args.im_size
@@ -999,8 +999,8 @@ class EigenGAN(pl.LightningModule):
                 w_loss_g = - self.beta_pca * w_loss
                 self.log('w_loss', w_loss_g, prog_bar=True)
                 self.log('sig_loss', sig_loss, prog_bar=True)
-                g_loss += w_loss_g
-                g_loss += sig_loss
+                g_loss += self.latent_weight * w_loss_g
+                g_loss += self.latent_weight * sig_loss
 
             self.log('g_loss', g_loss, prog_bar=True)
 
