@@ -7,8 +7,8 @@ num_samps: 2
 num_z_test: 32
 num_z_valid: 8
 num_z_train: 2
-num_z_pca: 20
-num_pc: 2
+num_z_pca: 10
+num_pc: 1
 pca_reg_freq: 100
 
 in_chans: 16
@@ -26,5 +26,5 @@ beta_2: 0.99
 gp_weight: 10
 
 var_weight: 0.012
-batch_size: 1 # 5 for big
+batch_size: 2 # 5 for big
 num_epochs: 100
