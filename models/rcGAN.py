@@ -783,7 +783,7 @@ class EigenGAN(pl.LightningModule):
         self.std_mult = 1
         self.std_mult_latent = 0.5
         self.latent_weight = 1e-1
-        self.beta_pca = 1e-1
+        self.beta_pca = 1
         self.lam_eps = 0
         self.is_good_model = 0
         self.resolution = self.args.im_size
@@ -955,7 +955,7 @@ class EigenGAN(pl.LightningModule):
             g_loss += l1_std_pixel
             g_loss += self.latent_weight * l1_std_latent
 
-            if (self.global_step - 1) % self.args.pca_reg_freq == 0 and self.current_epoch >= 20:
+            if (self.global_step - 1) % self.args.pca_reg_freq == 0 and self.current_epoch >= 25:
                 gens_embed = torch.zeros(
                     size=(y.size(0), self.args.num_z_pca, 512),
                     device=self.device)
@@ -1162,8 +1162,8 @@ class EigenGAN(pl.LightningModule):
         reduce_lr_on_plateau_mean = torch.optim.lr_scheduler.ReduceLROnPlateau(
             opt_g,
             mode='min',
-            factor=0.75,
-            patience=10,
+            factor=0.8,
+            patience=15,
             min_lr=1e-4,
         )
 
