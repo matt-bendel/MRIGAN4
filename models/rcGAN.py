@@ -783,7 +783,7 @@ class EigenGAN(pl.LightningModule):
         self.std_mult = 1
         self.std_mult_latent = 0.5
         self.latent_weight = 1e-1
-        self.beta_pca = 1
+        self.beta_pca = 1e-1
         self.lam_eps = 0
         self.is_good_model = 0
         self.resolution = self.args.im_size
@@ -1159,17 +1159,17 @@ class EigenGAN(pl.LightningModule):
         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.args.lr,
                                  betas=(self.args.beta_1, self.args.beta_2))
 
-        reduce_lr_on_plateau_mean = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            opt_g,
-            mode='min',
-            factor=0.8,
-            patience=15,
-            min_lr=1e-4,
-        )
+        # reduce_lr_on_plateau_mean = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        #     opt_g,
+        #     mode='min',
+        #     factor=0.8,
+        #     patience=15,
+        #     min_lr=1e-4,
+        # )
+        #
+        # lr_scheduler = {"scheduler": reduce_lr_on_plateau_mean, "monitor": "cfid"}
 
-        lr_scheduler = {"scheduler": reduce_lr_on_plateau_mean, "monitor": "cfid"}
-
-        return [opt_d, opt_g], lr_scheduler
+        return [opt_d, opt_g], []#lr_scheduler
 
     def on_save_checkpoint(self, checkpoint):
         checkpoint["beta_std"] = self.std_mult
