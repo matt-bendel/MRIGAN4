@@ -1215,7 +1215,7 @@ class EigenGANPix(pl.LightningModule):
         self.std_mult = 1
         # self.std_mult_latent = 0.5
         # self.latent_weight = 1e-1
-        self.beta_pca = 1
+        self.beta_pca = 1e-2
         self.lam_eps = 0
         self.is_good_model = 0
         self.resolution = self.args.im_size
