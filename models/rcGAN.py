@@ -1369,7 +1369,7 @@ class EigenGANPix(pl.LightningModule):
             l1_std_pixel = self.l1_std_p(avg_recon_pixel, gens, x, self.std_mult)
             self.log('l1_std_pixel', l1_std_pixel, prog_bar=True)
 
-            if (self.global_step - 1) % self.args.pca_reg_freq == 0 and self.current_epoch >= 0:
+            if (self.global_step - 1) % self.args.pca_reg_freq == 0 and self.current_epoch >= 25:
                 gens_embed = torch.zeros(
                     size=(y.size(0), self.args.num_z_pca, 2359296),
                     device=self.device)
