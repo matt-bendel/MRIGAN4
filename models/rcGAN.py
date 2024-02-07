@@ -1371,7 +1371,7 @@ class EigenGANPix(pl.LightningModule):
 
             if (self.global_step - 1) % self.args.pca_reg_freq == 0 and self.current_epoch >= 0:
                 gens_embed = torch.zeros(
-                    size=(y.size(0), self.args.num_z_pca, 2359296),
+                    size=(y.size(0), self.args.num_z_pca, 4718592),
                     device=self.device)
                 for z in range(self.args.num_z_pca):
                     gens_embed[:, z, :] = self.forward(y, mask).view(y.size(0), self.args.num_z_pca, -1)
