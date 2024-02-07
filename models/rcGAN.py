@@ -1551,9 +1551,9 @@ class EigenGANPix(pl.LightningModule):
         psnr_diff = psnr_diff
 
         mu_0 = 2e-2
-        mu_0_latent = 2e-4
+        # mu_0_latent = 2e-4
         self.std_mult += mu_0 * psnr_diff
-        self.std_mult_latent += mu_0_latent * psnr_diff
+        # self.std_mult_latent += mu_0_latent * psnr_diff
 
         if np.abs(psnr_diff) <= 0.25:
             self.is_good_model = 1
