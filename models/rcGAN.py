@@ -1202,11 +1202,11 @@ class EigenGANPix(pl.LightningModule):
             out_chans=self.out_chans
         )
 
-        # self.feature_extractor = vgg16(pretrained=True).eval()
-        # self.feature_extractor = WrapVGG(self.feature_extractor).eval()
-        # self.transforms = torch.nn.Sequential(
-        #     transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-        # )
+        self.feature_extractor = vgg16(pretrained=True).eval()
+        self.feature_extractor = WrapVGG(self.feature_extractor).eval()
+        self.transforms = torch.nn.Sequential(
+            transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+        )
 
         # self.discriminator = PatchDisc(
         #     input_nc=args.in_chans * 2
