@@ -9,7 +9,7 @@ import pytorch_lightning as pl
 from data_loaders.MRIDataModule import MRIDataModule
 from datasets.fastmri_multicoil_general import FastMRIDataModule
 from utils.parse_args import create_arg_parser
-from models.rcGAN import rcGAN, rcGANLatent, EigenGAN
+from models.rcGAN import rcGAN, rcGANLatent, EigenGAN, EigenGANPix
 from models.rcGAN_no_dc import rcGANNoDC
 from models.adler import Adler
 from models.ohayon import Ohayon
@@ -52,7 +52,7 @@ if __name__ == "__main__":
                     model = rcGANNoDC.load_from_checkpoint(
                         checkpoint_path=cfg.checkpoint_dir + args.exp_name + f'/checkpoint-epoch={epoch}.ckpt')
                 else:
-                    model = EigenGAN.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + args.exp_name + f'/checkpoint-epoch={epoch}.ckpt')
+                    model = EigenGANPix.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + args.exp_name + f'/checkpoint-epoch={epoch}.ckpt')
             except Exception as e:
                 print(e)
                 continue
