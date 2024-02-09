@@ -15,7 +15,7 @@ from data_loaders.CelebAHQDataModule import CelebAHQDataModule
 from utils.parse_args import create_arg_parser
 from pytorch_lightning import seed_everything
 from models.mri_unet import MRIUnet
-from models.rcGAN import rcGAN, rcGANLatent, EigenGAN
+from models.rcGAN import rcGAN, rcGANLatent, EigenGAN, EigenGANPix
 from models.rcGAN_no_dc import rcGANNoDC
 from models.adler import Adler
 from models.ohayon import Ohayon
@@ -261,7 +261,7 @@ if __name__ == "__main__":
             if args.nodc:
                 model_alias = rcGANNoDC
             else:
-                model_alias = EigenGAN
+                model_alias = EigenGANPix
         else:
             model_alias = Adler
     elif args.inpaint:
