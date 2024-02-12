@@ -52,7 +52,7 @@ if __name__ == "__main__":
                     model = rcGANNoDC.load_from_checkpoint(
                         checkpoint_path=cfg.checkpoint_dir + args.exp_name + f'/checkpoint-epoch={epoch}.ckpt')
                 else:
-                    model = EigenGAN.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + args.exp_name + f'/checkpoint-epoch={epoch}.ckpt')
+                    model = EigenGANPix.load_from_checkpoint(checkpoint_path=cfg.checkpoint_dir + args.exp_name + f'/checkpoint-epoch={epoch}.ckpt')
             except Exception as e:
                 print(e)
                 continue
