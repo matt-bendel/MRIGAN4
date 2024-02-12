@@ -261,7 +261,7 @@ if __name__ == "__main__":
             if args.nodc:
                 model_alias = rcGANNoDC
             else:
-                model_alias = EigenGAN
+                model_alias = EigenGANPix
         else:
             model_alias = Adler
     elif args.inpaint:
