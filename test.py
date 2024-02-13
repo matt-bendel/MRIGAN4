@@ -317,7 +317,6 @@ if __name__ == "__main__":
         print(f"EXPERIMENT: {args.exp_name}")
 
         for n in n_samps:
-            break
             trial_distss = []
 
             print(f"{n} SAMPLES")
