@@ -404,20 +404,20 @@ if __name__ == "__main__":
         lpips_str = ''
         dists_str = ''
 
-        # for i in range(len(n_psnrs)):
-        #     psnr_str = f'{psnr_str} {n_psnrs[i]:.2f} &'
-        #     ssim_str = f'{ssim_str} {n_ssims[i]:.4f} &'
-        #     lpips_str = f'{lpips_str} {n_lpipss[i]:.4f} &'
-        #     dists_str = f'{dists_str} {n_distss[i]:.4f} &'
-        #
-        # print("PSNR and SSIM:")
-        # print(f'{psnr_str} {ssim_str}')
-        # print("LPIPS and DISTS")
-        # print(f'{lpips_str} {dists_str}')
-        #
-        # print(f'APSD: {np.mean(apsds)}')
+        for i in range(len(n_psnrs)):
+            psnr_str = f'{psnr_str} {n_psnrs[i]:.2f} &'
+            ssim_str = f'{ssim_str} {n_ssims[i]:.4f} &'
+            lpips_str = f'{lpips_str} {n_lpipss[i]:.4f} &'
+            dists_str = f'{dists_str} {n_distss[i]:.4f} &'
 
-    # exit()
+        print("PSNR and SSIM:")
+        print(f'{psnr_str} {ssim_str}')
+        print("LPIPS and DISTS")
+        print(f'{lpips_str} {dists_str}')
+
+        print(f'APSD: {np.mean(apsds)}')
+
+    exit()
     cfids = []
     m_comps = []
     c_comps = []
