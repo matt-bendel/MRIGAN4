@@ -1574,15 +1574,15 @@ class EigenGANPix(pl.LightningModule):
         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.args.lr,
                                  betas=(self.args.beta_1, self.args.beta_2))
 
-        # reduce_lr_on_plateau_mean = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        #     opt_g,
-        #     mode='min',
-        #     factor=0.8,
-        #     patience=15,
-        #     min_lr=1e-4,
-        # )
-        #
-        # lr_scheduler = {"scheduler": reduce_lr_on_plateau_mean, "monitor": "cfid"}
+        reduce_lr_on_plateau_mean = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            opt_g,
+            mode='min',
+            factor=0.8,
+            patience=15,
+            min_lr=1e-4,
+        )
+
+        lr_scheduler = {"scheduler": reduce_lr_on_plateau_mean, "monitor": "cfid"}
 
         return [opt_d, opt_g], []#lr_scheduler
 

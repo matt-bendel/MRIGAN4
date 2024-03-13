@@ -257,9 +257,9 @@ if __name__ == "__main__":
                 if j == 0:
                     zoom_startx = 180
                     zoom_starty = 40
-                    zoom_length = 80
+                    zoom_length = 60
                 else:
-                    zoom_startx = 80  # np.random.randint(120, 250)
+                    zoom_startx = 60  # np.random.randint(120, 250)
                     zoom_starty1 = 180  # np.random.randint(30, 80)
                     zoom_starty2 = 180  # np.random.randint(260, 300)
 

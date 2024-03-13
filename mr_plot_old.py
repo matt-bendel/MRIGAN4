@@ -11,7 +11,7 @@ import matplotlib.patches as patches
 from data_loaders.MRIDataModule import MRIDataModule
 from utils.parse_args import create_arg_parser
 from pytorch_lightning import seed_everything
-from models.rcGAN import rcGAN, rcGANLatent, EigenGAN
+from models.rcGAN import rcGAN, EigenGANPix
 from models.adler import Adler
 from models.ohayon import Ohayon
 from models.l1_ssim_module import L1SSIMMRI
@@ -70,37 +70,21 @@ if __name__ == "__main__":
     with torch.no_grad():
         rcGAN_model = rcGAN.load_from_checkpoint(
             checkpoint_path=cfg.checkpoint_dir + f'/neurips/rcgan_R{R}/checkpoint_best.ckpt')
-        rcGANLatent_model = rcGANLatent.load_from_checkpoint(
-            checkpoint_path=cfg.checkpoint_dir + f'/neurips/rcgan_latent_R{R}/checkpoint_best.ckpt')
-        rcGANJoint_model = rcGANLatent.load_from_checkpoint(
-            checkpoint_path=cfg.checkpoint_dir + f'/neurips/rcgan_latent_pixel_R{R}/checkpoint_best.ckpt')
-        EigenGAN_model = EigenGAN.load_from_checkpoint(
-            checkpoint_path=cfg.checkpoint_dir + f'/neurips/eigen_K5/checkpoint_best.ckpt')
-        ohayon_model = Ohayon.load_from_checkpoint(
-            checkpoint_path=cfg.checkpoint_dir + f'/neurips/ohayon_R{R}/checkpoint_best.ckpt')
+        EigenGAN_model = EigenGANPix.load_from_checkpoint(
+            checkpoint_path=cfg.checkpoint_dir + f'/neurips/eigen_K1_R{R}/checkpoint_best.ckpt')
         adler_model = Adler.load_from_checkpoint(
             checkpoint_path=cfg.checkpoint_dir + f'/neurips/adler_R{R}/checkpoint_best.ckpt')
-        # l1_ssim_model = L1SSIMMRI.load_from_checkpoint(
-        #     checkpoint_path=cfg.checkpoint_dir + '/neurips/l1_ssim/checkpoint_best.ckpt')
         varnet_model = VarNetModule.load_from_checkpoint(
             checkpoint_path=f'/storage/matt_models/mri/neurips/e2e_varnet_R={R}/varnet/varnet_demo/checkpoints/checkpoint_best.ckpt')
 
         rcGAN_model.cuda()
-        rcGANLatent_model.cuda()
-        rcGANJoint_model.cuda()
         EigenGAN_model.cuda()
-        ohayon_model.cuda()
         adler_model.cuda()
-        # l1_ssim_model.cuda()
         varnet_model.cuda()
 
         rcGAN_model.eval()
-        rcGANLatent_model.eval()
-        rcGANJoint_model.eval()
         EigenGAN_model.eval()
-        ohayon_model.eval()
         adler_model.eval()
-        # l1_ssim_model.eval()
         varnet_model.eval()
 
         for i, data in enumerate(test_loader):
@@ -115,38 +99,22 @@ if __name__ == "__main__":
 
             gens_rcgan = torch.zeros(
                 size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
-            gens_rcgan_latent = torch.zeros(
-                size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
-            gens_rcgan_joint = torch.zeros(
-                size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
             gens_eigengan = torch.zeros(
-                size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
-            gens_ohayon = torch.zeros(
                 size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
             gens_adler = torch.zeros(
                 size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
-            # gens_l1_ssim = torch.zeros(
-            #     size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
             gens_varnet = torch.zeros(
                 size=(y.size(0), cfg.num_z_test, cfg.im_size, cfg.im_size)).cuda()
 
             for z in range(cfg.num_z_test):
                 gens_rcgan[:, z, :, :, :, :] = rcGAN_model.reformat(rcGAN_model.forward(y, mask))
-                gens_rcgan_latent[:, z, :, :, :, :] = rcGANLatent_model.reformat(rcGANLatent_model.forward(y, mask))
-                gens_rcgan_joint[:, z, :, :, :, :] = rcGANJoint_model.reformat(rcGANJoint_model.forward(y, mask))
                 gens_eigengan[:, z, :, :, :, :] = EigenGAN_model.reformat(EigenGAN_model.forward(y, mask))
-                gens_ohayon[:, z, :, :, :, :] = ohayon_model.reformat(ohayon_model.forward(y, mask))
                 gens_adler[:, z, :, :, :, :] = adler_model.reformat(adler_model.forward(y, mask))
-                # gens_l1_ssim[:, z, :, :, :, :] = l1_ssim_model.reformat(l1_ssim_model.forward(y, mask))
                 gens_varnet[:, z, :, :] = varnet_model(varnet_y.float(), mask.to(torch.bool), num_low_freqs.float())
 
             avg_rcgan = torch.mean(gens_rcgan, dim=1)
-            avg_rcgan_latent = torch.mean(gens_rcgan_latent, dim=1)
-            avg_rcgan_joint = torch.mean(gens_rcgan_joint, dim=1)
             avg_eigengan = torch.mean(gens_eigengan, dim=1)
-            avg_ohayon = torch.mean(gens_ohayon, dim=1)
             avg_adler = torch.mean(gens_adler, dim=1)
-            # avg_l1_ssim = torch.mean(gens_l1_ssim, dim=1)
             avg_varnet = torch.mean(gens_varnet, dim=1)
 
             gt = rcGAN_model.reformat(x)
@@ -159,10 +127,7 @@ if __name__ == "__main__":
                     # 'l1_ssim': None,
                     'varnet': None,
                     'rcgan': None,
-                    'rcgan_latent': None,
-                    'rcgan_joint': None,
                     'eigengan': None,
-                    'ohayon': None,
                     'adler': None
                 }
 
@@ -176,19 +141,13 @@ if __name__ == "__main__":
 
                 np_samps = {
                     'rcgan': [],
-                    'rcgan_latent': [],
-                    'rcgan_joint': [],
                     'eigengan': [],
-                    'ohayon': [],
                     'adler': []
                 }
 
                 np_stds = {
                     'rcgan': None,
-                    'rcgan_latent': None,
-                    'rcgan_joint': None,
                     'eigengan': None,
-                    'ohayon': None,
                     'adler': None
                 }
 
@@ -204,24 +163,12 @@ if __name__ == "__main__":
                 np_avgs['rcgan'] = ndimage.rotate(
                     torch.tensor(S.H * tensor_to_complex_np((avg_rcgan[j] * std[j] + mean[j]).cpu())).abs().numpy(),
                     180)
-                np_avgs['rcgan_latent'] = ndimage.rotate(
-                    torch.tensor(S.H * tensor_to_complex_np((avg_rcgan_latent[j] * std[j] + mean[j]).cpu())).abs().numpy(),
-                    180)
-                np_avgs['rcgan_joint'] = ndimage.rotate(
-                    torch.tensor(S.H * tensor_to_complex_np((avg_rcgan_joint[j] * std[j] + mean[j]).cpu())).abs().numpy(),
-                    180)
                 np_avgs['eigengan'] = ndimage.rotate(
                     torch.tensor(S.H * tensor_to_complex_np((avg_eigengan[j] * std[j] + mean[j]).cpu())).abs().numpy(),
-                    180)
-                np_avgs['ohayon'] = ndimage.rotate(
-                    torch.tensor(S.H * tensor_to_complex_np((avg_ohayon[j] * std[j] + mean[j]).cpu())).abs().numpy(),
                     180)
                 np_avgs['adler'] = ndimage.rotate(
                     torch.tensor(S.H * tensor_to_complex_np((avg_adler[j] * std[j] + mean[j]).cpu())).abs().numpy(),
                     180)
-                # np_avgs['l1_ssim'] = ndimage.rotate(
-                #     torch.tensor(S.H * tensor_to_complex_np((avg_l1_ssim[j] * std[j] + mean[j]).cpu())).abs().numpy(),
-                #     180)
                 np_avgs['varnet'] = ndimage.rotate(
                     avg_varnet[j].cpu().numpy(),
                     180)
@@ -229,22 +176,13 @@ if __name__ == "__main__":
                 for z in range(cfg.num_z_test):
                     np_samps['rcgan'].append(ndimage.rotate(torch.tensor(
                         S.H * tensor_to_complex_np((gens_rcgan[j, z] * std[j] + mean[j]).cpu())).abs().numpy(), 180))
-                    np_samps['rcgan_latent'].append(ndimage.rotate(torch.tensor(
-                        S.H * tensor_to_complex_np((gens_rcgan_latent[j, z] * std[j] + mean[j]).cpu())).abs().numpy(), 180))
-                    np_samps['rcgan_joint'].append(ndimage.rotate(torch.tensor(
-                        S.H * tensor_to_complex_np((gens_rcgan_joint[j, z] * std[j] + mean[j]).cpu())).abs().numpy(), 180))
                     np_samps['eigengan'].append(ndimage.rotate(torch.tensor(
                         S.H * tensor_to_complex_np((gens_eigengan[j, z] * std[j] + mean[j]).cpu())).abs().numpy(), 180))
-                    np_samps['ohayon'].append(ndimage.rotate(torch.tensor(
-                        S.H * tensor_to_complex_np((gens_ohayon[j, z] * std[j] + mean[j]).cpu())).abs().numpy(), 180))
                     np_samps['adler'].append(ndimage.rotate(torch.tensor(
                         S.H * tensor_to_complex_np((gens_adler[j, z] * std[j] + mean[j]).cpu())).abs().numpy(), 180))
 
                 np_stds['rcgan'] = np.std(np.stack(np_samps['rcgan']), axis=0)
-                np_stds['rcgan_latent'] = np.std(np.stack(np_samps['rcgan_latent']), axis=0)
-                np_stds['rcgan_joint'] = np.std(np.stack(np_samps['rcgan_joint']), axis=0)
                 np_stds['eigengan'] = np.std(np.stack(np_samps['eigengan']), axis=0)
-                np_stds['ohayon'] = np.std(np.stack(np_samps['ohayon']), axis=0)
                 np_stds['adler'] = np.std(np.stack(np_samps['adler']), axis=0)
 
                 recon_directory = f'/storage/fastMRI_brain/Langevin_Recons_R={R}/'
@@ -274,13 +212,13 @@ if __name__ == "__main__":
                 langevin_avg = np.mean(langevin_recons, axis=0)
                 langevin_std = np.std(langevin_recons, axis=0)
 
-                keys = ['varnet', 'rcgan', 'rcgan_latent', 'rcgan_joint', 'eigengan', 'ohayon', 'adler']
+                keys = ['varnet', 'rcgan', 'eigengan', 'adler']
                 if i % 4 == 0:
-                    zoom_startx = 180
+                    zoom_startx = 200
                     zoom_starty = 40
-                    zoom_length = 80
+                    zoom_length = 60
                 else:
-                    zoom_startx = 80  # np.random.randint(120, 250)
+                    zoom_startx = 60  # np.random.randint(120, 250)
                     zoom_starty1 = 180  # np.random.randint(30, 80)
                     zoom_starty2 = 180  # np.random.randint(260, 300)
 
@@ -291,7 +229,7 @@ if __name__ == "__main__":
 
                     print(zoom_starty)
 
-                    zoom_length = 80
+                    zoom_length = 60
 
                 x_coord = zoom_startx + zoom_length
                 y_coords = [zoom_starty, zoom_starty + zoom_length]
@@ -832,6 +770,6 @@ if __name__ == "__main__":
 
                 plt.savefig(f'mr_figs/app_mri_R_{R}_fig_{fig_count}.png', bbox_inches='tight', dpi=300)
                 plt.close(fig)
-                if fig_count == 24:
+                if fig_count == 30:
                     exit()
                 fig_count += 1
