@@ -144,7 +144,7 @@ if __name__ == "__main__":
 
                 np_samps = {
                     'rcgan': [],
-                    'ohayon': None,
+                    'ohayon': [],
                     'eigengan': [],
                     'adler': []
                 }
