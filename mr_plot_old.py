@@ -70,7 +70,7 @@ if __name__ == "__main__":
     with torch.no_grad():
         rcGAN_model = rcGAN.load_from_checkpoint(
             checkpoint_path=cfg.checkpoint_dir + f'/neurips/rcgan_R{R}/checkpoint_best.ckpt').cuda()
-        ohayon_model = rcGAN.load_from_checkpoint(
+        ohayon_model = Ohayon.load_from_checkpoint(
             checkpoint_path=cfg.checkpoint_dir + f'/neurips/ohayon_R{R}/checkpoint_best.ckpt').cuda()
         EigenGAN_model = EigenGANPix.load_from_checkpoint(
             checkpoint_path=cfg.checkpoint_dir + f'/neurips/eigen_K1_R{R}/checkpoint_best.ckpt').cuda()
