@@ -69,20 +69,18 @@ if __name__ == "__main__":
 
     with torch.no_grad():
         rcGAN_model = rcGAN.load_from_checkpoint(
-            checkpoint_path=cfg.checkpoint_dir + f'/neurips/rcgan_R{R}/checkpoint_best.ckpt')
+            checkpoint_path=cfg.checkpoint_dir + f'/neurips/rcgan_R{R}/checkpoint_best.ckpt').cuda()
+        ohayon_model = rcGAN.load_from_checkpoint(
+            checkpoint_path=cfg.checkpoint_dir + f'/neurips/ohayon_R{R}/checkpoint_best.ckpt').cuda()
         EigenGAN_model = EigenGANPix.load_from_checkpoint(
-            checkpoint_path=cfg.checkpoint_dir + f'/neurips/eigen_K1_R{R}/checkpoint_best.ckpt')
+            checkpoint_path=cfg.checkpoint_dir + f'/neurips/eigen_K1_R{R}/checkpoint_best.ckpt').cuda()
         adler_model = Adler.load_from_checkpoint(
-            checkpoint_path=cfg.checkpoint_dir + f'/neurips/adler_R{R}/checkpoint_best.ckpt')
+            checkpoint_path=cfg.checkpoint_dir + f'/neurips/adler_R{R}/checkpoint_best.ckpt').cuda()
         varnet_model = VarNetModule.load_from_checkpoint(
-            checkpoint_path=f'/storage/matt_models/mri/neurips/e2e_varnet_R={R}/varnet/varnet_demo/checkpoints/checkpoint_best.ckpt')
-
-        rcGAN_model.cuda()
-        EigenGAN_model.cuda()
-        adler_model.cuda()
-        varnet_model.cuda()
+            checkpoint_path=f'/storage/matt_models/mri/neurips/e2e_varnet_R={R}/varnet/varnet_demo/checkpoints/checkpoint_best.ckpt').cuda()
 
         rcGAN_model.eval()
+        ohayon_model.eval()
         EigenGAN_model.eval()
         adler_model.eval()
         varnet_model.eval()
@@ -99,6 +97,8 @@ if __name__ == "__main__":
 
             gens_rcgan = torch.zeros(
                 size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
+            gens_ohayon = torch.zeros(
+                size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
             gens_eigengan = torch.zeros(
                 size=(y.size(0), cfg.num_z_test, cfg.in_chans // 2, cfg.im_size, cfg.im_size, 2)).cuda()
             gens_adler = torch.zeros(
@@ -108,11 +108,13 @@ if __name__ == "__main__":
 
             for z in range(cfg.num_z_test):
                 gens_rcgan[:, z, :, :, :, :] = rcGAN_model.reformat(rcGAN_model.forward(y, mask))
+                gens_ohayon[:, z, :, :, :, :] = ohayon_model.reformat(ohayon_model.forward(y, mask))
                 gens_eigengan[:, z, :, :, :, :] = EigenGAN_model.reformat(EigenGAN_model.forward(y, mask))
                 gens_adler[:, z, :, :, :, :] = adler_model.reformat(adler_model.forward(y, mask))
                 gens_varnet[:, z, :, :] = varnet_model(varnet_y.float(), mask.to(torch.bool), num_low_freqs.float())
 
             avg_rcgan = torch.mean(gens_rcgan, dim=1)
+            avg_ohayon = torch.mean(gens_ohayon, dim=1)
             avg_eigengan = torch.mean(gens_eigengan, dim=1)
             avg_adler = torch.mean(gens_adler, dim=1)
             avg_varnet = torch.mean(gens_varnet, dim=1)
@@ -127,6 +129,7 @@ if __name__ == "__main__":
                     # 'l1_ssim': None,
                     'varnet': None,
                     'rcgan': None,
+                    'ohayon': None,
                     'eigengan': None,
                     'adler': None
                 }
@@ -141,12 +144,14 @@ if __name__ == "__main__":
 
                 np_samps = {
                     'rcgan': [],
+                    'ohayon': None,
                     'eigengan': [],
                     'adler': []
                 }
 
                 np_stds = {
                     'rcgan': None,
+                    'ohayon': None,
                     'eigengan': None,
                     'adler': None
                 }
@@ -163,6 +168,9 @@ if __name__ == "__main__":
                 np_avgs['rcgan'] = ndimage.rotate(
                     torch.tensor(S.H * tensor_to_complex_np((avg_rcgan[j] * std[j] + mean[j]).cpu())).abs().numpy(),
                     180)
+                np_avgs['ohayon'] = ndimage.rotate(
+                    torch.tensor(S.H * tensor_to_complex_np((avg_ohayon[j] * std[j] + mean[j]).cpu())).abs().numpy(),
+                    180)
                 np_avgs['eigengan'] = ndimage.rotate(
                     torch.tensor(S.H * tensor_to_complex_np((avg_eigengan[j] * std[j] + mean[j]).cpu())).abs().numpy(),
                     180)
@@ -176,12 +184,15 @@ if __name__ == "__main__":
                 for z in range(cfg.num_z_test):
                     np_samps['rcgan'].append(ndimage.rotate(torch.tensor(
                         S.H * tensor_to_complex_np((gens_rcgan[j, z] * std[j] + mean[j]).cpu())).abs().numpy(), 180))
+                    np_samps['ohayon'].append(ndimage.rotate(torch.tensor(
+                        S.H * tensor_to_complex_np((gens_ohayon[j, z] * std[j] + mean[j]).cpu())).abs().numpy(), 180))
                     np_samps['eigengan'].append(ndimage.rotate(torch.tensor(
                         S.H * tensor_to_complex_np((gens_eigengan[j, z] * std[j] + mean[j]).cpu())).abs().numpy(), 180))
                     np_samps['adler'].append(ndimage.rotate(torch.tensor(
                         S.H * tensor_to_complex_np((gens_adler[j, z] * std[j] + mean[j]).cpu())).abs().numpy(), 180))
 
                 np_stds['rcgan'] = np.std(np.stack(np_samps['rcgan']), axis=0)
+                np_stds['ohayon'] = np.std(np.stack(np_samps['ohayon']), axis=0)
                 np_stds['eigengan'] = np.std(np.stack(np_samps['eigengan']), axis=0)
                 np_stds['adler'] = np.std(np.stack(np_samps['adler']), axis=0)
 
@@ -212,7 +223,7 @@ if __name__ == "__main__":
                 langevin_avg = np.mean(langevin_recons, axis=0)
                 langevin_std = np.std(langevin_recons, axis=0)
 
-                keys = ['varnet', 'rcgan', 'eigengan', 'adler']
+                keys = ['varnet', 'eigengan', 'rcgan', 'ohayon', 'adler']
                 if i % 4 == 0:
                     zoom_startx = 200
                     zoom_starty = 40
